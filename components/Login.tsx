@@ -1,8 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { Mail, Lock, ArrowRight, Check } from 'lucide-react';
 import { supabaseService } from '../services/supabaseService';
-import { LogCashLogo } from './Logo';
 
 interface LoginProps {
   onLoginSuccess: () => void;
@@ -12,15 +9,14 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     const savedEmail = localStorage.getItem('logcash_saved_email');
     if (savedEmail) {
       setEmail(savedEmail);
-      setRememberMe(true);
     }
   }, []);
 
@@ -36,11 +32,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setIsSignUp(false);
       } else {
         await supabaseService.signIn(email, password);
-        if (rememberMe) {
-          localStorage.setItem('logcash_saved_email', email);
-        } else {
-          localStorage.removeItem('logcash_saved_email');
-        }
+        localStorage.setItem('logcash_saved_email', email);
         onLoginSuccess();
       }
     } catch (err: any) {
@@ -51,96 +43,115 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center p-4 relative overflow-hidden">
-      <div className="absolute top-[-10%] left-[-10%] w-64 h-64 md:w-72 md:h-72 bg-emerald-600/10 rounded-full blur-[100px] md:blur-[120px]"></div>
+    <div className="flex justify-center items-center min-h-screen bg-pitch-black text-white antialiased">
+      <div className="floating-particles">
+        <div className="particle w-1 h-1" style={{ left: '10%', animationDelay: '0s' }}></div>
+        <div className="particle w-1.5 h-1.5" style={{ left: '25%', animationDelay: '4s' }}></div>
+        <div className="particle w-1 h-1" style={{ left: '45%', animationDelay: '8s' }}></div>
+        <div className="particle w-2 h-2" style={{ left: '70%', animationDelay: '2s' }}></div>
+        <div className="particle w-1 h-1" style={{ left: '85%', animationDelay: '12s' }}></div>
+      </div>
 
-      <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
-        <div className="bg-black/60 backdrop-blur-2xl border border-white/5 rounded-[2.5rem] md:rounded-[3rem] p-6 md:p-12 shadow-2xl relative">
-
-          <div className="flex flex-col items-center mb-8 md:mb-10">
-            <div className="mb-6">
-              <LogCashLogo size={80} />
+      <div className="relative flex min-h-[max(884px,100dvh)] w-full flex-col overflow-hidden max-w-[430px] bg-pitch-black shadow-2xl z-10">
+        <div className="flex flex-col items-center justify-center pt-24 pb-12">
+          <div className="gold-glow mb-6">
+            <div className="flex items-center gap-1.5">
+              <div className="size-16 rounded-2xl metallic-3d-gold flex items-center justify-center p-0.5">
+                <div className="bg-black size-full rounded-[14px] flex items-center justify-center">
+                  <span className="material-symbols-outlined text-4xl text-primary-gold" style={{ fontVariationSettings: "'FILL' 1" }}>payments</span>
+                </div>
+              </div>
             </div>
-            <h1 className="text-3xl md:text-4xl font-game font-black text-white tracking-[0.2em] uppercase leading-none">
-              LOG<span className="text-emerald-400">CASH</span>
-            </h1>
-            <p className="text-slate-500 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.5em] mt-3">Intelligence & Results</p>
           </div>
+          <h1 className="text-4xl logcash-logo-font metallic-text-gold tracking-tight">LogCash</h1>
+          <p className="text-[10px] text-primary-gold font-bold tracking-[0.5em] mt-3 uppercase">Elite Luxo</p>
+        </div>
 
-          <form onSubmit={handleSubmit} className="space-y-5 md:space-y-6">
+        <div className="flex-1 px-8 space-y-6 flex flex-col">
+          <form className="space-y-4" onSubmit={handleSubmit}>
             {error && (
-              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] md:text-xs py-3 px-4 rounded-xl text-center font-bold uppercase tracking-wider">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-500 text-[10px] md:text-xs py-3 px-4 rounded-xl text-center font-bold uppercase tracking-wider">
                 {error}
               </div>
             )}
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">E-mail ou CPF</label>
+              <input
+                type="text"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full glass-input h-14 px-5 rounded-xl text-white placeholder:text-white/20 font-medium"
+                placeholder="exemplo@logcash.com"
+              />
+            </div>
 
-            <div className="space-y-3 md:space-y-4">
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
-                  <Mail size={18} />
-                </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black text-white/40 uppercase tracking-widest ml-1">Senha</label>
+              <div className="relative">
                 <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                  placeholder="E-mail"
-                />
-              </div>
-
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500">
-                  <Lock size={18} />
-                </div>
-                <input
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-12 pr-4 py-3.5 md:py-4 bg-white/5 border border-white/10 rounded-xl md:rounded-2xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-                  placeholder="Senha"
+                  className="w-full glass-input h-14 px-5 rounded-xl text-white placeholder:text-white/20 font-medium"
+                  placeholder="••••••••"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-white/30 hover:text-primary-gold transition-colors flex items-center justify-center"
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    {showPassword ? "visibility_off" : "visibility"}
+                  </span>
+                </button>
               </div>
             </div>
 
-            <div className="flex items-center px-1">
-              <button
-                type="button"
-                onClick={() => setRememberMe(!rememberMe)}
-                className="flex items-center gap-3 group cursor-pointer"
-              >
-                <div className={`w-5 h-5 md:w-6 md:h-6 rounded-lg border-2 transition-all flex items-center justify-center ${rememberMe ? 'bg-emerald-600 border-emerald-600' : 'border-white/10 bg-white/5'}`}>
-                  {rememberMe && <Check size={12} className="text-white" />}
-                </div>
-                <span className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-widest">
-                  Lembrar acesso
-                </span>
-              </button>
+            <div className="flex justify-end pt-1">
+              {!isSignUp && (
+                <a href="#" className="text-[11px] font-bold text-white/60 hover:text-primary-gold transition-colors tracking-tight">Esqueci minha senha</a>
+              )}
             </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-game font-black text-base md:text-lg py-4 md:py-5 rounded-xl md:rounded-2xl flex items-center justify-center gap-2 shadow-xl active:scale-95 uppercase tracking-widest border border-emerald-400/20 transition-all"
-            >
-              {loading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-              ) : (
-                <>{isSignUp ? "Registrar" : "Entrar Agora"} <ArrowRight size={18} /></>
-              )}
-            </button>
+            <div className="pt-4">
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full h-14 metallic-3d-gold rounded-xl flex items-center justify-center gap-3 disabled:opacity-50"
+              >
+                {loading ? (
+                  <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin"></div>
+                ) : (
+                  <>
+                    <span className="text-black font-black text-sm tracking-[0.15em] uppercase">
+                      {isSignUp ? "Registrar na Elite" : "Entrar na Elite"}
+                    </span>
+                    <span className="material-symbols-outlined text-black text-xl">arrow_forward_ios</span>
+                  </>
+                )}
+              </button>
+            </div>
           </form>
-
-          <div className="mt-6 md:mt-8 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-slate-500 hover:text-emerald-400 text-[10px] md:text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 mx-auto"
-            >
-              {isSignUp ? "Já tenho uma conta" : "Não tem conta? Cadastre-se"}
-            </button>
-          </div>
         </div>
+
+        <div className="pb-16 px-8 text-center relative mt-auto">
+          <button
+            type="button"
+            onClick={() => setIsSignUp(!isSignUp)}
+            className="text-[12px] font-medium text-white/40 hover:text-white/80 transition-colors z-20 relative cursor-pointer"
+          >
+            {isSignUp ? "Já sou motorista Elite? " : "Ainda não sou motorista Elite? "}
+            <span className="text-primary-gold font-black underline underline-offset-4 decoration-primary-gold/30">
+              {isSignUp ? "Entrar" : "Cadastre-se"}
+            </span>
+          </button>
+          <div className="absolute bottom-0 left-0 w-full h-40 carbon-texture -z-10 pointer-events-none"></div>
+        </div>
+
+        <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary-gold/20 to-transparent"></div>
+        <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary-gold/20 to-transparent"></div>
       </div>
     </div>
   );
