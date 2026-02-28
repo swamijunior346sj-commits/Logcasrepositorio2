@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { Truck, Zap, FileText, Download, LayoutDashboard, Send, Table as TableIcon, ListPlus, LogOut, Layers, Settings, Trash2, AlertCircle, User, Sliders, ChevronRight, X, CheckCircle2, Check, Wallet, AlertTriangle, ArrowDownLeft, ArrowUpRight, RotateCcw, Sparkles, Package, LogIn, Database, Map, MapPin } from 'lucide-react';
 import DashboardCards from './components/DashboardCards';
-import ActionButtons from './components/ActionButtons';
 import DailyStatsTable from './components/DailyStatsTable';
 import DailyRouteHistory from './components/DailyRouteHistory';
 import BulkActionModal from './components/BulkActionModal';
@@ -616,59 +615,6 @@ const App: React.FC = () => {
               />
             </div>
 
-            <section className="space-y-4 mb-10">
-              <ActionButtons
-                onAction={(type) => setConfirmingAction(type)}
-                todayCounts={{
-                  ENTRADA: counts.todayEntrada,
-                  SAIDA: counts.todaySaida,
-                  DEVOLUCAO: counts.todayDevolucao
-                }}
-              />
-              {/* Botão de Atalho para Rota */}
-              <button
-                onClick={() => setActiveTab('route')}
-                className="w-full mt-4 p-4 rounded-2xl border border-white/5 bg-gradient-to-r from-black to-slate-900 flex items-center justify-between group hover:border-blue-500/30 transition-all active:scale-95 shadow-lg"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-blue-500/10 rounded-lg text-blue-400 group-hover:bg-blue-500 group-hover:text-white transition-colors">
-                    <MapPin size={20} />
-                  </div>
-                  <div className="text-left">
-                    <p className="font-game font-black text-white text-sm uppercase tracking-wider">Rota de Hoje</p>
-                    <p className="text-[8px] text-slate-500 font-bold uppercase tracking-widest">Ver Detalhes do Percurso</p>
-                  </div>
-                </div>
-                <ChevronRight size={18} className="text-slate-600 group-hover:text-white group-hover:translate-x-1 transition-all" />
-              </button>
-            </section>
-
-            <section className="grid grid-cols-2 gap-4 mb-10">
-              <button onClick={() => setBulkModal({ isOpen: true, type: 'ENTRADA' })} className="glass-panel border border-white/5 p-6 rounded-3xl flex flex-col items-start gap-4 active:scale-95 hover:bg-white/[0.03] transition-all hover:border-emerald-500/30 group">
-                <div className="p-3 bg-emerald-600/10 text-emerald-400 rounded-2xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:scale-110 transition-transform"><ListPlus size={24} /></div>
-                <div className="text-left"><p className="font-game font-black text-white text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]">Lote Carregados</p><p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Multi-Checkin</p></div>
-              </button>
-              <button onClick={() => setBulkModal({ isOpen: true, type: 'SAIDA' })} className="glass-panel border border-white/5 p-6 rounded-3xl flex flex-col items-start gap-4 active:scale-95 hover:bg-white/[0.03] transition-all hover:border-blue-500/30 group">
-                <div className="p-3 bg-blue-600/10 text-blue-400 rounded-2xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:scale-110 transition-transform"><Send size={24} /></div>
-                <div className="text-left"><p className="font-game font-black text-white text-sm uppercase tracking-widest drop-shadow-[0_0_5px_rgba(255,255,255,0.2)]">Lote Entregues</p><p className="text-[8px] text-slate-500 uppercase font-bold mt-1">Multi-Entrega</p></div>
-              </button>
-            </section>
-
-            <section
-              onClick={() => setActiveTab('stats')}
-              className="glass-panel p-6 md:p-10 rounded-[3rem] border border-white/5 relative overflow-hidden group text-center neon-border hover:shadow-[0_0_40px_rgba(16,185,129,0.1)] transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <div className="flex flex-col items-center gap-4 mb-6">
-                <div className="p-4 bg-emerald-500/10 rounded-full border border-emerald-500/20 shadow-[0_0_20px_rgba(16,185,129,0.2)] animate-pulse-glow">
-                  <FileText size={32} className="text-emerald-400" />
-                </div>
-                <h3 className="font-game font-black text-white uppercase tracking-[0.2em] text-lg drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">Relatórios Detalhados</h3>
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest -mt-2">Ver Extrato e Transações</p>
-              </div>
-              <div className="w-full bg-emerald-600/20 py-4 rounded-2xl flex items-center justify-center gap-3 font-game font-black text-emerald-400 text-[10px] uppercase tracking-[0.2em] border border-emerald-500/20 group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                Acessar Extrato Completo
-              </div>
-            </section>
           </div>
         ) : activeTab === 'map' ? (
           <div className="animate-in fade-in duration-500 min-h-screen bg-black -mx-4 md:-mx-8 -mt-8 overflow-hidden">
