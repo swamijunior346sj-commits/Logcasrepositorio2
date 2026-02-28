@@ -164,6 +164,44 @@
   box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
 }
 
+.glass-input-refined {
+  background: #121210;
+  border: 1px solid #2A2A26;
+  transition: all 0.3s ease;
+}
+
+.glass-input-refined:focus-within {
+  border-color: #EBC051;
+  box-shadow: 0 0 15px rgba(235, 192, 81, 0.1);
+}
+
+.gold-glow-logo {
+  box-shadow: 0 0 50px rgba(235, 192, 81, 0.15);
+}
+
+.premium-button-refined {
+  background: linear-gradient(135deg, #EBC051 0%, #B88F35 100%);
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.premium-button-refined::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+}
+
+.premium-button-refined:hover::after {
+  transform: translateX(100%);
+}
+
 .logcash-logo-font {
   font-family: 'Plus Jakarta Sans', sans-serif;
   font-weight: 800;
