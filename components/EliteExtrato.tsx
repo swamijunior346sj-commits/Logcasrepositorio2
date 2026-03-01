@@ -7,11 +7,10 @@ interface EliteExtratoProps {
     userName: string;
     vehicleName: string;
     valorPorPacote: number;
-    onBack: () => void;
     onExport: () => void;
 }
 
-const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, vehicleName, valorPorPacote, onBack, onExport }) => {
+const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, vehicleName, valorPorPacote, onExport }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
 
@@ -144,17 +143,7 @@ const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, vehicleName
                 .animate-spin-slow-extrato { animation: spin 3s linear infinite; }
             `}} />
 
-            {/* Header Actions */}
-            <div className="flex items-center justify-between p-6 mt-4 z-20">
-                <button
-                    onClick={onBack}
-                    className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#EBC051] active:scale-90 transition-all"
-                >
-                    <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                </button>
-                <div className="text-[10px] font-black tracking-[0.4em] text-[#EBC051] uppercase">Preview Oficial</div>
-                <div className="size-11"></div>
-            </div>
+            <div className="mt-8"></div>
 
             <div className={`px-5 mb-8 relative transition-all duration-500 ${isExporting || showSuccess ? 'blur-md opacity-40' : 'blur-0 opacity-100'}`}>
                 <div className="pdf-page-extrato w-full rounded-sm p-8 flex flex-col h-auto min-h-[620px] text-left">
@@ -236,19 +225,6 @@ const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, vehicleName
                         </div>
                     </div>
 
-                    {/* Footer - Authenticity */}
-                    <div className="mt-auto flex justify-between items-end border-t border-white/5 pt-6 text-left">
-                        <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2 text-[#EBC051] opacity-80">
-                                <span className="material-symbols-outlined text-sm">verified_user</span>
-                                <span className="text-[8px] font-bold uppercase tracking-[0.15em]">Autenticidade Digital</span>
-                            </div>
-                            <div className="text-[7px] text-white/30 font-mono">HASH: {Math.random().toString(16).substring(2, 5).toUpperCase()}-{Math.random().toString(16).substring(2, 5).toUpperCase()}-LCASH</div>
-                        </div>
-                        <div className="p-1 bg-white/[0.03] border border-[#EBC051]/30 rounded">
-                            <span className="material-symbols-outlined text-[#EBC051] text-4xl">qr_code_2</span>
-                        </div>
-                    </div>
                 </div>
 
                 {/* Loading Overlay */}
@@ -282,13 +258,6 @@ const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, vehicleName
 
             {/* Actions Buttons */}
             <div className={`px-8 space-y-4 z-10 transition-all duration-500 ${isExporting || showSuccess ? 'opacity-40 pointer-events-none' : 'opacity-100'}`}>
-                <button
-                    onClick={handleExportClick}
-                    className="w-full minimalist-gold-btn-extrato py-4 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-[0.98]"
-                >
-                    <span className="material-symbols-outlined text-lg">share</span>
-                    Compartilhar PDF
-                </button>
                 <button
                     onClick={handleExportClick}
                     className="w-full minimalist-gold-btn-extrato py-4 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all active:scale-[0.98]"

@@ -725,7 +725,6 @@ const App: React.FC = () => {
               userName={userName}
               vehicleName={vehicleName}
               valorPorPacote={VALOR_POR_PACOTE}
-              onBack={() => setActiveTab('stats')}
               onExport={() => {
                 generatePDF(logs, userName);
               }}
@@ -736,11 +735,11 @@ const App: React.FC = () => {
             <EliteExpressReport
               logs={logs}
               userName={userName}
-              vehicleName={vehicleName}
               onBack={() => setActiveTab('stats')}
               onExportPDF={() => {
-                generatePDF(logs, userName);
-                triggerSuccess('EXPORT_PDF');
+                // Direct PDF generation bypassing the default success popup since EliteExpressReport handles its own success UI
+                const docDef = generateQuickPDF(logs, userName);
+                (window as any).pdfMake.createPdf(docDef).download(`LogCash_Relatorio_Expresso_${new Date().toISOString().split('T')[0]}.pdf`);
               }}
             />
           </div>
