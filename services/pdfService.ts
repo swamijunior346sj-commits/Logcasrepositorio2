@@ -114,17 +114,12 @@ const buildHTMLTemplate = (
         </div>
     </div>
 </div>
-<script>
-    // Aguarda Tailwind renderizar o documento e dispara a impressão
-    window.onload = () => {
-        setTimeout(() => {
-            window.print();
-        }, 1200);
-    };
-</script>
 </body>
 </html>`;
 };
+
+import { jsPDF } from 'jspdf';
+import html2canvas from 'html2canvas';
 
 const printHtmlPdf = (html: string) => {
   try {
@@ -132,9 +127,10 @@ const printHtmlPdf = (html: string) => {
     iframe.style.position = 'fixed';
     iframe.style.right = '0';
     iframe.style.bottom = '0';
-    iframe.style.width = '0';
-    iframe.style.height = '0';
+    iframe.style.width = '430px'; // Set to match the container width
+    iframe.style.height = '1000px'; // Give it enough height to render
     iframe.style.border = '0';
+    iframe.style.opacity = '0'; // Hide it visually but allow rendering
     document.body.appendChild(iframe);
 
     const doc = iframe.contentWindow?.document;
@@ -143,12 +139,38 @@ const printHtmlPdf = (html: string) => {
       doc.write(html);
       doc.close();
 
-      // Remove o iframe após impressão
-      setTimeout(() => {
-        if (document.body.contains(iframe)) {
-          document.body.removeChild(iframe);
+      // Wait a moment for fonts/images to load in the iframe
+      setTimeout(async () => {
+        try {
+          const elementToPrint = doc.querySelector('.pdf-container') as HTMLElement;
+          if (elementToPrint) {
+            const canvas = await html2canvas(elementToPrint, {
+              scale: 2,
+              useCORS: true,
+              backgroundColor: '#000000',
+              logging: false
+            });
+
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+
+            // Calculate dimensions
+            const pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'px',
+              format: [canvas.width / 2, canvas.height / 2]
+            });
+
+            pdf.addImage(imgData, 'JPEG', 0, 0, canvas.width / 2, canvas.height / 2);
+            pdf.save(`Extrato_LogCash_${new Date().getTime()}.pdf`);
+          }
+        } catch (canvasErr) {
+          console.error("Erro no html2canvas:", canvasErr);
+        } finally {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
         }
-      }, 5000); // tempo seguro
+      }, 1500);
     }
   } catch (e) {
     console.error("Erro ao gerar PDF via modo de impressão HTML.", e);

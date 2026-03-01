@@ -59,12 +59,7 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({ rows, onBack }) => {
                 <div className="flex flex-col bg-charcoal border border-primary-gold/20 rounded-2xl cinematic-glow overflow-hidden">
                     {/* Cabeçalho */}
                     <div className="px-6 py-10 flex flex-col items-center gap-2 border-b border-primary-gold/10">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="material-symbols-outlined text-primary-gold text-2xl">diamond</span>
-                            <span className="text-[10px] font-black tracking-[0.6em] text-primary-gold uppercase">LOGCASH PREMIUM</span>
-                        </div>
                         <h1 className="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center font-sans">RELATÓRIO SEMANAL</h1>
-                        <p className="text-[9px] text-white/30 tracking-widest uppercase">Documento Oficial de Movimentação</p>
                     </div>
 
                     {/* Header da Tabela */}
@@ -120,13 +115,18 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({ rows, onBack }) => {
                     </div>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-4 no-print px-4">
+                <div className="mt-8 flex flex-col gap-4 px-4">
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => {
+                            import('../services/pdfService').then(({ generateWeeklyPDF }) => {
+                                const counts = { delivered: rows.reduce((acc, row) => acc + row.delivered, 0), todayEntrada: 0, todaySaida: 0, todayDevolucao: 0 };
+                                generateWeeklyPDF({ userName: "Operador Logístico", vehicleName: "Veículo", counts });
+                            });
+                        }}
                         className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary-gold/20 to-primary-gold/5 border border-primary-gold/30 text-primary-gold font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
                     >
-                        <span className="material-symbols-outlined text-lg">ios_share</span>
-                        Compartilhar PDF
+                        <span className="material-symbols-outlined text-lg">download_for_offline</span>
+                        Exportar
                     </button>
                     <button
                         onClick={onBack}

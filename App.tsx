@@ -643,7 +643,8 @@ const App: React.FC = () => {
                           activeTab === 'pdf-view' ? 'VISUALIZAÇÃO PDF' :
                             activeTab === 'extrato' ? 'EXTRATO' :
                               activeTab === 'express-report' ? 'RELATÓRIO EXPRESSO' :
-                                'SISTEMA ELITE'}
+                                activeTab === 'weekly-report' || activeTab === 'weekly-pdf' ? '' :
+                                  'SISTEMA ELITE'}
               </span>
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>

@@ -161,12 +161,7 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                 <div className={`pdf-page bg-charcoal w-full rounded-2xl cinematic-glow flex flex-col h-auto transition-all duration-500 overflow-hidden border border-primary-gold/20 ${(isExporting || showSuccess) ? 'blur-[4px] select-none pointer-events-none' : ''}`}>
                     {/* Cabeçalho */}
                     <div className="px-6 py-10 flex flex-col items-center gap-2 border-b border-primary-gold/10">
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="material-symbols-outlined text-primary-gold text-2xl">diamond</span>
-                            <span className="text-[10px] font-black tracking-[0.6em] text-primary-gold uppercase">LOGCASH PREMIUM</span>
-                        </div>
                         <h1 className="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center">RELATÓRIO OPERACIONAL</h1>
-                        <p className="text-[9px] text-white/30 tracking-widest uppercase">Documento Oficial de Movimentação</p>
                     </div>
 
                     {/* Header da Tabela */}
@@ -280,7 +275,7 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                     className="w-full minimalist-gold-btn py-4 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:bg-primary-gold/5 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
                 >
                     <span className="material-symbols-outlined text-lg">download</span>
-                    Fazer Download
+                    Exportar
                 </button>
             </div>
 

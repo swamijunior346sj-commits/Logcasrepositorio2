@@ -146,13 +146,17 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
                     </div>
                 </div>
 
-                <div className="mt-8 flex flex-col gap-4 no-print px-4">
+                <div className="mt-8 flex flex-col gap-4 px-4">
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => {
+                            import('../services/pdfService').then(({ generatePDF }) => {
+                                generatePDF(logs, userName);
+                            });
+                        }}
                         className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary-gold/20 to-primary-gold/5 border border-primary-gold/30 text-primary-gold font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
                     >
-                        <span className="material-symbols-outlined text-lg">ios_share</span>
-                        Compartilhar PDF
+                        <span className="material-symbols-outlined text-lg">download_for_offline</span>
+                        Exportar
                     </button>
                     <button
                         onClick={onBack}
