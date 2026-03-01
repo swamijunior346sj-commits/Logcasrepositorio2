@@ -27,6 +27,8 @@ import EliteSettings from './components/EliteSettings';
 import EliteTaxInvoiceSuccessScreen from './components/EliteTaxInvoiceSuccess';
 import EliteMap from './components/EliteMap';
 import EliteExtrato from './components/EliteExtrato';
+import EliteExpressReport from './components/EliteExpressReport';
+import PremiumSuccessPopup from './components/PremiumSuccessPopup';
 
 
 
@@ -57,6 +59,7 @@ const App: React.FC = () => {
   const [bulkCount, setBulkCount] = useState(0);
   const [lastSettleValue, setLastSettleValue] = useState(0);
   const [successType, setSuccessType] = useState<SystemActionType>('ENTRADA');
+  const [premiumSuccessMsg, setPremiumSuccessMsg] = useState('Operação realizada com sucesso');
 
   // Estado Unificado de Confirmação
   const [confirmingAction, setConfirmingAction] = useState<SystemActionType | null>(null);
@@ -203,22 +206,23 @@ const App: React.FC = () => {
     setBulkActionPending(null);
     setShowSettings(false);
 
+    // Set contextual message
+    const msg = type === 'EXPORT_PDF' ? 'Relatório gerado com sucesso' :
+      type === 'SETTLE_WALLET' ? 'Saldo liquidado com sucesso' :
+        type === 'LOGOUT' ? 'Sessão encerrada' :
+          type === 'RESET_SYSTEM' ? 'Sistema resetado com sucesso' :
+            type === 'ENTRADA' ? `${count} pacote${count > 1 ? 's' : ''} carregado${count > 1 ? 's' : ''}` :
+              type === 'SAIDA' ? `${count} entrega${count > 1 ? 's' : ''} confirmada${count > 1 ? 's' : ''}` :
+                'Operação realizada com sucesso';
+    setPremiumSuccessMsg(msg);
+
     setTimeout(() => {
       setShowSuccessPopup(true);
-      // Para RESET_SYSTEM, deixamos o reload acontecer sem fechar o popup
-      if (type !== 'RESET_SYSTEM') {
-        setTimeout(closeSuccessPopup, 2400);
-      }
     }, 100);
   };
 
   const closeSuccessPopup = () => {
-    if (isClosingSuccess) return;
-    setIsClosingSuccess(true);
-    setTimeout(() => {
-      setShowSuccessPopup(false);
-      setIsClosingSuccess(false);
-    }, 400);
+    setShowSuccessPopup(false);
   };
 
   const handleRouteActivitySave = async (data: { entrada: number, saida: number, devolucao: number }) => {
@@ -245,7 +249,6 @@ const App: React.FC = () => {
 
       if (newLogs.length > 0) {
         await supabaseService.saveBulkLogs(newLogs);
-        triggerSuccess('SAIDA'); // Provoca um feedback visual de sucesso
       }
     } catch (error) {
       console.error('Erro ao salvar atividade da rota:', error);
@@ -506,7 +509,7 @@ const App: React.FC = () => {
                 onClick={() => {
                   if (activeTab === 'personal-data' || activeTab === 'tax-data' || activeTab === 'settings') {
                     setActiveTab('profile');
-                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato') {
+                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato' || activeTab === 'express-report') {
                     setActiveTab('stats');
                   } else if (activeTab === 'invoice-success') {
                     setActiveTab('dash');
@@ -526,7 +529,8 @@ const App: React.FC = () => {
                         activeTab === 'invoice-success' ? 'SUCESSO' :
                           activeTab === 'pdf-view' ? 'VISUALIZAÇÃO PDF' :
                             activeTab === 'extrato' ? 'EXTRATO' :
-                              'SISTEMA ELITE'}
+                              activeTab === 'express-report' ? 'RELATÓRIO EXPRESSO' :
+                                'SISTEMA ELITE'}
               </span>
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>
@@ -559,18 +563,6 @@ const App: React.FC = () => {
                 <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'route' ? 'text-[#D4AF37]' : 'text-white'}`}>ATIVIDADE DA ROTA</span>
               </button>
 
-              {/* ABA MAPA */}
-              <button
-                onClick={() => setActiveTab('map')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'map'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'map' ? { fontVariationSettings: "'FILL' 1" } : {}}>near_me</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`}>MAPA</span>
-              </button>
-
               <button
                 onClick={() => setActiveTab('stats')}
                 className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'stats'
@@ -591,6 +583,18 @@ const App: React.FC = () => {
               >
                 <span className={`material-symbols-outlined text-[20px] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'profile' ? { fontVariationSettings: "'FILL' 1" } : {}}>shield_person</span>
                 <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`}>PERFIL</span>
+              </button>
+
+              {/* ABA MAPA */}
+              <button
+                onClick={() => setActiveTab('map')}
+                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'map'
+                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
+                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
+                  }`}
+              >
+                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'map' ? { fontVariationSettings: "'FILL' 1" } : {}}>near_me</span>
+                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`}>MAPA</span>
               </button>
             </nav>
           )}
@@ -629,7 +633,7 @@ const App: React.FC = () => {
               userName={userName}
               wallet={counts.wallet}
               onSettle={() => setConfirmingAction('SETTLE_WALLET')}
-              onExportPDF={() => setConfirmingAction('EXPORT_PDF')}
+              onExportPDF={() => setActiveTab('express-report')}
               onEmitInvoice={() => setActiveTab('tax-invoice')}
               onExtrato={() => setActiveTab('extrato')}
               onBack={() => setActiveTab('dash')}
@@ -710,6 +714,17 @@ const App: React.FC = () => {
               valorPorPacote={VALOR_POR_PACOTE}
               onBack={() => setActiveTab('stats')}
               onExport={() => {
+                generatePDF(logs, userName);
+              }}
+            />
+          </div>
+        ) : activeTab === 'express-report' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteExpressReport
+              logs={logs}
+              userName={userName}
+              onBack={() => setActiveTab('stats')}
+              onExportPDF={() => {
                 generatePDF(logs, userName);
                 triggerSuccess('EXPORT_PDF');
               }}
@@ -821,6 +836,13 @@ const App: React.FC = () => {
         isOpen={showQuickEntry}
         onClose={() => setShowQuickEntry(false)}
         onExport={handleQuickEntryExport}
+      />
+
+      {/* Premium Success Popup */}
+      <PremiumSuccessPopup
+        isOpen={showSuccessPopup}
+        onClose={closeSuccessPopup}
+        message={premiumSuccessMsg}
       />
     </div>
   );
