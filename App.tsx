@@ -9,7 +9,7 @@ import WalletCard from './components/WalletCard';
 import Login from './components/Login';
 import DateRangeFilter from './components/DateRangeFilter';
 import { LogCashLogo } from './components/Logo';
-import { LogEntry, LogActionType, QuickEntryRow } from './types';
+import { LogEntry, LogActionType, QuickEntryRow, TemporaryExpressRow } from './types';
 import { supabaseService } from './services/supabaseService';
 import { generatePDF, generateQuickPDF } from './services/pdfService';
 import { VALOR_POR_PACOTE } from './constants';
@@ -67,8 +67,8 @@ const App: React.FC = () => {
   // Controle de Execução (Bloqueio de duplo clique)
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Alex Driver');
-  const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Mercedes-Benz Sprinter');
+  const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
+  const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Veículo Padrão');
   const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report'>('dash');
   const [showSettings, setShowSettings] = useState(false);
   const [showQuickEntry, setShowQuickEntry] = useState(false);
@@ -165,8 +165,18 @@ const App: React.FC = () => {
     setIsExecuting(true);
 
     try {
-      // Generate PDF directly from rows
-      generateQuickPDF(rows, userName);
+      // Convert QuickEntryRow to TemporaryExpressRow for the PDF generator
+      const formattedRows: TemporaryExpressRow[] = rows.map(r => ({
+        id: r.id,
+        date: r.date,
+        loaded: r.carregados,
+        delivered: r.entregues,
+        returns: r.insucessos,
+        totalValue: r.entregues * VALOR_POR_PACOTE
+      }));
+
+      // Generate PDF directly from mapped rows
+      generateQuickPDF(formattedRows, userName);
       triggerSuccess('EXPORT_PDF');
 
     } catch (err: any) {
@@ -673,6 +683,7 @@ const App: React.FC = () => {
           <div className="animate-in fade-in duration-500">
             <ElitePersonalData
               userName={userName}
+              userEmail={session?.user?.email || ''}
               vehicleName={vehicleName}
               onBack={() => setActiveTab('profile')}
               onSave={(data) => {
@@ -708,10 +719,8 @@ const App: React.FC = () => {
               logs={logs}
               userName={userName}
               onBack={() => setActiveTab('stats')}
-              onExportPDF={() => {
-                // Direct PDF generation bypassing the default success popup since EliteExpressReport handles its own success UI
-                const docDef = generateQuickPDF(logs, userName);
-                (window as any).pdfMake.createPdf(docDef).download(`LogCash_Relatorio_Expresso_${new Date().toISOString().split('T')[0]}.pdf`);
+              onExportPDF={(rows: TemporaryExpressRow[]) => {
+                generateQuickPDF(rows, userName);
               }}
             />
           </div>

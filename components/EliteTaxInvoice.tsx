@@ -9,8 +9,8 @@ interface EliteTaxInvoiceProps {
 
 const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBack, onEmit }) => {
     const [description, setDescription] = useState('Prestação de Serviços de Entrega Logística Premium - Período Atual');
-    const [razaoSocial, setRazaoSocial] = useState('LOGÍSTICA ELITE BRASIL LTDA');
-    const [cnpj, setCnpj] = useState('12.345.678/0001-90');
+    const [razaoSocial, setRazaoSocial] = useState('');
+    const [cnpj, setCnpj] = useState('');
 
     const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
 
@@ -124,6 +124,7 @@ const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBac
                                     <input
                                         className="w-full bg-transparent border-b border-white/10 pb-2 text-sm font-semibold focus:outline-none focus:border-[#EBC051] text-white"
                                         type="text"
+                                        placeholder="Sua Razão Social"
                                         value={razaoSocial}
                                         onChange={(e) => setRazaoSocial(e.target.value)}
                                     />
@@ -133,6 +134,7 @@ const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBac
                                     <input
                                         className="w-full bg-transparent border-b border-white/10 pb-2 text-sm font-semibold focus:outline-none focus:border-[#EBC051] text-white"
                                         type="text"
+                                        placeholder="00.000.000/0001-00"
                                         value={cnpj}
                                         onChange={(e) => setCnpj(e.target.value)}
                                     />

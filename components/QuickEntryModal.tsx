@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { X, Plus, Trash2, Download } from 'lucide-react';
-import { QuickEntryRow } from '../types';
+import { TemporaryExpressRow } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
 
 interface QuickEntryModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onExport: (rows: QuickEntryRow[]) => void;
+  onExport: (rows: TemporaryExpressRow[]) => void;
 }
 
-interface RowData extends QuickEntryRow { }
+interface RowData extends TemporaryExpressRow { }
 
 const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onExport }) => {
   const [rows, setRows] = useState<RowData[]>([
-    { id: '1', date: new Date().toISOString().split('T')[0], carregados: 0, entregues: 0, insucessos: 0 }
+    { id: '1', date: new Date().toISOString().split('T')[0], loaded: 0, delivered: 0, returns: 0, totalValue: 0 }
   ]);
 
   if (!isOpen) return null;
@@ -22,9 +22,10 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
     setRows([...rows, {
       id: Math.random().toString(36).substr(2, 9),
       date: new Date().toISOString().split('T')[0],
-      carregados: 0,
-      entregues: 0,
-      insucessos: 0
+      loaded: 0,
+      delivered: 0,
+      returns: 0,
+      totalValue: 0
     }]);
   };
 
@@ -42,7 +43,7 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
     onExport(rows);
     onClose();
     // Reset rows
-    setRows([{ id: '1', date: new Date().toISOString().split('T')[0], carregados: 0, entregues: 0, insucessos: 0 }]);
+    setRows([{ id: '1', date: new Date().toISOString().split('T')[0], loaded: 0, delivered: 0, returns: 0, totalValue: 0 }]);
   };
 
   const formatBRL = (val: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
@@ -93,8 +94,8 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
                     <input
                       type="number"
                       min="0"
-                      value={row.carregados}
-                      onChange={(e) => updateRow(row.id, 'carregados', Math.max(0, parseInt(e.target.value) || 0))}
+                      value={row.loaded}
+                      onChange={(e) => updateRow(row.id, 'loaded', Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-emerald-400 font-bold text-center focus:outline-none focus:border-emerald-500/50"
                       placeholder="0"
                     />
@@ -105,8 +106,8 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
                     <input
                       type="number"
                       min="0"
-                      value={row.entregues}
-                      onChange={(e) => updateRow(row.id, 'entregues', Math.max(0, parseInt(e.target.value) || 0))}
+                      value={row.delivered}
+                      onChange={(e) => updateRow(row.id, 'delivered', Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-blue-400 font-bold text-center focus:outline-none focus:border-blue-500/50"
                       placeholder="0"
                     />
@@ -117,8 +118,8 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
                     <input
                       type="number"
                       min="0"
-                      value={row.insucessos}
-                      onChange={(e) => updateRow(row.id, 'insucessos', Math.max(0, parseInt(e.target.value) || 0))}
+                      value={row.returns}
+                      onChange={(e) => updateRow(row.id, 'returns', Math.max(0, parseInt(e.target.value) || 0))}
                       className="w-full bg-black/20 border border-white/10 rounded-lg px-3 py-2 text-xs text-orange-400 font-bold text-center focus:outline-none focus:border-orange-500/50"
                       placeholder="0"
                     />
@@ -126,7 +127,7 @@ const QuickEntryModal: React.FC<QuickEntryModalProps> = ({ isOpen, onClose, onEx
 
                   {/* Total */}
                   <div className="col-span-2 text-right font-mono font-bold text-white text-sm">
-                    {formatBRL(row.entregues * VALOR_POR_PACOTE)}
+                    {formatBRL(row.delivered * VALOR_POR_PACOTE)}
                   </div>
 
                   {/* Actions */}

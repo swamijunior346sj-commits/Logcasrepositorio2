@@ -1,7 +1,7 @@
 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { LogEntry, DailySummary, QuickEntryRow } from '../types';
+import { LogEntry, DailySummary, TemporaryExpressRow } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
 
 // Cores Oficiais LogCash Elite
@@ -12,7 +12,7 @@ const BLACK_BG: [number, number, number] = [10, 10, 10];       // #0A0A0A
 const WHITE_PURE: [number, number, number] = [255, 255, 255];
 const SLATE_400: [number, number, number] = [148, 163, 184];
 
-export const generateQuickPDF = (rows: QuickEntryRow[], userName: string = 'Operador Logístico') => {
+export const generateQuickPDF = (rows: TemporaryExpressRow[], userName: string = 'Operador Logístico') => {
   const doc = new jsPDF();
   const dateStr = new Date().toLocaleDateString('pt-BR');
   const pageWidth = doc.internal.pageSize.getWidth();
@@ -49,7 +49,7 @@ export const generateQuickPDF = (rows: QuickEntryRow[], userName: string = 'Oper
   doc.text(dateStr, pageWidth - 20, 32, { align: 'right' });
 
   // --- RESUMO FINANCEIRO ---
-  const totalGains = rows.reduce((acc, row) => acc + (row.entregues * VALOR_POR_PACOTE), 0);
+  const totalGains = rows.reduce((acc, row) => acc + (row.delivered * VALOR_POR_PACOTE), 0);
 
   doc.setFillColor(15, 15, 15);
   doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
@@ -66,13 +66,12 @@ export const generateQuickPDF = (rows: QuickEntryRow[], userName: string = 'Oper
   // --- TABELA ---
   const tableColumn = ["DATA", "CARREGADOS", "ENTREGUES", "INSUCESSOS", "GANHOS"];
   const tableRows = rows.map(row => {
-    const [y, m, d] = row.date.split('-');
     return [
-      `${d}/${m}/${y}`,
-      row.carregados.toString(),
-      row.entregues.toString(),
-      row.insucessos.toString(),
-      `R$ ${(row.entregues * VALOR_POR_PACOTE).toFixed(2)}`
+      row.date,
+      row.loaded.toString(),
+      row.delivered.toString(),
+      row.returns.toString(),
+      `R$ ${(row.delivered * VALOR_POR_PACOTE).toFixed(2)}`
     ];
   });
 

@@ -2,57 +2,70 @@ import React, { useMemo, useState } from 'react';
 import { LogEntry } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
 
-interface EliteExpressReportProps {
-    logs: LogEntry[];
-    userName: string;
-    onBack: () => void;
-    onExportPDF: () => void;
+export interface TemporaryExpressRow {
+    id: string;
+    date: string;
+    loaded: number;
+    delivered: number;
+    returns: number;
+    totalValue: number;
 }
 
-const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ logs, onBack, onExportPDF }) => {
+interface EliteExpressReportProps {
+    userName: string;
+    onBack: () => void;
+    onExportPDF: (rows: TemporaryExpressRow[]) => void;
+}
+
+const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBack, onExportPDF }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
+    const [rows, setRows] = useState<TemporaryExpressRow[]>([]);
 
-    // Group logs by date
-    const dailyData = useMemo(() => {
-        const groups: Record<string, {
-            date: string,
-            id: string,
-            loaded: number,
-            delivered: number,
-            returns: number,
-            totalValue: number
-        }> = {};
+    // Temporary editing state
+    const [editingId, setEditingId] = useState<string | null>(null);
+    const [editForm, setEditForm] = useState({ date: '', loaded: '', delivered: '', returns: '' });
+    // Add a new empty row
+    const handleAddRow = () => {
+        const now = new Date();
+        const newRow: TemporaryExpressRow = {
+            id: Date.now().toString(),
+            date: now.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric' }),
+            loaded: 0,
+            delivered: 0,
+            returns: 0,
+            totalValue: 0
+        };
+        setRows([newRow, ...rows]);
+        startEditing(newRow);
+    };
 
-        logs.forEach(log => {
-            const dateObj = new Date(log.timestamp);
-            const dateStr = dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-            const key = dateObj.toISOString().split('T')[0];
-
-            if (!groups[key]) {
-                groups[key] = {
-                    date: dateStr,
-                    id: `#${String(dateObj.getDate()).padStart(2, '0')}${String(dateObj.getMonth() + 1).padStart(2, '0')}`,
-                    loaded: 0,
-                    delivered: 0,
-                    returns: 0,
-                    totalValue: 0
-                };
-            }
-
-            groups[key].loaded += (log.entrada || 0);
-            groups[key].delivered += (log.saida || 0);
-            groups[key].returns += (log.devolucao || 0);
+    const startEditing = (row: TemporaryExpressRow) => {
+        setEditingId(row.id);
+        setEditForm({
+            date: row.date,
+            loaded: String(row.loaded),
+            delivered: String(row.delivered),
+            returns: String(row.returns)
         });
+    };
 
-        // Calculate values and sort by date descending
-        return Object.values(groups)
-            .map(day => ({
-                ...day,
-                totalValue: day.delivered * VALOR_POR_PACOTE
-            }))
-            .sort((a, b) => b.id.localeCompare(a.id));
-    }, [logs]);
+    const saveEdit = (id: string) => {
+        const deliveredCount = parseInt(editForm.delivered) || 0;
+        setRows(rows.map(r => r.id === id ? {
+            ...r,
+            date: editForm.date || r.date,
+            loaded: parseInt(editForm.loaded) || 0,
+            delivered: deliveredCount,
+            returns: parseInt(editForm.returns) || 0,
+            totalValue: deliveredCount * VALOR_POR_PACOTE
+        } : r));
+        setEditingId(null);
+    };
+
+    const deleteRow = (id: string) => {
+        setRows(rows.filter(r => r.id !== id));
+    };
 
     const formatCurrency = (val: number) =>
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
@@ -68,7 +81,7 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ logs, onBack, o
 
     const handleOpenPDF = () => {
         setShowSuccess(false);
-        onExportPDF();
+        onExportPDF(rows);
     };
 
     const isOverlayActive = isExporting || showSuccess;
@@ -217,42 +230,83 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ logs, onBack, o
 
                     {/* Table Rows */}
                     <div className="flex flex-col font-geometric pb-20">
-                        {dailyData.length > 0 ? (
-                            dailyData.map((day, idx) => (
-                                <div key={idx} className="spreadsheet-grid px-4 py-5 row-divider hover:bg-white/5 transition-colors">
-                                    <div className="flex flex-col">
-                                        <span className="text-[11px] font-bold text-ice-white">{day.date}</span>
-                                        <span className="text-[8px] text-white/40 font-medium">{day.id}</span>
-                                    </div>
-                                    <div className="text-[11px] font-medium text-white/90 text-center">{day.loaded}</div>
-                                    <div className="text-[11px] font-medium text-white/90 text-center">{day.delivered}</div>
-                                    <div className={`text-[11px] font-medium text-center ${day.returns > 0 ? 'text-primary-gold' : 'text-white/30'}`}>
-                                        {day.returns > 0 ? String(day.returns).padStart(2, '0') : '00'}
-                                    </div>
-                                    <div className="text-[11px] font-bold text-ice-white text-right">
-                                        R$ {formatCurrency(day.totalValue)}
-                                    </div>
-                                    <div className="flex justify-end gap-1.5 pl-2">
-                                        <button className="action-outline-btn">
-                                            <span className="material-symbols-outlined text-[14px]">edit</span>
-                                        </button>
-                                        <button className="action-outline-btn">
-                                            <span className="material-symbols-outlined text-[14px]">delete</span>
-                                        </button>
-                                    </div>
+                        {rows.length > 0 ? (
+                            rows.map((row) => (
+                                <div key={row.id} className="spreadsheet-grid px-4 py-3 row-divider hover:bg-white/5 transition-colors items-center">
+                                    {editingId === row.id ? (
+                                        <>
+                                            {/* Edit Mode */}
+                                            <input
+                                                className="w-[50px] bg-transparent border-b border-primary-gold text-[10px] text-ice-white focus:outline-none placeholder-white/20 p-0 text-center"
+                                                value={editForm.date}
+                                                onChange={e => setEditForm({ ...editForm, date: e.target.value })}
+                                                placeholder="DD/MM"
+                                            />
+                                            <input
+                                                type="number"
+                                                className="w-10 bg-transparent border-b border-primary-gold text-[11px] text-center text-ice-white focus:outline-none p-0 mx-auto"
+                                                value={editForm.loaded}
+                                                onChange={e => setEditForm({ ...editForm, loaded: e.target.value })}
+                                            />
+                                            <input
+                                                type="number"
+                                                className="w-10 bg-transparent border-b border-primary-gold text-[11px] text-center text-emerald-400 focus:outline-none p-0 mx-auto"
+                                                value={editForm.delivered}
+                                                onChange={e => setEditForm({ ...editForm, delivered: e.target.value })}
+                                            />
+                                            <input
+                                                type="number"
+                                                className="w-10 bg-transparent border-b border-primary-gold text-[11px] text-center text-red-400 focus:outline-none p-0 mx-auto"
+                                                value={editForm.returns}
+                                                onChange={e => setEditForm({ ...editForm, returns: e.target.value })}
+                                            />
+                                            <div className="text-[10px] font-bold text-ice-white text-right opacity-50">-</div>
+                                            <div className="flex justify-end gap-1 pl-1">
+                                                <button onClick={() => saveEdit(row.id)} className="action-outline-btn border-emerald-500 text-emerald-500 hover:bg-emerald-500/10 active:bg-emerald-500">
+                                                    <span className="material-symbols-outlined text-[14px]">check</span>
+                                                </button>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <>
+                                            {/* View Mode */}
+                                            <div className="flex flex-col">
+                                                <span className="text-[11px] font-bold text-ice-white">{row.date}</span>
+                                            </div>
+                                            <div className="text-[11px] font-medium text-white/90 text-center">{row.loaded}</div>
+                                            <div className="text-[11px] font-medium text-emerald-400 text-center">{row.delivered}</div>
+                                            <div className={`text-[11px] font-medium text-center ${row.returns > 0 ? 'text-red-400' : 'text-white/30'}`}>
+                                                {row.returns > 0 ? String(row.returns).padStart(2, '0') : '00'}
+                                            </div>
+                                            <div className="text-[11px] font-bold text-ice-white text-right">
+                                                R$ {formatCurrency(row.totalValue)}
+                                            </div>
+                                            <div className="flex justify-end gap-1.5 pl-2">
+                                                <button onClick={() => startEditing(row)} className="action-outline-btn">
+                                                    <span className="material-symbols-outlined text-[14px]">edit</span>
+                                                </button>
+                                                <button onClick={() => deleteRow(row.id)} className="action-outline-btn border-red-500/50 text-red-400 hover:bg-red-500/10">
+                                                    <span className="material-symbols-outlined text-[14px]">delete</span>
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
                                 </div>
                             ))
                         ) : (
-                            <div className="px-6 py-12 text-center">
-                                <p className="text-secondary-gray text-xs font-medium opacity-50 uppercase tracking-widest">Nenhum registro encontrado</p>
+                            <div className="px-6 py-16 text-center flex flex-col items-center justify-center border-2 border-dashed border-white/5 mx-4 mt-4 rounded-3xl">
+                                <span className="material-symbols-outlined text-4xl text-primary-gold/30 mb-2">post_add</span>
+                                <h3 className="text-sm font-bold text-white mb-1">Lista Vazia</h3>
+                                <p className="text-secondary-gray text-xs font-medium opacity-50 px-4">Adicione linhas manuais para preencher este relatório avulso. Nada será salvo no histórico.</p>
                             </div>
                         )}
                     </div>
                 </div>
 
-                {/* Bottom Actions */}
                 <div className="mt-auto px-6 pb-12 pt-8 bg-gradient-to-t from-pitch-black to-[rgba(0,0,0,0.8)] flex flex-col gap-4 font-jakarta sticky bottom-0 z-30 border-t border-primary-gold/10">
-                    <button className="w-full flex items-center justify-center gap-3 rounded-lg py-4 border border-primary-gold/40 bg-pitch-black text-primary-gold hover:border-primary-gold active:bg-primary-gold/10 transition-all">
+                    <button
+                        onClick={handleAddRow}
+                        className="w-full flex items-center justify-center gap-3 rounded-lg py-4 border border-primary-gold/40 bg-pitch-black text-primary-gold hover:border-primary-gold active:bg-primary-gold/10 transition-all">
                         <span className="material-symbols-outlined text-xl">add_box</span>
                         <span className="text-[11px] font-bold tracking-[0.4em] uppercase">ADICIONAR LINHA</span>
                     </button>

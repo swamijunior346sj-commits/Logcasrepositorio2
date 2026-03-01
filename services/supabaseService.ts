@@ -55,11 +55,11 @@ export const supabaseService = {
       try {
         // Tenta pegar o usuário do cache local (getSession) em vez de validar na rede (getUser)
         const { data: { session }, error: authError } = await supabase.auth.getSession();
-        
+
         if (authError) {
-           console.warn("Erro de sessão ao subscrever:", authError.message);
-           callback([], authError);
-           return;
+          console.warn("Erro de sessão ao subscrever:", authError.message);
+          callback([], authError);
+          return;
         }
 
         const user = session?.user;
@@ -69,7 +69,7 @@ export const supabaseService = {
           callback([], null);
           return;
         }
-        
+
         // Função interna para buscar dados
         const fetchData = async () => {
           try {
@@ -83,9 +83,9 @@ export const supabaseService = {
               // Se for erro de fetch na busca, passamos o erro mas não quebramos a app
               callback([], error);
             } else {
-              // FILTRO HÍBRIDO: Aceita dados do usuário OU dados legados (sem user_id)
-              const isolatedData = (data as LogEntry[]).filter(log => 
-                log.user_id === user.id || !log.user_id
+              // FILTRO RESTRITO: Aceita apenas dados do usuário logado
+              const isolatedData = (data as LogEntry[]).filter(log =>
+                log.user_id === user.id
               );
               callback(isolatedData);
             }
@@ -104,9 +104,9 @@ export const supabaseService = {
           .channel(`public_logs_feed`)
           .on(
             "postgres_changes",
-            { 
-              event: "*", 
-              schema: "public", 
+            {
+              event: "*",
+              schema: "public",
               table: TABLE_NAME
             },
             () => {
@@ -114,9 +114,9 @@ export const supabaseService = {
             }
           )
           .subscribe((status) => {
-             if (status === 'CHANNEL_ERROR') {
-               console.warn("Erro no canal Realtime (provável desconexão).");
-             }
+            if (status === 'CHANNEL_ERROR') {
+              console.warn("Erro no canal Realtime (provável desconexão).");
+            }
           });
       } catch (err) {
         console.error("Erro fatal no subscribeToLogs:", err);
@@ -136,10 +136,10 @@ export const supabaseService = {
     // Usa getSession para evitar falha de rede na verificação de auth
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
-    
+
     if (!user) throw new Error("Usuário desconectado.");
-    
-    const payload = { 
+
+    const payload = {
       type: entry.type,
       timestamp: entry.timestamp,
       value: entry.value,
@@ -149,28 +149,19 @@ export const supabaseService = {
 
     // 1. Tenta salvar com user_id
     const { error } = await supabase.from(TABLE_NAME).insert([cleanPayload(payload)]);
-    
+
     if (error) {
       if (error.message.includes('Failed to fetch')) {
-         throw new Error('Sem conexão com a internet.');
+        throw new Error('Sem conexão com a internet.');
       }
-
-      console.warn("Erro no insert seguro. Tentando modo legado...", error.message);
-      
-      // 2. Fallback: Remove user_id e tenta de novo
-      const legacyPayload = { ...payload };
-      delete (legacyPayload as any).user_id;
-
-      const { error: legacyError } = await supabase.from(TABLE_NAME).insert([cleanPayload(legacyPayload)]);
-      
-      if (legacyError) handleSupabaseError(legacyError);
+      handleSupabaseError(error);
     }
   },
 
   saveBulkLogs: async (entries: Omit<LogEntry, 'id'>[]) => {
     const { data: { session } } = await supabase.auth.getSession();
     const user = session?.user;
-    
+
     if (!user) throw new Error("Usuário desconectado.");
 
     const payloads = entries.map(e => ({
@@ -183,22 +174,12 @@ export const supabaseService = {
 
     // 1. Tenta salvar com user_id
     const { error } = await supabase.from(TABLE_NAME).insert(cleanPayload(payloads));
-    
+
     if (error) {
-       if (error.message.includes('Failed to fetch')) {
-         throw new Error('Sem conexão com a internet.');
-       }
-       console.warn("Erro no insert em lote seguro. Tentando modo legado...", error.message);
-
-       // 2. Fallback
-       const legacyPayloads = payloads.map(p => {
-         const copy = { ...p };
-         delete (copy as any).user_id;
-         return copy;
-       });
-
-       const { error: legacyError } = await supabase.from(TABLE_NAME).insert(cleanPayload(legacyPayloads));
-       if (legacyError) handleSupabaseError(legacyError);
+      if (error.message.includes('Failed to fetch')) {
+        throw new Error('Sem conexão com a internet.');
+      }
+      handleSupabaseError(error);
     }
   },
 
@@ -214,7 +195,7 @@ export const supabaseService = {
       .eq('user_id', user.id)
       .eq('isPaid', false)
       .eq('type', 'SAIDA');
-      
+
     if (error && !error.message.includes("column")) handleSupabaseError(error);
   },
 
@@ -225,10 +206,10 @@ export const supabaseService = {
 
     // Tenta deletar pelo ID
     const { error } = await supabase
-        .from(TABLE_NAME)
-        .delete()
-        .eq('user_id', user.id);
-        
+      .from(TABLE_NAME)
+      .delete()
+      .eq('user_id', user.id);
+
     if (error) handleSupabaseError(error);
   },
 
@@ -238,9 +219,9 @@ export const supabaseService = {
     if (!user) return;
 
     const { error } = await supabase
-        .from(TABLE_NAME)
-        .delete()
-        .in('id', ids);
+      .from(TABLE_NAME)
+      .delete()
+      .in('id', ids);
 
     if (error) handleSupabaseError(error);
   }

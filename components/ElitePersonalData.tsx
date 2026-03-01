@@ -3,12 +3,13 @@ import PremiumDeleteSuccessPopup from './PremiumDeleteSuccessPopup';
 
 interface ElitePersonalDataProps {
     userName: string;
+    userEmail: string;
     vehicleName: string;
     onBack: () => void;
     onSave: (data: { userName: string, vehicleName: string }) => void;
 }
 
-const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicleName, onBack, onSave }) => {
+const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEmail, vehicleName, onBack, onSave }) => {
     const [vehicle, setVehicle] = useState(vehicleName);
     const [isVehicleMenuOpen, setIsVehicleMenuOpen] = useState(false);
     const [showDeleteAnim, setShowDeleteAnim] = useState(false);
@@ -91,7 +92,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                                 disabled
                                 className="bg-transparent border-none p-0 text-white font-semibold focus:ring-0 w-full text-sm cursor-not-allowed"
                                 type="email"
-                                value="ricardo.silva@elitedelivery.com"
+                                value={userEmail || "Não informado"}
                             />
                         </div>
                     </div>
@@ -103,7 +104,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                             <input
                                 className="bg-transparent border-none p-0 text-white font-semibold focus:ring-0 w-full text-sm"
                                 type="tel"
-                                defaultValue="+55 (11) 98765-4321"
+                                placeholder="(11) 90000-0000"
                             />
                         </div>
                     </div>

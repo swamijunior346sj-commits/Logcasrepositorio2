@@ -25,3 +25,12 @@ export interface QuickEntryRow {
   entregues: number;
   insucessos: number;
 }
+
+export interface TemporaryExpressRow {
+  id: string;
+  date: string;
+  loaded: number;
+  delivered: number;
+  returns: number;
+  totalValue: number;
+}
