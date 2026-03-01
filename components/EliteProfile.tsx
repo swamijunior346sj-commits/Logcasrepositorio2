@@ -42,14 +42,7 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
 
             <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 carbon-texture">
                 {/* Header */}
-                <header className="flex items-center justify-between p-6 mt-4">
-                    <button
-                        onClick={onBack}
-                        className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#D4AF37] active:scale-90 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                    </button>
-                    <span className="text-[10px] font-black tracking-[0.4em] text-white/40 uppercase">PERFIL ELITE</span>
+                <header className="flex items-center justify-end p-6 mt-4">
                     <button
                         onClick={onSettings}
                         className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#D4AF37] active:scale-90 transition-all"

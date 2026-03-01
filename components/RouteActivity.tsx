@@ -233,7 +233,6 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                     <div className="flex flex-col items-center gap-3">
                         <div className="flex items-center gap-4 w-full">
                             <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent to-gold/10"></div>
-                            <p className="text-[8px] text-gold/40 font-bold tracking-[0.4em] uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>LogCash Elite</p>
                             <div className="h-[1px] flex-grow bg-gradient-to-l from-transparent to-gold/10"></div>
                         </div>
                         <div className="flex gap-2">

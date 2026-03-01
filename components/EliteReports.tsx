@@ -123,7 +123,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                         <h2 className="text-4xl font-black text-white tracking-tight mb-8 metallic-text">{formatBRL(wallet.pending)}</h2>
                         <div className="flex justify-between items-end">
                             <div className="flex flex-col gap-1">
-                                <p className="text-[8px] tracking-[0.2em] font-bold text-white/30 uppercase">TITULAR ELITE</p>
+                                <p className="text-[8px] tracking-[0.2em] font-bold text-white/30 uppercase">OPERADOR</p>
                                 <p className="text-sm font-medium tracking-widest text-white/90 uppercase">{userName}</p>
                             </div>
                             <button
@@ -183,7 +183,12 @@ const EliteReports: React.FC<EliteReportsProps> = ({
             <div className="px-6 pt-8 pb-4">
                 <div className="flex items-center justify-between mb-6">
                     <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">TRANSAÇÕES</h3>
-                    <span className="material-symbols-outlined text-[#D4AF37] text-xl">calendar_month</span>
+                    <button
+                        onClick={() => alert("Filtro de datas ativo (Em breve)")}
+                        className="flex items-center justify-center p-2 rounded-xl bg-white/5 border border-white/10 active:scale-95 transition-all text-[#D4AF37] hover:bg-white/10"
+                    >
+                        <span className="material-symbols-outlined text-xl">calendar_month</span>
+                    </button>
                 </div>
 
                 <div className="w-full overflow-hidden">

@@ -80,14 +80,11 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                         </div>
                         <div className="absolute -bottom-1 -right-1 bg-gradient-to-b from-primary-gold to-deep-gold text-black text-[9px] font-black px-2 py-0.5 rounded-full border border-black/50 shadow-md">LVL 15</div>
                     </div>
-                    <div className="text-left">
-                        <p className="text-[9px] tracking-[0.2em] text-primary-gold font-bold uppercase opacity-80">LogCash Premium</p>
-                        <h2 className="text-lg font-bold text-f5-white">{userName || 'Alex Driver'}</h2>
+                    <div className="text-left flex flex-col justify-center">
+                        <p className="text-[10px] tracking-[0.2em] text-primary-gold font-bold uppercase opacity-80 mb-0.5">Operador</p>
+                        <h2 className="text-xl font-bold text-f5-white leading-none">{userName}</h2>
                     </div>
                 </div>
-                <button className="flex size-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-primary-gold active:scale-90 transition-transform">
-                    <span className="material-symbols-outlined text-xl">notifications</span>
-                </button>
             </div>
 
             {/* Total Balance / Graph */}
@@ -200,14 +197,14 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                         DETALHES
                     </span>
                 </div>
-                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide snap-x snap-mandatory">
                     {[
                         { icon: 'grade', label: 'LENDA' },
                         { icon: 'bolt', label: 'RÁPIDO' },
                         { icon: 'diamond', label: 'DIAMANTE' },
                         { icon: 'verified_user', label: 'SEGURO' }
                     ].map((ach, i) => (
-                        <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3 achievement-glass p-5 rounded-2xl w-[100px]">
+                        <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3 achievement-glass p-5 rounded-2xl w-[100px] snap-center">
                             <div className="size-14 rounded-xl icon-outline-gold flex items-center justify-center">
                                 <span className="material-symbols-outlined text-2xl text-primary-gold font-light" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>{ach.icon}</span>
                             </div>
