@@ -90,23 +90,6 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                     </div>
                 </div>
 
-                {/* Global Ranking Card */}
-                <div className="px-6 mb-8">
-                    <div className="card-border rounded-3xl p-6 relative overflow-hidden flex items-center justify-between">
-                        <div className="relative z-10 text-left">
-                            <p className="text-[10px] font-bold text-[#D4AF37] uppercase tracking-[0.2em] mb-1">Ranking Global</p>
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-4xl font-black text-white">#12</span>
-                                <span className="text-xs font-bold text-white/40 uppercase tracking-widest">Mundo</span>
-                            </div>
-                        </div>
-                        <div className="relative z-10 size-16 flex items-center justify-center">
-                            <span className="material-symbols-outlined text-5xl metallic-gold-text">military_tech</span>
-                        </div>
-                        <div className="absolute top-0 right-0 w-32 h-full bg-gradient-to-l from-[#D4AF37]/10 to-transparent pointer-events-none"></div>
-                    </div>
-                </div>
-
                 {/* Profile Options */}
                 <div className="px-6 flex flex-col gap-3">
                     <button

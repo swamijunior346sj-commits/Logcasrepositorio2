@@ -82,7 +82,12 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                     0%, 100% { box-shadow: 0 0 10px rgba(235, 192, 81, 0.03); }
                     50% { box-shadow: 0 0 20px rgba(235, 192, 81, 0.08); }
                 }
-                
+                .ios-safe-bottom {
+                    padding-bottom: env(safe-area-inset-bottom);
+                }
+                .ios-safe-top {
+                    padding-top: env(safe-area-inset-top);
+                }
                 /* One-click card animations */
                 @keyframes float-up-fade {
                     0% { transform: translateY(0) scale(1); opacity: 1; }
@@ -110,40 +115,39 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                 `
             }} />
 
-            <div className="max-w-md mx-auto p-6 flex flex-col relative z-20">
+            <div className="max-w-md mx-auto p-6 flex flex-col relative z-20 h-full ios-safe-top pb-24">
                 {/* Header / Circular Gauge */}
-                <div className="glass-charcoal cinematic-glow rounded-[2.5rem] p-8 flex flex-col items-center justify-center relative mb-8 mt-4">
-                    <div className="relative w-52 h-52 flex items-center justify-center">
+                <div className="glass-charcoal cinematic-glow rounded-[2.5rem] p-6 flex flex-col items-center justify-center relative mb-6 mt-2">
+                    <div className="relative w-48 h-48 flex items-center justify-center">
                         <div className="absolute inset-0 rounded-full border-[1.5px] border-gold/10"></div>
                         <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
                             <circle
-                                className="transition-all duration-1000 ease-out"
+                                className="transition-all duration-1000 ease-out opacity-80"
                                 cx="50" cy="50" fill="none" r="48"
                                 stroke="#EBC051"
-                                strokeDasharray="301"
+                                strokeDasharray="301" // circumference 2*pi*48 = ~301
                                 strokeDashoffset={strokeDashoffset}
                                 strokeLinecap="round"
-                                strokeWidth="2"
-                                opacity="0.8"
+                                strokeWidth="1.5"
                             ></circle>
                         </svg>
                         <div className="text-center z-10">
-                            <p className="text-[10px] font-bold tracking-[0.4em] text-gold/60 uppercase mb-3" style={{ fontFamily: "'Syncopate', sans-serif" }}>Total</p>
+                            <p className="text-[9px] font-bold tracking-[0.4em] text-gold/60 uppercase mb-2" style={{ fontFamily: "'Syncopate', sans-serif" }}>Total</p>
                             <div className="flex flex-col items-center">
-                                <span className="text-[14px] font-bold text-gold/80 mb-1" style={{ fontFamily: "'Syncopate', sans-serif" }}>R$</span>
+                                <span className="text-[14px] font-medium text-gold/80 mb-1" style={{ fontFamily: "'Syncopate', sans-serif" }}>R$</span>
                                 <span className="text-4xl font-extrabold tracking-tight text-[#F5F5F5]">{formatCurrency(totalValue)}</span>
                             </div>
-                            <p className="text-[9px] font-bold tracking-[0.2em] text-zinc-500 mt-4 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Hoje</p>
+                            <p className="text-[8px] font-bold tracking-[0.2em] text-zinc-500 mt-3 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Hoje</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Stats Grid - One-click buttons */}
-                <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="grid grid-cols-3 gap-3 mb-6">
                     {/* Carregados */}
                     <button
                         onClick={() => handleOneClick('entrada')}
-                        className={`flex flex-col items-center justify-center py-5 px-2 rounded-2xl bg-log-card/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'entrada' ? 'border-primary scale-95' : 'border-log-border/30 glow-pulse'
+                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'entrada' ? 'border-primary scale-95' : 'border-[#2A2A26]/30 glow-pulse'
                             }`}
                     >
                         {animatingCard === 'entrada' && (
@@ -156,17 +160,17 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-primary text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7.5px] font-bold tracking-[0.15em] text-zinc-500 mb-1.5 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Carregados</p>
+                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Carregados</p>
                         <div className={`text-xl font-bold transition-colors ${animatingCard === 'entrada' ? 'text-primary' : 'text-[#F5F5F5]'}`}>
                             {String(counts.todayEntrada).padStart(2, '0')}
                         </div>
-                        <div className="mt-2 w-5 h-[1.5px] bg-gold/40 rounded-full"></div>
+                        <div className="mt-1.5 w-4 h-[1.5px] bg-gold/40 rounded-full"></div>
                     </button>
 
                     {/* Entregues */}
                     <button
                         onClick={() => handleOneClick('saida')}
-                        className={`flex flex-col items-center justify-center py-5 px-2 rounded-2xl bg-log-card/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'saida' ? 'border-emerald-500 scale-95' : 'border-log-border/30 glow-pulse'
+                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'saida' ? 'border-emerald-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
                             }`}
                     >
                         {animatingCard === 'saida' && (
@@ -179,17 +183,17 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-emerald-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7.5px] font-bold tracking-[0.15em] text-zinc-500 mb-1.5 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Entregues</p>
+                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Entregues</p>
                         <div className={`text-xl font-bold transition-colors ${animatingCard === 'saida' ? 'text-emerald-400' : 'text-[#F5F5F5]'}`}>
                             {String(counts.todaySaida).padStart(2, '0')}
                         </div>
-                        <div className="mt-2 w-5 h-[1.5px] bg-emerald-500/40 rounded-full"></div>
+                        <div className="mt-1.5 w-4 h-[1.5px] bg-emerald-500/40 rounded-full"></div>
                     </button>
 
                     {/* Insucessos */}
                     <button
                         onClick={() => handleOneClick('devolucao')}
-                        className={`flex flex-col items-center justify-center py-5 px-2 rounded-2xl bg-log-card/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'devolucao' ? 'border-red-500 scale-95' : 'border-log-border/30 glow-pulse'
+                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'devolucao' ? 'border-red-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
                             }`}
                     >
                         {animatingCard === 'devolucao' && (
@@ -202,48 +206,33 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-red-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7.5px] font-bold tracking-[0.15em] text-zinc-500 mb-1.5 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Insucessos</p>
+                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Insucessos</p>
                         <div className={`text-xl font-bold transition-colors ${animatingCard === 'devolucao' ? 'text-red-400' : 'text-[#F5F5F5]'}`}>
                             {String(counts.todayDevolucao).padStart(2, '0')}
                         </div>
-                        <div className="mt-2 w-5 h-[1.5px] bg-red-500/40 rounded-full"></div>
+                        <div className="mt-1.5 w-4 h-[1.5px] bg-red-500/40 rounded-full"></div>
                     </button>
                 </div>
 
                 {/* Bulk Action Buttons */}
-                <div className="flex flex-col gap-4 flex-grow justify-start">
+                <div className="flex flex-col gap-3 flex-grow justify-start">
                     <button
                         onClick={() => { setBulkQty(0); setShowBulkLoad(true); }}
-                        className="glass-charcoal w-full py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
+                        className="glass-charcoal w-full py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
                     >
-                        <span className="material-symbols-outlined text-[#EBC051] font-light text-2xl">layers</span>
+                        <span className="material-symbols-outlined text-[#EBC051] font-light text-xl">layers</span>
                         <span className="text-[#EBC051] font-bold text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>CARREGAR EM MASSA</span>
                     </button>
                     <button
                         onClick={() => { setBulkQty(0); setShowBulkDeliver(true); }}
-                        className="glass-charcoal w-full py-5 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
+                        className="glass-charcoal w-full py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
                     >
-                        <span className="material-symbols-outlined text-[#EBC051] font-light text-2xl">task_alt</span>
+                        <span className="material-symbols-outlined text-[#EBC051] font-light text-xl">task_alt</span>
                         <span className="text-[#EBC051] font-bold text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>ENTREGAS EM MASSA</span>
                     </button>
                 </div>
 
-                {/* Footer */}
-                <div className="mt-auto pt-6 pb-20">
-                    <div className="flex flex-col items-center gap-3">
-                        <div className="flex items-center gap-4 w-full">
-                            <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent to-gold/10"></div>
-                            <div className="h-[1px] flex-grow bg-gradient-to-l from-transparent to-gold/10"></div>
-                        </div>
-                        <div className="flex gap-2">
-                            <div className="w-1 h-1 rounded-full bg-gold/5"></div>
-                            <div className="w-1 h-1 rounded-full bg-gold/20"></div>
-                            <div className="w-3 h-1 rounded-full bg-gold/60"></div>
-                            <div className="w-1 h-1 rounded-full bg-gold/20"></div>
-                            <div className="w-1 h-1 rounded-full bg-gold/5"></div>
-                        </div>
-                    </div>
-                </div>
+                <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/5 rounded-full z-10"></div>
             </div>
 
             {/* Bulk Actions Modals */}

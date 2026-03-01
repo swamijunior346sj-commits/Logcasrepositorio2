@@ -25,7 +25,6 @@ import EliteTaxData from './components/EliteTaxData';
 import ElitePersonalData from './components/ElitePersonalData';
 import EliteSettings from './components/EliteSettings';
 import EliteInvoiceSuccess from './components/EliteInvoiceSuccess';
-import EliteMap from './components/EliteMap';
 import EliteExtrato from './components/EliteExtrato';
 import EliteExpressReport from './components/EliteExpressReport';
 import PremiumSuccessPopup from './components/PremiumSuccessPopup';
@@ -479,7 +478,7 @@ const App: React.FC = () => {
       <header className="bg-black/50 backdrop-blur-3xl border-b border-[#D4AF37]/10 px-4 sticky top-0 z-[100] pt-6 pb-2 transition-all">
         <div className="max-w-lg mx-auto flex flex-col gap-6">
           {/* Main Info Row / Sub-screen Header */}
-          {['dash', 'route', 'map', 'stats', 'profile'].includes(activeTab) ? (
+          {['dash', 'route', 'stats', 'profile'].includes(activeTab) ? (
             <div className="flex justify-between items-center px-2">
               <div className="flex items-center gap-4">
                 <div className="relative">
@@ -497,17 +496,6 @@ const App: React.FC = () => {
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 bg-white/5 border border-white/10 px-3 py-1.5 rounded-xl">
-                  <div className="size-7 rounded-lg bg-[#D4AF37] flex items-center justify-center shadow-[0_0_10px_rgba(212,175,55,0.2)]">
-                    <span className="material-symbols-outlined text-black text-lg font-black">box</span>
-                  </div>
-                  <div className="hidden xs:block">
-                    <h1 className="text-[10px] font-black tracking-widest text-white leading-tight">LOG<span className="text-[#D4AF37]">CASH</span></h1>
-                    <p className="text-[6px] text-white/30 font-black tracking-[0.2em]">VER 1.0</p>
-                  </div>
-                </div>
-              </div>
             </div>
           ) : (
             <div className="flex items-center justify-between px-2">
@@ -590,18 +578,6 @@ const App: React.FC = () => {
                 <span className={`material-symbols-outlined text-[20px] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'profile' ? { fontVariationSettings: "'FILL' 1" } : {}}>shield_person</span>
                 <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`}>PERFIL</span>
               </button>
-
-              {/* ABA MAPA */}
-              <button
-                onClick={() => setActiveTab('map')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'map'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'map' ? { fontVariationSettings: "'FILL' 1" } : {}}>near_me</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'map' ? 'text-[#D4AF37]' : 'text-white'}`}>MAPA</span>
-              </button>
             </nav>
           )}
         </div>
@@ -627,10 +603,6 @@ const App: React.FC = () => {
               />
             </div>
 
-          </div>
-        ) : activeTab === 'map' ? (
-          <div className="animate-in fade-in duration-500">
-            <EliteMap onBack={() => setActiveTab('dash')} />
           </div>
         ) : activeTab === 'stats' ? (
           <div className="animate-in fade-in duration-500">

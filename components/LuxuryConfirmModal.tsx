@@ -39,39 +39,80 @@ const LuxuryConfirmModal: React.FC<LuxuryConfirmModalProps> = ({
     };
 
     return (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/75 backdrop-blur-[12px] animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-[200] flex min-h-screen w-full flex-col items-center justify-center p-6 bg-pitch-black/80 backdrop-blur-sm animate-in fade-in duration-300">
             <style dangerouslySetInnerHTML={{
                 __html: `
-        .popup-card {
-            background: linear-gradient(180deg, #121212 0%, #080808 100%);
-            border: 1px solid rgba(212, 175, 55, 0.4);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.9);
+        .glass-modal-confirm {
+            background: rgba(15, 15, 15, 0.7);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(235, 192, 81, 0.3);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
         }
+        .particle-confirm {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: #EBC051;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        @keyframes float-particle-confirm {
+            0% { transform: translateY(0) translateX(0); opacity: 0; }
+            25% { opacity: 0.6; }
+            100% { transform: translateY(-100px) translateX(20px); opacity: 0; }
+        }
+        @keyframes liquid-metallic-confirm {
+            0%, 100% { transform: scale(1) rotate(0deg); filter: drop-shadow(0 0 5px #EBC051); }
+            50% { transform: scale(1.05) rotate(2deg); filter: drop-shadow(0 0 15px #EBC051); }
+        }
+        .animate-float-particle-confirm { animation: float-particle-confirm 10s linear infinite; }
+        .animate-liquid-metallic-confirm { animation: liquid-metallic-confirm 4s ease-in-out infinite; }
       `}} />
 
-            <div className="popup-card w-full max-w-[340px] rounded-[32px] overflow-hidden p-8 flex flex-col items-center text-center animate-in zoom-in-95 duration-300">
-                <div className="size-16 rounded-full bg-[#D4AF37]/10 border border-[#D4AF37]/30 flex items-center justify-center mb-6">
-                    {getIcon()}
-                </div>
+            {/* Background Glow */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[300px] h-[300px] bg-primary-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-                <h2 className="text-xl font-bold text-white mb-3">{title}</h2>
-                <p className="text-white/60 text-sm font-medium leading-relaxed mb-8 px-2">
-                    {description}
-                </p>
+            <div className="relative z-10 w-full max-w-[430px] flex justify-center">
+                <div className="glass-modal-confirm w-full rounded-[40px] p-10 flex flex-col items-center text-center animate-in slide-in-from-bottom-5 duration-500">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 bg-primary-gold/10 rounded-full blur-xl animate-pulse"></div>
+                        <div className="relative size-24 rounded-full border border-primary-gold/20 flex items-center justify-center bg-pitch-black/40">
+                            <span className="animate-liquid-metallic-confirm flex items-center justify-center">
+                                {getIcon()}
+                            </span>
+                        </div>
+                        <div className="absolute inset-0 pointer-events-none">
+                            <div className="particle-confirm animate-float-particle-confirm top-0 left-1/2" style={{ animationDelay: '0s' }}></div>
+                            <div className="particle-confirm animate-float-particle-confirm top-1/4 right-0" style={{ animationDelay: '1.5s' }}></div>
+                            <div className="particle-confirm animate-float-particle-confirm bottom-0 left-1/4" style={{ animationDelay: '3s' }}></div>
+                        </div>
+                    </div>
 
-                <div className="flex flex-col w-full gap-3">
-                    <button
-                        onClick={onConfirm}
-                        className="w-full bg-gradient-to-r from-[#AA771C] via-[#F9E29C] to-[#AA771C] text-black py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-lg shadow-[#D4AF37]/20 active:scale-[0.98] transition-all"
-                    >
-                        Confirmar
-                    </button>
-                    <button
-                        onClick={onClose}
-                        className="w-full border border-[#D4AF37]/30 text-[#D4AF37] py-4 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-white/5 active:scale-[0.98] transition-all"
-                    >
-                        Cancelar
-                    </button>
+                    <h2 className="text-ice-white font-bold text-xl tracking-[0.2em] mb-3 uppercase">
+                        {title}
+                    </h2>
+                    <p className="text-primary-gold text-[13px] font-medium tracking-wide mb-10 opacity-80">
+                        {description}
+                    </p>
+
+                    <div className="w-full space-y-6">
+                        <button
+                            onClick={onConfirm}
+                            className={`w-full bg-transparent border py-4 rounded-full font-bold text-xs uppercase tracking-[0.3em] active:scale-[0.97] transition-all ${type === 'RESET_SYSTEM' || type === 'LOGOUT'
+                                    ? 'border-red-500 text-red-500 hover:bg-red-500/5'
+                                    : 'border-primary-gold text-primary-gold hover:bg-primary-gold/5'
+                                }`}
+                        >
+                            CONFIRMAR
+                        </button>
+                        <button
+                            onClick={onClose}
+                            className="w-full text-primary-gold/60 py-2 font-medium text-xs uppercase tracking-[0.2em] active:opacity-40 transition-opacity"
+                        >
+                            CANCELAR
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

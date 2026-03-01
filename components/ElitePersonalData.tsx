@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import PremiumDeleteSuccessPopup from './PremiumDeleteSuccessPopup';
 
 interface ElitePersonalDataProps {
     userName: string;
@@ -8,8 +9,9 @@ interface ElitePersonalDataProps {
 }
 
 const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicleName, onBack, onSave }) => {
-    const [name, setName] = useState(userName);
     const [vehicle, setVehicle] = useState(vehicleName);
+    const [isVehicleMenuOpen, setIsVehicleMenuOpen] = useState(false);
+    const [showDeleteAnim, setShowDeleteAnim] = useState(false);
 
     return (
         <div className="flex flex-col items-center bg-pitch-black animate-in fade-in duration-700 min-h-screen">
@@ -44,15 +46,8 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
 
             <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl carbon-texture pb-12">
                 {/* Header Actions */}
-                <div className="flex items-center justify-between p-6 mt-4">
-                    <button
-                        onClick={onBack}
-                        className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-primary-gold active:scale-90 transition-all"
-                    >
-                        <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                    </button>
+                <div className="flex items-center justify-center p-6 mt-4">
                     <h2 className="text-[12px] font-black tracking-[0.4em] text-white uppercase text-center">DADOS PESSOAIS</h2>
-                    <div className="size-11"></div>
                 </div>
 
                 {/* Profile Picture */}
@@ -77,13 +72,13 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                 <div className="px-6 space-y-5">
                     <div className="space-y-1.5 text-left">
                         <label className="text-[10px] font-bold text-primary-gold/60 uppercase tracking-widest ml-1">Nome Completo</label>
-                        <div className="input-card-border rounded-2xl p-4 flex items-center">
+                        <div className="input-card-border rounded-2xl p-4 flex items-center opacity-60">
                             <span className="material-symbols-outlined text-primary-gold/50 mr-3">person</span>
                             <input
-                                className="bg-transparent border-none p-0 text-white font-semibold focus:ring-0 w-full text-sm"
+                                disabled
+                                className="bg-transparent border-none p-0 text-white font-semibold focus:ring-0 w-full text-sm cursor-not-allowed"
                                 type="text"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
+                                value={userName}
                             />
                         </div>
                     </div>
@@ -117,24 +112,19 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                     <div className="pt-4 text-left">
                         <div className="flex items-center justify-between mb-4">
                             <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.3em]">Meus Veículos</h3>
-                            <button className="text-[10px] font-black text-primary-gold uppercase tracking-widest flex items-center hover:opacity-80 transition-opacity">
-                                <span className="material-symbols-outlined text-sm mr-1">add_circle</span>
-                                Adicionar
-                            </button>
                         </div>
 
-                        <div className="space-y-3">
-                            <div className="input-card-border rounded-2xl p-4 flex items-center justify-between relative overflow-hidden group">
+                        <div className="space-y-3 relative">
+                            <button
+                                onClick={() => setIsVehicleMenuOpen(!isVehicleMenuOpen)}
+                                className={`w-full input-card-border rounded-2xl p-4 flex items-center justify-between relative overflow-hidden group transition-all active:scale-[0.98] ${isVehicleMenuOpen ? 'ring-1 ring-primary-gold shadow-[0_0_15px_rgba(235,192,81,0.2)]' : ''}`}
+                            >
                                 <div className="flex items-center">
                                     <div className="size-11 rounded-xl bg-primary-gold/10 flex items-center justify-center mr-4">
                                         <span className="material-symbols-outlined text-primary-gold">local_shipping</span>
                                     </div>
-                                    <div className="flex-1">
-                                        <input
-                                            className="bg-transparent border-none p-0 text-sm font-bold text-white focus:ring-0 w-full mb-0.5"
-                                            value={vehicle}
-                                            onChange={(e) => setVehicle(e.target.value)}
-                                        />
+                                    <div className="flex-1 text-left">
+                                        <div className="text-sm font-bold text-white mb-0.5">{vehicle}</div>
                                         <p className="text-[10px] text-white/40 font-medium tracking-wide uppercase">Operacional • Padrão LogCash</p>
                                     </div>
                                 </div>
@@ -142,7 +132,31 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                                     <span className="material-symbols-outlined text-[12px] text-primary-gold mr-1" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
                                     <span className="text-[10px] font-black text-primary-gold uppercase tracking-tighter">ATIVO</span>
                                 </div>
-                            </div>
+                            </button>
+
+                            {/* Cockpit Menu */}
+                            {isVehicleMenuOpen && (
+                                <div className="z-20 flex justify-between gap-3 animate-in slide-in-from-top-2 fade-in duration-200 mt-2">
+                                    <button
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 active:scale-95 transition-all text-[10px] font-bold tracking-widest uppercase"
+                                        onClick={(e) => { e.stopPropagation(); alert("Interface de edição em breve"); setIsVehicleMenuOpen(false); }}
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">edit</span>
+                                        Editar
+                                    </button>
+                                    <button
+                                        className="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-500 hover:bg-red-500/20 active:scale-95 transition-all text-[10px] font-bold tracking-widest uppercase"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            setIsVehicleMenuOpen(false);
+                                            setShowDeleteAnim(true);
+                                        }}
+                                    >
+                                        <span className="material-symbols-outlined text-[16px]">delete</span>
+                                        Excluir
+                                    </button>
+                                </div>
+                            )}
 
                             <button className="w-full input-card-border border-dashed border-primary-gold/20 rounded-2xl p-4 flex items-center justify-center group active:bg-white/5 transition-colors">
                                 <span className="material-symbols-outlined text-primary-gold/30 mr-2 group-hover:text-primary-gold transition-colors">add</span>
@@ -155,7 +169,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                 {/* Action Button */}
                 <div className="mt-12 px-6 mb-10">
                     <button
-                        onClick={() => onSave({ userName: name, vehicleName: vehicle })}
+                        onClick={() => onSave({ userName: userName, vehicleName: vehicle })}
                         className="w-full outline-gold-btn rounded-2xl py-5 font-black text-sm uppercase tracking-[0.2em] active:scale-[0.98] transition-all"
                     >
                         Salvar Alterações
@@ -166,6 +180,11 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, vehicle
                     <div className="w-32 h-1 bg-white/20 rounded-full"></div>
                 </div>
             </div>
+
+            <PremiumDeleteSuccessPopup
+                isOpen={showDeleteAnim}
+                onClose={() => setShowDeleteAnim(false)}
+            />
         </div>
     );
 };
