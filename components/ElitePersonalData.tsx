@@ -45,7 +45,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                 `
             }} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl carbon-texture pb-12">
+            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl pb-12">
                 {/* Header Actions */}
                 <div className="flex items-center justify-center p-6 mt-4">
                     <h2 className="text-[12px] font-black tracking-[0.4em] text-white uppercase text-center">DADOS PESSOAIS</h2>

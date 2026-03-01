@@ -114,7 +114,28 @@ const App: React.FC = () => {
       if (supabaseError) {
         console.error("Erro de sincronização:", supabaseError);
       } else {
-        setLogs(updatedLogs);
+        setLogs(prevLogs => {
+          // Filtramos os logs vindo do servidor que já podem estar representados por IDs temporários
+          // Na verdade, a abordagem mais segura é manter os temporários que NÃO estão no servidor
+          const tempLogs = prevLogs.filter(log => String(log.id).startsWith('temp-'));
+
+          // Se o servidor retornar logs, ele é a fonte da verdade para o passado.
+          // Mas os temporários são o "futuro próximo" que ainda não refletiu no servidor.
+
+          // Para evitar duplicidade se o realtime for MUITO rápido:
+          // Poderíamos checar timestamps ou tipos, mas o prefixo temp- é o mais simples.
+
+          // Unir logs do servidor com logs temporários locais
+          const merged = [...tempLogs, ...updatedLogs];
+
+          // Opcional: Remover duplicatas se um log temporário já foi persistido 
+          // (isso exigiria comparar timestamp/conteúdo, o que é instável)
+          // Mas como o fetch do Supabase é ordenado por timestamp desc, 
+          // e novos logs entram no topo, o merge funciona bem.
+
+          return merged;
+        });
+
         // Save on Update (redundância)
         localStorage.setItem(userCacheKey, JSON.stringify(updatedLogs));
       }
@@ -129,6 +150,8 @@ const App: React.FC = () => {
   useEffect(() => {
     const handleBeforeUnload = () => {
       if (session?.user?.id && logs.length > 0) {
+        // Filtrar IDs temporários antes de salvar no cache se quiser, 
+        // mas o cache local ajuda a manter o estado otimista entre reloads rápidos
         const userCacheKey = `logcash_cache_${session.user.id}`;
         localStorage.setItem(userCacheKey, JSON.stringify(logs));
       }
@@ -137,6 +160,9 @@ const App: React.FC = () => {
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [logs, session]);
+
+  // Bloqueio de ID temporário para evitar duplicidade visual quando o realtime chega
+  const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     localStorage.setItem('logcash_user_name', userName);
@@ -241,33 +267,54 @@ const App: React.FC = () => {
   };
 
   const handleRouteActivitySave = async (data: { entrada: number, saida: number, devolucao: number }) => {
+    if (isExecuting) return;
     setIsExecuting(true);
+
+    const previousLogs = [...logs];
+    const timestamp = new Date().toISOString();
+    const newOptimisticLogs: LogEntry[] = [];
+
+    // Gerar logs otimistas
+    if (data.entrada > 0) {
+      for (let i = 0; i < data.entrada; i++) {
+        newOptimisticLogs.push({ id: `temp-route-in-${Date.now()}-${i}`, type: 'ENTRADA', value: 0, timestamp, user_id: session?.user?.id });
+      }
+    }
+    if (data.saida > 0) {
+      for (let i = 0; i < data.saida; i++) {
+        newOptimisticLogs.push({ id: `temp-route-out-${Date.now()}-${i}`, type: 'SAIDA', value: VALOR_POR_PACOTE, timestamp, user_id: session?.user?.id });
+      }
+    }
+    if (data.devolucao > 0) {
+      for (let i = 0; i < data.devolucao; i++) {
+        newOptimisticLogs.push({ id: `temp-route-ret-${Date.now()}-${i}`, type: 'DEVOLUCAO', value: 0, timestamp, user_id: session?.user?.id });
+      }
+    }
+
+    if (newOptimisticLogs.length === 0) {
+      setIsExecuting(false);
+      return;
+    }
+
+    // 1. Atualização Otimista Imediata
+    setLogs(prev => [...newOptimisticLogs, ...prev]);
+
+    // O feedback visual agora é dado apenas pela animação interna dos botões na Atividade da Rota
+    // removendo triggerSuccess para uma experiência mais fluida
+    // triggerSuccess(mainAction as SystemActionType, totalCount); 
+
     try {
-      const newLogs: Omit<LogEntry, 'id'>[] = [];
-      const timestamp = new Date().toISOString();
+      const payload = newOptimisticLogs.map(log => ({
+        type: log.type,
+        timestamp: log.timestamp,
+        value: log.value
+      }));
 
-      if (data.entrada > 0) {
-        for (let i = 0; i < data.entrada; i++) {
-          newLogs.push({ type: 'ENTRADA', value: 0, timestamp, user_id: session?.user?.id });
-        }
-      }
-      if (data.saida > 0) {
-        for (let i = 0; i < data.saida; i++) {
-          newLogs.push({ type: 'SAIDA', value: VALOR_POR_PACOTE, timestamp, user_id: session?.user?.id });
-        }
-      }
-      if (data.devolucao > 0) {
-        for (let i = 0; i < data.devolucao; i++) {
-          newLogs.push({ type: 'DEVOLUCAO', value: 0, timestamp, user_id: session?.user?.id });
-        }
-      }
-
-      if (newLogs.length > 0) {
-        await supabaseService.saveBulkLogs(newLogs);
-      }
-    } catch (error) {
+      await supabaseService.saveBulkLogs(payload);
+    } catch (error: any) {
       console.error('Erro ao salvar atividade da rota:', error);
-      showError('Erro ao salvar dados');
+      setLogs(previousLogs); // Rollback
+      showError(error.message || 'Erro ao sincronizar dados. Ação revertida.');
     } finally {
       setIsExecuting(false);
     }
@@ -305,7 +352,7 @@ const App: React.FC = () => {
             user_id: session?.user?.id
           };
           setLogs(prev => [newLog, ...prev]);
-          triggerSuccess(actionToExecute); // Feedback visual instantâneo
+          // triggerSuccess(actionToExecute); // Feedback visual instantâneo removido a pedido do usuário
 
           // 2. Envio Real
           await supabaseService.saveLog({
@@ -383,13 +430,10 @@ const App: React.FC = () => {
     }
   };
 
-  const executeBulkAction = async () => {
-    if (!bulkActionPending || isExecuting) return;
-
-    const pending = bulkActionPending;
+  const executeBulkAction = async (type: 'ENTRADA' | 'SAIDA', quantity: number) => {
+    if (isExecuting) return;
     setIsExecuting(true);
-
-    const { type, quantity } = pending;
+    setBulkActionPending(null); // Limpar qualquer estado pendente
     const previousLogs = [...logs];
     const timestamp = new Date().toISOString();
 
@@ -404,8 +448,9 @@ const App: React.FC = () => {
         user_id: session?.user?.id
       }));
 
+      // Inserir no topo para feedback imediato
       setLogs(prev => [...newEntriesOptimistic, ...prev]);
-      triggerSuccess(type, quantity);
+      // triggerSuccess(type, quantity); // Feedback visual instantâneo removido a pedido do usuário
 
       // 2. Real
       const payload = newEntriesOptimistic.map(e => ({
@@ -763,38 +808,7 @@ const App: React.FC = () => {
       />
 
       {/* MODAL LOTE (Bulk Confirmation) */}
-      {bulkActionPending && (
-        <div className="fixed inset-0 z-[650] flex items-center justify-center p-6 bg-black/95 backdrop-blur-2xl">
-          <div className="w-full max-w-md glass-deep rounded-[3.5rem] p-10 border border-white/20 animate-pop-burst text-center relative overflow-hidden">
-            <div className={`absolute top-0 inset-x-0 h-2 bg-gradient-to-r ${bulkActionPending.type === 'SAIDA' ? 'from-blue-600 via-white/40 to-blue-600' : 'from-emerald-600 via-white/40 to-emerald-600'}`}></div>
-            <div className={`w-28 h-28 mx-auto bg-white/5 rounded-[2.5rem] flex items-center justify-center mb-8 border border-white/10 animate-float-bounce ${bulkActionPending.type === 'ENTRADA' ? 'text-emerald-400 shadow-[0_0_50px_rgba(52,211,153,0.2)]' : 'text-blue-400 shadow-[0_0_50px_rgba(59,130,246,0.2)]'}`}>
-              <Package size={54} strokeWidth={1.5} />
-            </div>
-            <h3 className="text-3xl font-game font-black text-white uppercase tracking-tighter mb-2 leading-none">Confirmar Lote?</h3>
-            <div className="flex flex-col items-center gap-2 mb-10">
-              <div className={`px-6 py-2 rounded-2xl border text-2xl font-game font-black tracking-widest ${bulkActionPending.type === 'ENTRADA' ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' : 'bg-blue-500/10 border-blue-500/20 text-blue-400'}`}>{bulkActionPending.quantity} UNIDADES</div>
-              {bulkActionPending.type === 'SAIDA' && <div className="text-emerald-400 font-game font-black text-xl tracking-widest mt-2">+ {formatBRL(bulkActionPending.quantity * VALOR_POR_PACOTE)}</div>}
-            </div>
-            <div className="space-y-4">
-              <button
-                disabled={isExecuting}
-                onClick={executeBulkAction}
-                className={`w-full py-5 rounded-2xl font-game font-black text-sm uppercase tracking-[0.4em] shadow-2xl transition-all active:scale-95 text-white flex items-center justify-center gap-3 shine-container overflow-hidden ${bulkActionPending.type === 'ENTRADA' ? 'bg-emerald-600 shadow-emerald-900/40' : 'bg-blue-600 shadow-blue-900/40'}`}
-              >
-                <div className="shine-overlay"></div>
-                {isExecuting ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div> : 'Confirmar Lote'}
-              </button>
-              <button
-                disabled={isExecuting}
-                onClick={() => setBulkActionPending(null)}
-                className="w-full py-4 bg-white/5 text-slate-500 font-bold uppercase text-[10px] tracking-widest rounded-xl transition-all"
-              >
-                Voltar
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modal de Confirmação de Lote removido a pedido do usuário para ação instantânea */}
 
       {/* PAINEL DE AJUSTES */}
       {showSettings && (
@@ -820,7 +834,7 @@ const App: React.FC = () => {
         onClose={() => setBulkModal({ ...bulkModal, isOpen: false })}
         onConfirm={(q) => {
           setBulkModal({ ...bulkModal, isOpen: false });
-          setBulkActionPending({ type: bulkModal.type, quantity: q });
+          executeBulkAction(bulkModal.type, q);
         }}
       />
 

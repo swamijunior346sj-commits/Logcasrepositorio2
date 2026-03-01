@@ -1,6 +1,5 @@
 import React, { useState, useCallback } from 'react';
 import { VALOR_POR_PACOTE } from '../constants';
-import PremiumSuccessPopup from './PremiumSuccessPopup';
 
 interface RouteActivityProps {
     onBack?: () => void;
@@ -17,8 +16,6 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
     const [showBulkDeliver, setShowBulkDeliver] = useState(false);
     const [bulkQty, setBulkQty] = useState(0);
     const [animatingCard, setAnimatingCard] = useState<'entrada' | 'saida' | 'devolucao' | null>(null);
-    const [showSuccess, setShowSuccess] = useState(false);
-    const [successMessage, setSuccessMessage] = useState('Operação realizada com sucesso');
 
     const handleOneClick = useCallback((type: 'entrada' | 'saida' | 'devolucao') => {
         setAnimatingCard(type);
@@ -38,13 +35,13 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
 
     const handleBulkConfirm = (type: 'entrada' | 'saida') => {
         if (bulkQty > 0) {
+            // Chama o onSave imediatamente
             onSave({
                 entrada: type === 'entrada' ? bulkQty : 0,
                 saida: type === 'saida' ? bulkQty : 0,
                 devolucao: 0
             });
-            setSuccessMessage(type === 'entrada' ? `${bulkQty} pacotes carregados com sucesso` : `${bulkQty} entregas confirmadas com sucesso`);
-            setShowSuccess(true);
+            // Removido popup local para agilizar a experiência
         }
         setBulkQty(0);
         setShowBulkLoad(false);
@@ -144,27 +141,26 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
 
                 {/* Stats Grid - One-click buttons */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
-                    {/* Carregados */}
                     <button
                         onClick={() => handleOneClick('entrada')}
-                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'entrada' ? 'border-primary scale-95' : 'border-[#2A2A26]/30 glow-pulse'
+                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'entrada' ? 'border-yellow-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
                             }`}
                     >
                         {animatingCard === 'entrada' && (
                             <>
-                                <div className="absolute inset-0 bg-primary/20 oneclick-flash"></div>
+                                <div className="absolute inset-0 bg-yellow-500/20 oneclick-flash"></div>
                                 <div className="absolute inset-0 flex items-center justify-center">
-                                    <div className="size-12 rounded-full border-2 border-primary/50 oneclick-ripple"></div>
+                                    <div className="size-12 rounded-full border-2 border-yellow-500/50 oneclick-ripple"></div>
                                 </div>
-                                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-black text-primary oneclick-float-up z-20">+1</span>
-                                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-primary text-sm oneclick-check z-20">check</span>
+                                <span className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-lg font-black text-yellow-400 oneclick-float-up z-20">+1</span>
+                                <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-yellow-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
                         <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Carregados</p>
-                        <div className={`text-xl font-bold transition-colors ${animatingCard === 'entrada' ? 'text-primary' : 'text-[#F5F5F5]'}`}>
+                        <div className={`text-xl font-bold transition-colors ${animatingCard === 'entrada' ? 'text-yellow-400' : 'text-[#F5F5F5]'}`}>
                             {String(counts.todayEntrada).padStart(2, '0')}
                         </div>
-                        <div className="mt-1.5 w-4 h-[1.5px] bg-gold/40 rounded-full"></div>
+                        <div className="mt-1.5 w-4 h-[1.5px] bg-yellow-500/40 rounded-full"></div>
                     </button>
 
                     {/* Entregues */}
@@ -236,73 +232,68 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
             </div>
 
             {/* Bulk Actions Modals */}
-            {(showBulkLoad || showBulkDeliver) && (
-                <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300 bg-black/80 backdrop-blur-xl">
-                    <div className="w-full max-w-[380px] rounded-[32px] overflow-hidden bg-zinc-900/40 border border-[#EBC051]/30 p-8 shadow-2xl">
-                        <div className="text-center">
-                            <div className="size-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-gold/5 border border-gold/20">
-                                <span className="material-symbols-outlined text-[#EBC051] text-3xl">
-                                    {showBulkLoad ? 'move_to_inbox' : 'done_all'}
-                                </span>
-                            </div>
-                            <h2 className="text-xl font-black tracking-widest text-white uppercase mb-4">
-                                {showBulkLoad ? 'CARREGAMENTO EM MASSA' : 'ENTREGUES EM MASSA'}
-                            </h2>
-                            <p className="text-white/60 text-sm font-medium mb-10 leading-relaxed px-4">
-                                {showBulkLoad ? 'Confirme a quantidade de pacotes carregados na base:' : 'Confirme a quantidade de pacotes entregues com sucesso:'}
-                            </p>
-
-                            <div className="relative flex items-center justify-center gap-8 mb-12">
-                                <button
-                                    onClick={() => setBulkQty(prev => Math.max(0, prev - 1))}
-                                    className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
-                                >
-                                    <span className="material-symbols-outlined">remove</span>
-                                </button>
-                                <div className="relative">
-                                    <input
-                                        autoFocus
-                                        type="number"
-                                        value={bulkQty}
-                                        onChange={(e) => setBulkQty(parseInt(e.target.value) || 0)}
-                                        className="w-24 bg-transparent border-none text-center text-5xl font-black text-white focus:ring-0 p-0"
-                                    />
-                                    <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#EBC051] uppercase tracking-[0.2em] opacity-60">UNIDADES</div>
+            {
+                (showBulkLoad || showBulkDeliver) && (
+                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300 bg-black/80 backdrop-blur-xl">
+                        <div className="w-full max-w-[380px] rounded-[32px] overflow-hidden bg-zinc-900/40 border border-[#EBC051]/30 p-8 shadow-2xl">
+                            <div className="text-center">
+                                <div className="size-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-gold/5 border border-gold/20">
+                                    <span className="material-symbols-outlined text-[#EBC051] text-3xl">
+                                        {showBulkLoad ? 'move_to_inbox' : 'done_all'}
+                                    </span>
                                 </div>
-                                <button
-                                    onClick={() => setBulkQty(prev => prev + 1)}
-                                    className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
-                                >
-                                    <span className="material-symbols-outlined">add</span>
-                                </button>
-                            </div>
+                                <h2 className="text-xl font-black tracking-widest text-white uppercase mb-4">
+                                    {showBulkLoad ? 'CARREGAMENTO EM MASSA' : 'ENTREGUES EM MASSA'}
+                                </h2>
+                                <p className="text-white/60 text-sm font-medium mb-10 leading-relaxed px-4">
+                                    {showBulkLoad ? 'Confirme a quantidade de pacotes carregados na base:' : 'Confirme a quantidade de pacotes entregues com sucesso:'}
+                                </p>
 
-                            <div className="space-y-4">
-                                <button
-                                    onClick={() => handleBulkConfirm(showBulkLoad ? 'entrada' : 'saida')}
-                                    className="w-full h-14 rounded-2xl flex items-center justify-center text-[#EBC051] border border-[#EBC051] font-bold uppercase tracking-[0.25em] text-xs transition-all active:scale-[0.98] hover:bg-gold/5"
-                                >
-                                    CONFIRMAR LOTE
-                                </button>
-                                <button
-                                    onClick={() => { setShowBulkLoad(false); setShowBulkDeliver(false); }}
-                                    className="w-full py-2 text-zinc-500 font-bold uppercase tracking-widest text-[11px] hover:text-white transition-colors"
-                                >
-                                    CANCELAR
-                                </button>
+                                <div className="relative flex items-center justify-center gap-8 mb-12">
+                                    <button
+                                        onClick={() => setBulkQty(prev => Math.max(0, prev - 1))}
+                                        className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
+                                    >
+                                        <span className="material-symbols-outlined">remove</span>
+                                    </button>
+                                    <div className="relative">
+                                        <input
+                                            autoFocus
+                                            type="number"
+                                            value={bulkQty}
+                                            onChange={(e) => setBulkQty(parseInt(e.target.value) || 0)}
+                                            className="w-24 bg-transparent border-none text-center text-5xl font-black text-white focus:ring-0 p-0"
+                                        />
+                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#EBC051] uppercase tracking-[0.2em] opacity-60">UNIDADES</div>
+                                    </div>
+                                    <button
+                                        onClick={() => setBulkQty(prev => prev + 1)}
+                                        className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
+                                    >
+                                        <span className="material-symbols-outlined">add</span>
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <button
+                                        onClick={() => handleBulkConfirm(showBulkLoad ? 'entrada' : 'saida')}
+                                        className="w-full h-14 rounded-2xl flex items-center justify-center text-[#EBC051] border border-[#EBC051] font-bold uppercase tracking-[0.25em] text-xs transition-all active:scale-[0.98] hover:bg-gold/5"
+                                    >
+                                        CONFIRMAR LOTE
+                                    </button>
+                                    <button
+                                        onClick={() => { setShowBulkLoad(false); setShowBulkDeliver(false); }}
+                                        className="w-full py-2 text-zinc-500 font-bold uppercase tracking-widest text-[11px] hover:text-white transition-colors"
+                                    >
+                                        CANCELAR
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            )}
-
-            {/* Premium Success Popup */}
-            <PremiumSuccessPopup
-                isOpen={showSuccess}
-                onClose={() => setShowSuccess(false)}
-                message={successMessage}
-            />
-        </div>
+                )
+            }
+        </div >
     );
 };
 

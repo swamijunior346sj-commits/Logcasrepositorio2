@@ -118,15 +118,6 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                         <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
-                    <button className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]">
-                        <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
-                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">local_shipping</span>
-                            </div>
-                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Minha Frota</span>
-                        </div>
-                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
-                    </button>
 
                     <button className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]">
                         <div className="flex items-center gap-4">
