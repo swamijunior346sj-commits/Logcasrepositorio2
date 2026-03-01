@@ -225,3 +225,163 @@ export const generatePDF = (logs: LogEntry[], userName: string = 'Operador Logí
 
   doc.save(`logcash_extrato_${dateStr.replace(/\//g, '-')}.pdf`);
 };
+
+export const generateWeeklyPDF = (data: {
+  userName: string;
+  vehicleName: string;
+  counts: {
+    delivered: number;
+    todayEntrada: number;
+    todaySaida: number;
+    todayDevolucao: number;
+  }
+}) => {
+  const doc = new jsPDF({
+    unit: 'mm',
+    format: [100, 150] // Formato compacto tipo mobile/extrato
+  });
+
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  const refId = Math.floor(Math.random() * 9000) + 1000;
+
+  const VALOR_POR_PACOTE = 5.0;
+  const routeEarnings = (data.counts.delivered || 0) * VALOR_POR_PACOTE;
+  const bonusPerformance = 180.0;
+  const totalLiquid = routeEarnings + bonusPerformance;
+
+  // --- FUNDO DARK ---
+  doc.setFillColor(0, 0, 0);
+  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+  // --- MOLDURA GOLD ---
+  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setLineWidth(0.5);
+  doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
+
+  // --- LOGO & TÍTULO ---
+  doc.setFontSize(14);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.text('LOGCASH', pageWidth / 2, 20, { align: 'center' });
+
+  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setLineWidth(0.3);
+  doc.line(pageWidth / 2 - 5, 24, pageWidth / 2 + 5, 24);
+
+  doc.setFontSize(9);
+  doc.setTextColor(255, 255, 255);
+  doc.text('RELATÓRIO OPERACIONAL', pageWidth / 2, 32, { align: 'center' });
+
+  doc.setFontSize(7);
+  doc.setTextColor(150, 150, 150);
+  doc.text(`Emissão: ${dateStr} • Ref: #LC-${refId}`, pageWidth / 2, 38, { align: 'center' });
+
+  // --- SEÇÃO: DADOS DO MOTORISTA ---
+  let y = 50;
+  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.circle(12, y - 1, 0.6, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.text('DADOS DO MOTORISTA', 15, y);
+
+  y += 6;
+  doc.setFontSize(6);
+  doc.text('CONDUTOR', 15, y);
+  y += 4;
+  doc.setFontSize(8);
+  doc.setTextColor(245, 245, 245);
+  doc.text(data.userName.toUpperCase(), 15, y);
+
+  y += 6;
+  doc.setFontSize(6);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.text('IDENTIFICAÇÃO', 15, y);
+  doc.text('VEÍCULO', pageWidth - 15, y, { align: 'right' });
+
+  y += 4;
+  doc.setFontSize(8);
+  doc.setTextColor(245, 245, 245);
+  doc.text(`#${refId}`, 15, y);
+  doc.text(data.vehicleName.toUpperCase(), pageWidth - 15, y, { align: 'right' });
+
+  y += 4;
+  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setLineWidth(0.1);
+  doc.line(15, y, pageWidth - 15, y);
+
+  // --- SEÇÃO: RESUMO DA ROTA ---
+  y += 10;
+  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.circle(12, y - 1, 0.6, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.text('RESUMO DA ROTA', 15, y);
+
+  y += 6;
+  doc.setFontSize(7);
+  doc.setTextColor(200, 200, 200);
+  doc.text('Volumes Carregados', 15, y);
+  doc.setTextColor(255, 255, 255);
+  doc.text(`${data.counts.todayEntrada || 0} Unid.`, pageWidth - 15, y, { align: 'right' });
+
+  y += 5;
+  doc.setTextColor(200, 200, 200);
+  doc.text('Entregas Sucesso', 15, y);
+  doc.setTextColor(255, 255, 255);
+  doc.text(`${data.counts.delivered || 0} Unid.`, pageWidth - 15, y, { align: 'right' });
+
+  y += 5;
+  doc.setTextColor(200, 200, 200);
+  doc.text('Acareações', 15, y);
+  doc.setTextColor(255, 255, 255);
+  doc.text(`${(data.counts.todayDevolucao || 0).toString().padStart(2, '0')} Unid.`, pageWidth - 15, y, { align: 'right' });
+
+  y += 5;
+  doc.setTextColor(200, 200, 200);
+  doc.text('Performance da Rota', 15, y);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.text('98%', pageWidth - 15, y, { align: 'right' });
+
+  y += 4;
+  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.line(15, y, pageWidth - 15, y);
+
+  // --- SEÇÃO: FINANCEIRO ---
+  y += 10;
+  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.circle(12, y - 1, 0.6, 'F');
+  doc.setFontSize(7);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.setFont('helvetica', 'bold');
+  doc.text('DETALHAMENTO FINANCEIRO', 15, y);
+
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(200, 200, 200);
+  doc.text('Ganhos de Rota', 15, y);
+  doc.setTextColor(255, 255, 255);
+  doc.text(routeEarnings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
+
+  y += 5;
+  doc.setTextColor(200, 200, 200);
+  doc.text('Bônus Performance', 15, y);
+  doc.setTextColor(255, 255, 255);
+  doc.text(bonusPerformance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
+
+  y += 8;
+  doc.setFontSize(8);
+  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
+  doc.text('VALOR LÍQUIDO', 15, y);
+  doc.setFontSize(12);
+  doc.text(totalLiquid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
+
+  // --- RODAPÉ ---
+  doc.setFontSize(5);
+  doc.setTextColor(100, 100, 100);
+  doc.text('LogCash Elite Services • Documento Digital Autenticado', pageWidth / 2, pageHeight - 7, { align: 'center' });
+
+  doc.save(`logcash_weekly_${refId}.pdf`);
+};

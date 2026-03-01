@@ -9,9 +9,9 @@ import WalletCard from './components/WalletCard';
 import Login from './components/Login';
 import DateRangeFilter from './components/DateRangeFilter';
 import { LogCashLogo } from './components/Logo';
-import { LogEntry, LogActionType, QuickEntryRow, TemporaryExpressRow } from './types';
+import { LogEntry, LogActionType, QuickEntryRow, TemporaryExpressRow, DailySummary } from './types';
 import { supabaseService } from './services/supabaseService';
-import { generatePDF, generateQuickPDF } from './services/pdfService';
+import { generatePDF, generateQuickPDF, generateWeeklyPDF } from './services/pdfService';
 import { VALOR_POR_PACOTE } from './constants';
 import QuickEntryModal from './components/QuickEntryModal';
 import EliteDashboard from './components/EliteDashboard';
@@ -28,6 +28,9 @@ import EliteInvoiceSuccess from './components/EliteInvoiceSuccess';
 import EliteExtrato from './components/EliteExtrato';
 import EliteExpressReport from './components/EliteExpressReport';
 import PremiumSuccessPopup from './components/PremiumSuccessPopup';
+import EliteWeeklyReport from './components/EliteWeeklyReport';
+import EliteWeeklyPDF from './components/EliteWeeklyPDF';
+import EliteExpressPDF from './components/EliteExpressPDF';
 
 
 
@@ -74,7 +77,7 @@ const App: React.FC = () => {
 
   const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
   const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Veículo Padrão');
-  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report'>('dash');
+  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report' | 'weekly-report' | 'weekly-pdf' | 'express-pdf'>('dash');
   const [showSettings, setShowSettings] = useState(false);
   const [showQuickEntry, setShowQuickEntry] = useState(false);
 
@@ -82,6 +85,8 @@ const App: React.FC = () => {
     isOpen: false,
     type: 'ENTRADA'
   });
+
+  const [expressRows, setExpressRows] = useState<TemporaryExpressRow[]>([]);
 
   // 1. Verifica Sessão
   useEffect(() => {
@@ -243,6 +248,29 @@ const App: React.FC = () => {
     setShowToast(true);
     setTimeout(() => setShowToast(false), 4000);
   };
+
+  // Cálculo das linhas de resumo diário para o relatório semanal
+  const summaryRows = useMemo(() => {
+    const dailyData: Record<string, DailySummary> = {};
+    filteredLogs.forEach(log => {
+      const day = new Date(log.timestamp).toLocaleDateString('pt-BR');
+      if (!dailyData[day]) {
+        dailyData[day] = { date: day, loaded: 0, delivered: 0, returns: 0, gains: 0 };
+      }
+      if (log.type === 'ENTRADA') dailyData[day].loaded += 1;
+      else if (log.type === 'SAIDA') {
+        dailyData[day].delivered += 1;
+        dailyData[day].gains += VALOR_POR_PACOTE;
+      }
+      else if (log.type === 'DEVOLUCAO') dailyData[day].returns += 1;
+    });
+
+    return Object.values(dailyData).sort((a, b) => {
+      const [da, ma, ya] = a.date.split('/').map(Number);
+      const [db, mb, yb] = b.date.split('/').map(Number);
+      return new Date(ya, ma - 1, da).getTime() - new Date(yb, mb - 1, db).getTime();
+    }).reverse(); // Mais recente primeiro
+  }, [filteredLogs]);
 
   const triggerSuccess = (type: SystemActionType, count: number = 1) => {
     setSuccessType(type);
@@ -660,6 +688,7 @@ const App: React.FC = () => {
               onEmitInvoice={() => setActiveTab('tax-invoice')}
               onExtrato={() => setActiveTab('extrato')}
               onExpressReport={() => setActiveTab('express-report')}
+              onWeeklyReport={() => setActiveTab('weekly-report')}
               onBack={() => setActiveTab('dash')}
             />
           </div>
@@ -671,6 +700,29 @@ const App: React.FC = () => {
               onBack={() => setActiveTab('stats')}
             />
           </div>
+        ) : activeTab === 'express-report' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteExpressReport
+              userName={userName}
+              onBack={() => setActiveTab('stats')}
+              onExportPDF={(rows: TemporaryExpressRow[]) => {
+                generateQuickPDF(rows, userName);
+              }}
+              onViewPDF={(rows) => {
+                setExpressRows(rows);
+                setActiveTab('express-pdf');
+              }}
+            />
+          </div>
+        ) : activeTab === 'express-pdf' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteExpressPDF
+              userName={userName}
+              vehicleName={vehicleName}
+              rows={expressRows}
+              onBack={() => setActiveTab('express-report')}
+            />
+          </div>
         ) : activeTab === 'profile' ? (
           <EliteProfile
             userName={userName}
@@ -679,6 +731,7 @@ const App: React.FC = () => {
             onTaxData={() => setActiveTab('tax-data')}
             onPersonalData={() => setActiveTab('personal-data')}
             onSettings={() => setActiveTab('settings')}
+            onReset={() => setConfirmingAction('RESET_SYSTEM')}
           />
         ) : activeTab === 'tax-invoice' ? (
           <div className="animate-in fade-in duration-500">
@@ -746,17 +799,25 @@ const App: React.FC = () => {
               }}
             />
           </div>
-        ) : activeTab === 'express-report' ? (
-          <div className="animate-in fade-in duration-500">
-            <EliteExpressReport
-              logs={logs}
-              userName={userName}
-              onBack={() => setActiveTab('stats')}
-              onExportPDF={(rows: TemporaryExpressRow[]) => {
-                generateQuickPDF(rows, userName);
-              }}
-            />
-          </div>
+        ) : activeTab === 'weekly-report' ? (
+          <EliteWeeklyReport
+            userName={userName}
+            vehicleName={vehicleName}
+            counts={counts}
+            rows={summaryRows}
+            onBack={() => setActiveTab('stats')}
+            onDownload={() => {
+              generateWeeklyPDF({ userName, vehicleName, counts });
+            }}
+            onViewPDF={() => setActiveTab('weekly-pdf')}
+          />
+        ) : activeTab === 'weekly-pdf' ? (
+          <EliteWeeklyPDF
+            userName={userName}
+            vehicleName={vehicleName}
+            rows={summaryRows}
+            onBack={() => setActiveTab('weekly-report')}
+          />
         ) : (
           <div className="animate-in fade-in duration-500">
             <RouteActivity

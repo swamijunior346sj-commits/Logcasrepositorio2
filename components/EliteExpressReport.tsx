@@ -1,23 +1,15 @@
 import React, { useMemo, useState } from 'react';
-import { LogEntry } from '../types';
+import { LogEntry, TemporaryExpressRow } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
-
-export interface TemporaryExpressRow {
-    id: string;
-    date: string;
-    loaded: number;
-    delivered: number;
-    returns: number;
-    totalValue: number;
-}
 
 interface EliteExpressReportProps {
     userName: string;
     onBack: () => void;
     onExportPDF: (rows: TemporaryExpressRow[]) => void;
+    onViewPDF: (rows: TemporaryExpressRow[]) => void;
 }
 
-const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBack, onExportPDF }) => {
+const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBack, onExportPDF, onViewPDF }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
     const [rows, setRows] = useState<TemporaryExpressRow[]>([]);
@@ -72,7 +64,11 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBac
             .format(val).replace('R$', '').trim();
 
     const handleExport = () => {
+        if (rows.length === 0) return;
         setIsExporting(true);
+        // Trigger the actual PDF generation
+        onExportPDF(rows);
+
         setTimeout(() => {
             setIsExporting(false);
             setShowSuccess(true);
@@ -81,23 +77,17 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBac
 
     const handleOpenPDF = () => {
         setShowSuccess(false);
-        onExportPDF(rows);
+        onViewPDF(rows);
     };
 
     const isOverlayActive = isExporting || showSuccess;
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] mx-auto bg-pitch-black shadow-2xl carbon-texture">
+        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] mx-auto bg-pitch-black shadow-2xl">
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
                 
-                .carbon-texture {
-                    background-color: #000000;
-                    background-image: radial-gradient(#1a1a1a 0.5px, transparent 0.5px);
-                    background-size: 4px 4px;
-                    background-attachment: fixed;
-                }
                 .spreadsheet-grid {
                     display: grid;
                     grid-template-columns: 1.2fr 0.8fr 0.8fr 0.8fr 1.4fr 1fr;

@@ -8,9 +8,10 @@ interface EliteProfileProps {
     onTaxData: () => void;
     onPersonalData: () => void;
     onSettings: () => void;
+    onReset: () => void;
 }
 
-const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings }) => {
+const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset }) => {
     return (
         <div className="flex flex-col items-center pb-10">
             <style dangerouslySetInnerHTML={{
@@ -140,16 +141,29 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                     </button>
 
                     <button
-                        onClick={onLogout}
-                        className="w-full bg-[#1A0505] border border-red-900/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#2A0505] mt-6"
+                        onClick={onReset}
+                        className="w-full bg-[#1A0505] border border-red-900/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#2A0505] mt-6"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-red-950/40 flex items-center justify-center border border-red-900/50">
-                                <span className="material-symbols-outlined text-red-500 text-2xl">logout</span>
+                            <div className="size-11 rounded-xl bg-red-950/20 flex items-center justify-center border border-red-900/30">
+                                <span className="material-symbols-outlined text-red-500/70 text-2xl">delete_forever</span>
                             </div>
-                            <span className="text-base font-extrabold text-red-500 tracking-wide">Sair da Conta</span>
+                            <span className="text-base font-extrabold text-red-500/70 tracking-wide">Apagar todos os dados</span>
                         </div>
-                        <span className="material-symbols-outlined text-red-500/40 group-hover:text-red-500 transition-colors">logout</span>
+                        <span className="material-symbols-outlined text-red-500/30 group-hover:text-red-500/70 transition-colors">chevron_right</span>
+                    </button>
+
+                    <button
+                        onClick={onLogout}
+                        className="w-full bg-white/5 border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-white/10 mt-2"
+                    >
+                        <div className="flex items-center gap-4">
+                            <div className="size-11 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
+                                <span className="material-symbols-outlined text-white/70 text-2xl">logout</span>
+                            </div>
+                            <span className="text-base font-extrabold text-white/70 tracking-wide">Sair da Conta</span>
+                        </div>
+                        <span className="material-symbols-outlined text-white/30 group-hover:text-white/70 transition-colors">logout</span>
                     </button>
                 </div>
             </div>

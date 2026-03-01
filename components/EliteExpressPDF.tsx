@@ -1,60 +1,29 @@
 
-import React, { useMemo, useEffect } from 'react';
-import { LogEntry } from '../types';
+import React, { useEffect } from 'react';
+import { TemporaryExpressRow } from '../types';
 
-interface ElitePDFViewProps {
-    logs: LogEntry[];
+interface EliteExpressPDFProps {
     userName: string;
+    vehicleName: string;
+    rows: TemporaryExpressRow[];
     onBack: () => void;
 }
 
-const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) => {
+const EliteExpressPDF: React.FC<EliteExpressPDFProps> = ({
+    userName,
+    vehicleName,
+    rows,
+    onBack
+}) => {
     // Sincronizar o título do documento para o download do PDF
     useEffect(() => {
         const prevTitle = document.title;
-        document.title = "Extrato Detalhado Minimalista Absoluto";
+        document.title = "Relatório Expresso Minimalista Absoluto";
         return () => { document.title = prevTitle; };
     }, []);
 
-    // Agrupando logs por dia para a tabela cinematográfica
-    const routeData = useMemo(() => {
-        const groups: {
-            [key: string]: {
-                date: string;
-                loaded: number;
-                delivered: number;
-                returns: number;
-                totalValue: number;
-            }
-        } = {};
-
-        logs.forEach(log => {
-            const dateObj = new Date(log.timestamp);
-            const key = dateObj.toISOString().split('T')[0];
-
-            if (!groups[key]) {
-                groups[key] = {
-                    date: dateObj.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).toUpperCase().replace('.', ''),
-                    loaded: 0,
-                    delivered: 0,
-                    returns: 0,
-                    totalValue: 0
-                };
-            }
-
-            if (log.type === 'ENTRADA') groups[key].loaded += 1;
-            if (log.type === 'SAIDA') groups[key].delivered += 1;
-            if (log.type === 'DEVOLUCAO') groups[key].returns += 1;
-            groups[key].totalValue += Number(log.value) || 0;
-        });
-
-        // Retorna ordenado por data descendente
-        return Object.keys(groups)
-            .sort((a, b) => b.localeCompare(a))
-            .map(key => groups[key]);
-    }, [logs]);
-
-    const totalLiquid = routeData.reduce((acc, curr) => acc + curr.totalValue, 0);
+    // Cálculo do valor líquido total estritamente baseado nas linhas
+    const totalLiquid = rows.reduce((acc, row) => acc + (Number(row.totalValue) || 0), 0);
 
     return (
         <div className="flex flex-col justify-center items-center p-4 bg-pitch-black w-full font-geometric animate-in fade-in duration-700 overflow-y-auto" style={{ minHeight: 'max(884px, 100dvh)' }}>
@@ -88,7 +57,7 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
                 `
             }} />
 
-            {/* Ações superiores (no-print) */}
+            {/* Ações superiores - Botão de Voltar (no-print) */}
             <div className="w-full max-w-[430px] flex justify-start mb-6 no-print">
                 <button
                     onClick={onBack}
@@ -98,7 +67,7 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
                 </button>
             </div>
 
-            {/* CONTAINER PDF - Design Minimalista Absoluto */}
+            {/* CONTAINER PDF - Estrutura idêntica ao HTML fornecido */}
             <div className="relative flex w-full flex-col max-w-[430px] pdf-container">
                 <div className="flex flex-col bg-charcoal border border-primary-gold/20 rounded-2xl cinematic-glow overflow-hidden">
                     {/* Cabeçalho */}
@@ -122,14 +91,14 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
 
                     {/* Listagem de Linhas */}
                     <div className="flex flex-col">
-                        {routeData.length > 0 ? routeData.map((row, idx) => (
+                        {rows.length > 0 ? rows.map((row, idx) => (
                             <div key={idx} className="spreadsheet-grid px-6 py-5 row-divider">
                                 <div className="text-[11px] font-bold text-ice-white">{row.date}</div>
                                 <div className="text-[11px] font-medium text-white/90 text-center font-inter">{row.loaded}</div>
                                 <div className="text-[11px] font-medium text-white/90 text-center font-inter">{row.delivered}</div>
                                 <div className="text-[11px] font-medium text-primary-gold text-center font-inter">{row.returns}</div>
                                 <div className="text-[11px] font-bold text-ice-white text-right font-inter">
-                                    R$ {row.totalValue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                    R$ {Number(row.totalValue).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                 </div>
                             </div>
                         )) : (
@@ -147,7 +116,7 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
                             </div>
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-primary-gold/50 uppercase tracking-[0.2em] mb-1">VALOR LÍQUIDO ACUMULADO</span>
+                                    <span className="text-[9px] text-primary-gold/50 uppercase tracking-[0.2em] mb-1">VALOR LÍQUIDO TOTAL</span>
                                     <span className="text-3xl font-bold text-ice-white font-inter tracking-tight">
                                         R$ {totalLiquid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                                     </span>
@@ -169,7 +138,7 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
                         className="w-full bg-gradient-to-r from-primary-gold/20 to-primary-gold/5 border border-primary-gold/30 text-primary-gold py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
                     >
                         <span className="material-symbols-outlined text-xl">share</span>
-                        Compartilhar Extrato
+                        Compartilhar Relatório
                     </button>
                     <button
                         onClick={onBack}
@@ -183,4 +152,4 @@ const ElitePDFView: React.FC<ElitePDFViewProps> = ({ logs, userName, onBack }) =
     );
 };
 
-export default ElitePDFView;
+export default EliteExpressPDF;
