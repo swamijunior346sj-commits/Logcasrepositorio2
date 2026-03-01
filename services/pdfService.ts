@@ -1,230 +1,237 @@
 
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
 import { LogEntry, DailySummary, TemporaryExpressRow } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
 
-// Cores Oficiais LogCash Elite
-const GOLD_PRIMARY: [number, number, number] = [235, 192, 81]; // #EBC051
-const GOLD_LIGHT: [number, number, number] = [249, 226, 156];   // #F9E29C
-const GOLD_DARK: [number, number, number] = [170, 119, 28];    // #AA771C
-const BLACK_BG: [number, number, number] = [10, 10, 10];       // #0A0A0A
-const WHITE_PURE: [number, number, number] = [255, 255, 255];
-const SLATE_400: [number, number, number] = [148, 163, 184];
+const formatCurrency = (val: number) =>
+  new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+const buildHTMLTemplate = (
+  title: string,
+  subtitle: string,
+  rowsHtml: string,
+  totalLiquid: number,
+  bonusHtml: string = ''
+) => {
+  return `<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>${title}</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script>
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary-gold": "#EBC051",
+                    "deep-gold": "#AA771C",
+                    "pitch-black": "#000000",
+                    "charcoal": "#0F0F0F",
+                    "ice-white": "#F5F5F5",
+                },
+                fontFamily: {
+                    "sans": ["Plus Jakarta Sans", "sans-serif"],
+                    "geometric": ["Inter", "sans-serif"]
+                },
+            },
+        },
+    }
+</script>
+<style type="text/tailwindcss">
+    @layer base {
+        body { @apply bg-pitch-black text-ice-white antialiased font-geometric; }
+    }
+    .cinematic-glow { box-shadow: 0 0 60px -15px rgba(235, 192, 81, 0.12); }
+    .spreadsheet-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr 1.2fr 1.5fr;
+        align-items: center;
+    }
+    .row-divider { border-bottom: 0.5px solid rgba(235, 192, 81, 0.08); }
+    .gold-gradient-text {
+        background: linear-gradient(135deg, #EBC051 0%, #AA771C 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+</style>
+<style>
+    body { min-height: 100dvh; margin: 0; padding: 0; background-color: #000; }
+    @media print {
+        body { background-color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+</style>
+</head>
+<body class="flex justify-center items-center p-4 bg-pitch-black">
+<div class="relative flex w-full flex-col max-w-[430px]">
+    <div class="flex flex-col bg-charcoal border border-primary-gold/20 rounded-2xl cinematic-glow overflow-hidden">
+        
+        <!-- Cabeçalho -->
+        <div class="px-6 py-10 flex flex-col items-center gap-2 border-b border-primary-gold/10">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="material-symbols-outlined text-primary-gold text-2xl">diamond</span>
+                <span class="text-[10px] font-black tracking-[0.6em] text-primary-gold uppercase">LOGCASH PREMIUM</span>
+            </div>
+            <h1 class="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center font-sans">${title}</h1>
+            <p class="text-[9px] text-white/30 tracking-widest uppercase">${subtitle}</p>
+        </div>
+
+        <!-- Tabela Header -->
+        <div class="spreadsheet-grid px-6 py-4 bg-white/[0.02] border-b border-primary-gold/10">
+            <div class="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase">DATA</div>
+            <div class="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">CARREG.</div>
+            <div class="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">ENTREG.</div>
+            <div class="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">DEVOL.</div>
+            <div class="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-right">VALOR TOTAL</div>
+        </div>
+
+        <!-- Linhas dinâmicas -->
+        <div class="flex flex-col">
+            ${rowsHtml}
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="px-6 py-10 bg-gradient-to-b from-transparent to-primary-gold/[0.03]">
+            <div class="flex flex-col gap-4">
+                <div class="flex justify-between items-center border-t border-primary-gold/20 pt-6">
+                    <span class="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase">RESUMO FINANCEIRO ${bonusHtml}</span>
+                </div>
+                <div class="flex justify-between items-end">
+                    <div class="flex flex-col">
+                        <span class="text-[9px] text-primary-gold/50 uppercase tracking-[0.2em] mb-1">VALOR LÍQUIDO TOTAL</span>
+                        <span class="text-3xl font-bold text-ice-white font-sans tracking-tight">${formatCurrency(totalLiquid)}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rodapé -->
+        <div class="px-6 py-6 flex justify-center border-t border-primary-gold/10 bg-black/40">
+            <p class="text-[7px] text-white/20 tracking-[0.4em] uppercase font-sans">Autenticidade Verificada LogCash Digital</p>
+        </div>
+    </div>
+</div>
+<script>
+    // Aguarda Tailwind renderizar o documento e dispara a impressão
+    window.onload = () => {
+        setTimeout(() => {
+            window.print();
+        }, 1200);
+    };
+</script>
+</body>
+</html>`;
+};
+
+const printHtmlPdf = (html: string) => {
+  try {
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentWindow?.document;
+    if (doc) {
+      doc.open();
+      doc.write(html);
+      doc.close();
+
+      // Remove o iframe após impressão
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 5000); // tempo seguro
+    }
+  } catch (e) {
+    console.error("Erro ao gerar PDF via modo de impressão HTML.", e);
+  }
+};
+
+const getRowHtml = (date: string, loaded: number | string, delivered: number | string, returns: number | string, valStr: string) => {
+  const returnClass = Number(returns) > 0 ? 'text-primary-gold' : 'text-white/20';
+  return `
+    <div class="spreadsheet-grid px-6 py-5 row-divider">
+        <div class="text-[11px] font-bold text-ice-white uppercase">${date}</div>
+        <div class="text-[11px] font-medium text-white/90 text-center">${loaded}</div>
+        <div class="text-[11px] font-medium text-white/90 text-center">${delivered}</div>
+        <div class="text-[11px] font-medium ${returnClass} text-center">${String(returns).padStart(2, '0')}</div>
+        <div class="text-[11px] font-bold text-ice-white text-right font-sans">${valStr}</div>
+    </div>`;
+};
+
 
 export const generateQuickPDF = (rows: TemporaryExpressRow[], userName: string = 'Operador Logístico') => {
-  const doc = new jsPDF();
-  const dateStr = new Date().toLocaleDateString('pt-BR');
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
+  const totalLiquid = rows.reduce((acc, row) => acc + (Number(row.totalValue) || 0), 0);
 
-  // --- FUNDO DARK ---
-  doc.setFillColor(0, 0, 0);
-  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+  const rowsHtml = rows.length > 0 ? rows.map(r =>
+    getRowHtml(r.date || '', r.loaded || 0, r.delivered || 0, r.returns || 0, formatCurrency(r.totalValue || 0))
+  ).join('') : `<div class="px-6 py-10 text-center text-[10px] text-white/20 uppercase tracking-widest">Nenhum registro encontrado</div>`;
 
-  // --- CABEÇALHO ---
-  // Representação Minimalista da Logo Elite
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.5);
-  doc.line(20, 20, 40, 20); // Linha acima
+  const fullHtml = buildHTMLTemplate(
+    'RELATÓRIO EXPRESSO',
+    'Documento Oficial de Movimentação',
+    rowsHtml,
+    totalLiquid
+  );
 
-  doc.setFontSize(22);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('LOGCASH', 20, 32);
-
-  doc.setFontSize(8);
-  doc.setTextColor(SLATE_400[0], SLATE_400[1], SLATE_400[2]);
-  doc.text('ELITE DOCUMENT SERVICE • RELATÓRIO EXPRESSO', 20, 38);
-
-  // INFO OPERADOR (Direita)
-  doc.setTextColor(WHITE_PURE[0], WHITE_PURE[1], WHITE_PURE[2]);
-  doc.setFontSize(8);
-  doc.text(`OPERADOR:`, pageWidth - 20, 20, { align: 'right' });
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text(userName.toUpperCase(), pageWidth - 20, 26, { align: 'right' });
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
-  doc.text(dateStr, pageWidth - 20, 32, { align: 'right' });
-
-  // --- RESUMO FINANCEIRO ---
-  const totalGains = rows.reduce((acc, row) => acc + (row.delivered * VALOR_POR_PACOTE), 0);
-
-  doc.setFillColor(15, 15, 15);
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.1);
-  doc.roundedRect(14, 50, pageWidth - 28, 30, 2, 2, 'FD');
-
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFontSize(9);
-  doc.text('VALOR LÍQUIDO A RECEBER', 20, 58);
-  doc.setFontSize(20);
-  doc.setFont('inter', 'bold');
-  doc.text(`R$ ${totalGains.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 20, 72);
-
-  // --- TABELA ---
-  const tableColumn = ["DATA", "CARREGADOS", "ENTREGUES", "INSUCESSOS", "GANHOS"];
-  const tableRows = rows.map(row => {
-    return [
-      row.date,
-      row.loaded.toString(),
-      row.delivered.toString(),
-      row.returns.toString(),
-      `R$ ${(row.delivered * VALOR_POR_PACOTE).toFixed(2)}`
-    ];
-  });
-
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 90,
-    theme: 'plain',
-    headStyles: {
-      fillColor: [20, 20, 20],
-      textColor: GOLD_PRIMARY,
-      fontSize: 9,
-      fontStyle: 'bold',
-      halign: 'center'
-    },
-    bodyStyles: {
-      fillColor: [0, 0, 0],
-      textColor: [200, 200, 200],
-      fontSize: 8,
-      halign: 'center',
-      lineWidth: 0.1,
-      lineColor: [30, 30, 30]
-    },
-    columnStyles: {
-      0: { halign: 'left' },
-      4: { fontStyle: 'bold', textColor: WHITE_PURE }
-    }
-  });
-
-  doc.save(`logcash_express_${dateStr.replace(/\//g, '-')}.pdf`);
+  printHtmlPdf(fullHtml);
 };
+
 
 export const generatePDF = (logs: LogEntry[], userName: string = 'Operador Logístico') => {
-  const doc = new jsPDF();
-  const dateStr = new Date().toLocaleDateString('pt-BR');
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-
-  // --- FUNDO DARK ---
-  doc.setFillColor(BLACK_BG[0], BLACK_BG[1], BLACK_BG[2]);
-  doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
-  // --- CABEÇALHO DESIGN ---
-  doc.setFillColor(15, 15, 15);
-  doc.rect(0, 0, pageWidth, 45, 'F');
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.5);
-  doc.line(0, 45, pageWidth, 45);
-
-  // LOGO LOGCASH ELITE
-  doc.setFontSize(24);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('LOGCASH', 20, 25);
-  doc.setFontSize(10);
-  doc.setTextColor(GOLD_DARK[0], GOLD_DARK[1], GOLD_DARK[2]);
-  doc.text('PREMIUM OPERATIONAL REPORT', 20, 32);
-
-  // INFO CABEÇALHO
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(8);
-  doc.text(`EMISSÃO: ${dateStr}`, pageWidth - 20, 20, { align: 'right' });
-  doc.setFontSize(10);
-  doc.text(`OPERADOR: ${userName.toUpperCase()}`, pageWidth - 20, 28, { align: 'right' });
-
-  // --- CÁLCULOS ---
   const dailyData: Record<string, DailySummary> = {};
-  logs.forEach(log => {
-    const day = new Date(log.timestamp).toLocaleDateString('pt-BR');
-    if (!dailyData[day]) {
-      dailyData[day] = { date: day, loaded: 0, delivered: 0, returns: 0, gains: 0 };
-    }
-    if (log.type === 'ENTRADA') dailyData[day].loaded += 1;
-    else if (log.type === 'SAIDA') {
-      dailyData[day].delivered += 1;
-      dailyData[day].gains += VALOR_POR_PACOTE;
-    }
-    else if (log.type === 'DEVOLUCAO') dailyData[day].returns += 1;
-  });
+  const costPerPackage = VALOR_POR_PACOTE || 2.50;
 
-  const summaryRows = Object.values(dailyData).sort((a, b) => {
-    const [da, ma, ya] = a.date.split('/').map(Number);
-    const [db, mb, yb] = b.date.split('/').map(Number);
-    return new Date(ya, ma - 1, da).getTime() - new Date(yb, mb - 1, db).getTime();
-  });
+  const routeDataKey = () => {
+    logs.forEach(log => {
+      const d = new Date(log.timestamp);
+      const dayStr = d.toLocaleDateString('pt-BR', { day: '2-digit' });
+      const monthStr = d.toLocaleDateString('pt-BR', { month: 'short' }).toUpperCase().replace('.', '');
+      const day = `${dayStr}/${monthStr}`;
 
-  const totalGains = logs.filter(l => l.type === 'SAIDA').length * VALOR_POR_PACOTE;
-  const totalDelivered = logs.filter(l => l.type === 'SAIDA').length;
+      const key = d.toISOString().split('T')[0];
 
-  // --- CARD DE RESUMO ---
-  doc.setFillColor(20, 20, 20);
-  doc.roundedRect(14, 55, pageWidth - 28, 35, 2, 2, 'F');
-  doc.setDrawColor(GOLD_DARK[0], GOLD_DARK[1], GOLD_DARK[2]);
-  doc.setLineWidth(0.1);
-  doc.roundedRect(14, 55, pageWidth - 28, 35, 2, 2, 'S');
+      if (!dailyData[key]) {
+        dailyData[key] = { date: day, loaded: 0, delivered: 0, returns: 0, gains: 0 };
+      }
+      if (log.type === 'ENTRADA') dailyData[key].loaded += 1;
+      else if (log.type === 'SAIDA') {
+        dailyData[key].delivered += 1;
+        dailyData[key].gains += costPerPackage;
+      }
+      else if (log.type === 'DEVOLUCAO') dailyData[key].returns += 1;
+    });
 
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFontSize(10);
-  doc.text('SALDO SEMANAL TOTAL', 22, 65);
-  doc.setTextColor(WHITE_PURE[0], WHITE_PURE[1], WHITE_PURE[2]);
-  doc.setFontSize(24);
-  doc.text(`R$ ${totalGains.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`, 22, 80);
+    return Object.keys(dailyData)
+      .sort((a, b) => b.localeCompare(a))
+      .map(key => dailyData[key]);
+  };
 
-  doc.setTextColor(GOLD_LIGHT[0], GOLD_LIGHT[1], GOLD_LIGHT[2]);
-  doc.setFontSize(11);
-  doc.text(`${totalDelivered} ENTREGAS CONCLUÍDAS`, pageWidth - 25, 80, { align: 'right' });
+  const summaryRows = routeDataKey();
+  const totalLiquid = summaryRows.reduce((acc, curr) => acc + curr.gains, 0);
 
-  // --- TABELA ---
-  const tableColumn = ["DATA", "CARREGADOS", "ENTREGUES", "DEVOLUÇÕES", "VALOR LÍQUIDO"];
-  const tableRows = summaryRows.map(row => [
-    row.date,
-    row.loaded.toString(),
-    row.delivered.toString(),
-    row.returns.toString(),
-    `R$ ${row.gains.toFixed(2)}`
-  ]);
+  const rowsHtml = summaryRows.length > 0 ? summaryRows.map(r =>
+    getRowHtml(r.date || '', r.loaded || 0, r.delivered || 0, r.returns || 0, formatCurrency(r.gains || 0))
+  ).join('') : `<div class="px-6 py-10 text-center text-[10px] text-white/20 uppercase tracking-widest">Nenhum registro neste mês</div>`;
 
-  autoTable(doc, {
-    head: [tableColumn],
-    body: tableRows,
-    startY: 100,
-    theme: 'plain',
-    headStyles: {
-      fillColor: [15, 15, 15],
-      textColor: GOLD_PRIMARY,
-      fontSize: 10,
-      fontStyle: 'bold',
-      halign: 'center'
-    },
-    bodyStyles: {
-      fillColor: [10, 10, 10],
-      fontSize: 9,
-      halign: 'center',
-      textColor: [200, 200, 200],
-      lineWidth: 0.1,
-      lineColor: [30, 30, 30]
-    },
-    alternateRowStyles: {
-      fillColor: [15, 15, 15]
-    },
-    columnStyles: {
-      0: { halign: 'left' },
-      4: { fontStyle: 'bold', textColor: GOLD_LIGHT }
-    }
-  });
+  const fullHtml = buildHTMLTemplate(
+    'RELATÓRIO MENSAL',
+    'Resumo Operacional do Mês',
+    rowsHtml,
+    totalLiquid
+  );
 
-  // --- RODAPÉ ---
-  doc.setFontSize(8);
-  doc.setTextColor(GOLD_DARK[0], GOLD_DARK[1], GOLD_DARK[2]);
-  doc.text('LOGCASH ELITE SERVICES • DOCUMENTO DIGITAL AUTENTICADO', pageWidth / 2, pageHeight - 15, { align: 'center' });
-
-  doc.save(`logcash_extrato_${dateStr.replace(/\//g, '-')}.pdf`);
+  printHtmlPdf(fullHtml);
 };
+
 
 export const generateWeeklyPDF = (data: {
   userName: string;
@@ -234,154 +241,42 @@ export const generateWeeklyPDF = (data: {
     todayEntrada: number;
     todaySaida: number;
     todayDevolucao: number;
-  }
+  },
+  rows?: DailySummary[]
 }) => {
-  const doc = new jsPDF({
-    unit: 'mm',
-    format: [100, 150] // Formato compacto tipo mobile/extrato
-  });
+  const costPerPackage = VALOR_POR_PACOTE || 2.50;
+  let rowsHtml = '';
+  let totalLiquid = 0;
 
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
-  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
-  const refId = Math.floor(Math.random() * 9000) + 1000;
+  if (data.rows && data.rows.length > 0) {
+    const topRows = data.rows.slice(0, 10);
+    const routeEarnings = topRows.reduce((a, b) => a + (b.gains || 0), 0);
+    totalLiquid = routeEarnings + 180.0; // Bonus
 
-  const VALOR_POR_PACOTE = 5.0;
-  const routeEarnings = (data.counts.delivered || 0) * VALOR_POR_PACOTE;
-  const bonusPerformance = 180.0;
-  const totalLiquid = routeEarnings + bonusPerformance;
+    rowsHtml = topRows.map(r =>
+      getRowHtml(r.date || '', r.loaded || 0, r.delivered || 0, r.returns || 0, formatCurrency(r.gains || 0))
+    ).join('');
+  } else {
+    const dateStr = new Date().toLocaleDateString('pt-BR');
+    const routeEarnings = (data.counts?.delivered || 0) * costPerPackage;
+    totalLiquid = routeEarnings + 180.0; // Bonus
 
-  // --- FUNDO DARK ---
-  doc.setFillColor(0, 0, 0);
-  doc.rect(0, 0, pageWidth, pageHeight, 'F');
+    rowsHtml = getRowHtml(
+      dateStr,
+      data.counts?.todayEntrada || 0,
+      data.counts?.todaySaida || 0,
+      data.counts?.todayDevolucao || 0,
+      formatCurrency(routeEarnings)
+    );
+  }
 
-  // --- MOLDURA GOLD ---
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.5);
-  doc.rect(5, 5, pageWidth - 10, pageHeight - 10, 'S');
+  const fullHtml = buildHTMLTemplate(
+    'RELATÓRIO SEMANAL',
+    'Documento Oficial de Movimentação',
+    rowsHtml,
+    totalLiquid,
+    '(+BÔNUS)'
+  );
 
-  // --- LOGO & TÍTULO ---
-  doc.setFontSize(14);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('LOGCASH', pageWidth / 2, 20, { align: 'center' });
-
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.3);
-  doc.line(pageWidth / 2 - 5, 24, pageWidth / 2 + 5, 24);
-
-  doc.setFontSize(9);
-  doc.setTextColor(255, 255, 255);
-  doc.text('RELATÓRIO OPERACIONAL', pageWidth / 2, 32, { align: 'center' });
-
-  doc.setFontSize(7);
-  doc.setTextColor(150, 150, 150);
-  doc.text(`Emissão: ${dateStr} • Ref: #LC-${refId}`, pageWidth / 2, 38, { align: 'center' });
-
-  // --- SEÇÃO: DADOS DO MOTORISTA ---
-  let y = 50;
-  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.circle(12, y - 1, 0.6, 'F');
-  doc.setFontSize(7);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.text('DADOS DO MOTORISTA', 15, y);
-
-  y += 6;
-  doc.setFontSize(6);
-  doc.text('CONDUTOR', 15, y);
-  y += 4;
-  doc.setFontSize(8);
-  doc.setTextColor(245, 245, 245);
-  doc.text(data.userName.toUpperCase(), 15, y);
-
-  y += 6;
-  doc.setFontSize(6);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.text('IDENTIFICAÇÃO', 15, y);
-  doc.text('VEÍCULO', pageWidth - 15, y, { align: 'right' });
-
-  y += 4;
-  doc.setFontSize(8);
-  doc.setTextColor(245, 245, 245);
-  doc.text(`#${refId}`, 15, y);
-  doc.text(data.vehicleName.toUpperCase(), pageWidth - 15, y, { align: 'right' });
-
-  y += 4;
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setLineWidth(0.1);
-  doc.line(15, y, pageWidth - 15, y);
-
-  // --- SEÇÃO: RESUMO DA ROTA ---
-  y += 10;
-  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.circle(12, y - 1, 0.6, 'F');
-  doc.setFontSize(7);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.text('RESUMO DA ROTA', 15, y);
-
-  y += 6;
-  doc.setFontSize(7);
-  doc.setTextColor(200, 200, 200);
-  doc.text('Volumes Carregados', 15, y);
-  doc.setTextColor(255, 255, 255);
-  doc.text(`${data.counts.todayEntrada || 0} Unid.`, pageWidth - 15, y, { align: 'right' });
-
-  y += 5;
-  doc.setTextColor(200, 200, 200);
-  doc.text('Entregas Sucesso', 15, y);
-  doc.setTextColor(255, 255, 255);
-  doc.text(`${data.counts.delivered || 0} Unid.`, pageWidth - 15, y, { align: 'right' });
-
-  y += 5;
-  doc.setTextColor(200, 200, 200);
-  doc.text('Acareações', 15, y);
-  doc.setTextColor(255, 255, 255);
-  doc.text(`${(data.counts.todayDevolucao || 0).toString().padStart(2, '0')} Unid.`, pageWidth - 15, y, { align: 'right' });
-
-  y += 5;
-  doc.setTextColor(200, 200, 200);
-  doc.text('Performance da Rota', 15, y);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('98%', pageWidth - 15, y, { align: 'right' });
-
-  y += 4;
-  doc.setDrawColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.line(15, y, pageWidth - 15, y);
-
-  // --- SEÇÃO: FINANCEIRO ---
-  y += 10;
-  doc.setFillColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.circle(12, y - 1, 0.6, 'F');
-  doc.setFontSize(7);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.setFont('helvetica', 'bold');
-  doc.text('DETALHAMENTO FINANCEIRO', 15, y);
-
-  y += 6;
-  doc.setFont('helvetica', 'normal');
-  doc.setTextColor(200, 200, 200);
-  doc.text('Ganhos de Rota', 15, y);
-  doc.setTextColor(255, 255, 255);
-  doc.text(routeEarnings.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
-
-  y += 5;
-  doc.setTextColor(200, 200, 200);
-  doc.text('Bônus Performance', 15, y);
-  doc.setTextColor(255, 255, 255);
-  doc.text(bonusPerformance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
-
-  y += 8;
-  doc.setFontSize(8);
-  doc.setTextColor(GOLD_PRIMARY[0], GOLD_PRIMARY[1], GOLD_PRIMARY[2]);
-  doc.text('VALOR LÍQUIDO', 15, y);
-  doc.setFontSize(12);
-  doc.text(totalLiquid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }), pageWidth - 15, y, { align: 'right' });
-
-  // --- RODAPÉ ---
-  doc.setFontSize(5);
-  doc.setTextColor(100, 100, 100);
-  doc.text('LogCash Elite Services • Documento Digital Autenticado', pageWidth / 2, pageHeight - 7, { align: 'center' });
-
-  doc.save(`logcash_weekly_${refId}.pdf`);
+  printHtmlPdf(fullHtml);
 };

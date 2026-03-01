@@ -3,32 +3,28 @@ import React, { useEffect } from 'react';
 import { DailySummary } from '../types';
 
 interface EliteWeeklyPDFProps {
-    userName: string;
-    vehicleName: string;
     rows: DailySummary[];
     onBack: () => void;
 }
 
-const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
-    userName,
-    vehicleName,
-    rows,
-    onBack
-}) => {
-    // Sincronizar o título do documento para o download do PDF
+const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({ rows, onBack }) => {
     useEffect(() => {
         const prevTitle = document.title;
         document.title = "Relatório Semanal Minimalista Absoluto";
         return () => { document.title = prevTitle; };
     }, []);
 
-    // Cálculo do valor líquido total (Soma dos ganhos + bônus fixo de performance)
-    const totalGains = rows.reduce((acc, row) => acc + (Number(row.gains) || 0), 0);
+    const VALOR_POR_PACOTE = 2.50; // Alinhado com o sistema
+    const totalEarnings = rows.reduce((acc, curr) => acc + (curr.gains || 0), 0);
     const bonusPerformance = 180.0;
-    const totalLiquid = totalGains + bonusPerformance;
+    const totalValue = totalEarnings + bonusPerformance;
+
+    const formatCurrency = (val: number) =>
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
+            .format(val);
 
     return (
-        <div className="flex flex-col justify-center items-center p-4 bg-pitch-black w-full font-geometric animate-in fade-in duration-700 overflow-y-auto" style={{ minHeight: 'max(884px, 100dvh)' }}>
+        <div className="relative flex min-h-screen w-full flex-col items-center justify-center p-4 bg-pitch-black font-geometric animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
                 __html: `
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -49,27 +45,16 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
-                .font-inter { font-family: 'Inter', sans-serif; }
                 
                 @media print {
                     .no-print { display: none !important; }
-                    body { background: #000 !important; }
-                    .pdf-container { transform: scale(1) !important; margin: 0 !important; width: 100% !important; }
+                    body { background: #000 !important; margin: 0 !important; padding: 0 !important; }
+                    .pdf-container { transform: scale(1) !important; margin: 0 !important; width: 100% !important; border: none !important; box-shadow: none !important; }
                 }
+                @page { margin: 0; size: auto; }
                 `
             }} />
 
-            {/* Ações superiores - Botão de Voltar (no-print) */}
-            <div className="w-full max-w-[430px] flex justify-start mb-6 no-print">
-                <button
-                    onClick={onBack}
-                    className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-primary-gold active:scale-95 transition-all"
-                >
-                    <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                </button>
-            </div>
-
-            {/* CONTAINER PDF - Estrutura idêntica ao HTML fornecido */}
             <div className="relative flex w-full flex-col max-w-[430px] pdf-container">
                 <div className="flex flex-col bg-charcoal border border-primary-gold/20 rounded-2xl cinematic-glow overflow-hidden">
                     {/* Cabeçalho */}
@@ -78,7 +63,7 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
                             <span className="material-symbols-outlined text-primary-gold text-2xl">diamond</span>
                             <span className="text-[10px] font-black tracking-[0.6em] text-primary-gold uppercase">LOGCASH PREMIUM</span>
                         </div>
-                        <h1 className="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center">RELATÓRIO OPERACIONAL</h1>
+                        <h1 className="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center font-sans">RELATÓRIO SEMANAL</h1>
                         <p className="text-[9px] text-white/30 tracking-widest uppercase">Documento Oficial de Movimentação</p>
                     </div>
 
@@ -93,19 +78,21 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
 
                     {/* Listagem de Linhas */}
                     <div className="flex flex-col">
-                        {rows.length > 0 ? rows.slice(0, 10).map((row, idx) => (
+                        {rows.length > 0 ? rows.slice(0, 7).map((row, idx) => (
                             <div key={idx} className="spreadsheet-grid px-6 py-5 row-divider">
-                                <div className="text-[11px] font-bold text-ice-white">{row.date.split('/')[0]}/{row.date.split('/')[1]}</div>
-                                <div className="text-[11px] font-medium text-white/90 text-center font-inter">{row.loaded}</div>
-                                <div className="text-[11px] font-medium text-white/90 text-center font-inter">{row.delivered}</div>
-                                <div className="text-[11px] font-medium text-primary-gold text-center font-inter">{row.returns}</div>
-                                <div className="text-[11px] font-bold text-ice-white text-right font-inter">
-                                    R$ {Number(row.gains).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                <div className="text-[11px] font-bold text-ice-white uppercase">{row.date}</div>
+                                <div className="text-[11px] font-medium text-white/90 text-center">{row.loaded}</div>
+                                <div className="text-[11px] font-medium text-white/90 text-center">{row.delivered}</div>
+                                <div className={`text-[11px] font-medium text-center ${row.returns > 0 ? 'text-primary-gold' : 'text-white/20'}`}>
+                                    {String(row.returns || 0).padStart(2, '0')}
+                                </div>
+                                <div className="text-[11px] font-bold text-ice-white text-right font-geometric">
+                                    {formatCurrency(row.gains)}
                                 </div>
                             </div>
                         )) : (
                             <div className="px-6 py-10 text-center text-[10px] text-white/20 uppercase tracking-widest">
-                                Nenhum registro encontrado
+                                Nenhum registro nesta semana
                             </div>
                         )}
                     </div>
@@ -114,13 +101,13 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
                     <div className="px-6 py-10 bg-gradient-to-b from-transparent to-primary-gold/[0.03]">
                         <div className="flex flex-col gap-4">
                             <div className="flex justify-between items-center border-t border-primary-gold/20 pt-6">
-                                <span className="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase">RESUMO FINANCEIRO</span>
+                                <span className="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase">RESUMO FINANCEIRO (+BÔNUS)</span>
                             </div>
                             <div className="flex justify-between items-end">
                                 <div className="flex flex-col">
                                     <span className="text-[9px] text-primary-gold/50 uppercase tracking-[0.2em] mb-1">VALOR LÍQUIDO TOTAL</span>
-                                    <span className="text-3xl font-bold text-ice-white font-inter tracking-tight">
-                                        R$ {totalLiquid.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                                    <span className="text-3xl font-bold text-ice-white font-geometric tracking-tight">
+                                        {formatCurrency(totalValue)}
                                     </span>
                                 </div>
                             </div>
@@ -129,24 +116,23 @@ const EliteWeeklyPDF: React.FC<EliteWeeklyPDFProps> = ({
 
                     {/* Rodapé Interno */}
                     <div className="px-6 py-6 flex justify-center border-t border-primary-gold/10 bg-black/40">
-                        <p className="text-[7px] text-white/20 tracking-[0.4em] uppercase">Autenticidade Verificada LogCash Digital</p>
+                        <p className="text-[7px] text-white/20 tracking-[0.4em] uppercase font-sans">Autenticidade Verificada LogCash Digital</p>
                     </div>
                 </div>
 
-                {/* Ações de Compartilhamento (no-print) */}
-                <div className="mt-8 flex flex-col gap-4 no-print pb-10">
+                <div className="mt-8 flex flex-col gap-4 no-print px-4">
                     <button
                         onClick={() => window.print()}
-                        className="w-full bg-gradient-to-r from-primary-gold/20 to-primary-gold/5 border border-primary-gold/30 text-primary-gold py-4 rounded-2xl font-black text-[10px] uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
+                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-primary-gold/20 to-primary-gold/5 border border-primary-gold/30 text-primary-gold font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
                     >
-                        <span className="material-symbols-outlined text-xl">share</span>
-                        Compartilhar Relatório
+                        <span className="material-symbols-outlined text-lg">ios_share</span>
+                        Compartilhar PDF
                     </button>
                     <button
                         onClick={onBack}
-                        className="w-full bg-white/5 border border-white/10 text-white/40 py-3 rounded-xl font-bold text-[9px] uppercase tracking-[0.2em] active:scale-95 transition-all text-center"
+                        className="w-full py-4 rounded-2xl border border-white/5 text-white/40 font-bold text-xs uppercase tracking-[0.2em] hover:text-white transition-all"
                     >
-                        Sair da Visualização
+                        Voltar ao Terminal
                     </button>
                 </div>
             </div>

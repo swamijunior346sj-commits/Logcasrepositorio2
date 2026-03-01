@@ -33,12 +33,12 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
     const totalValue = routeEarnings + bonusPerformance;
 
     const handleDownload = () => {
+        if (onDownload) onDownload();
         setIsExporting(true);
         setTimeout(() => {
             setIsExporting(false);
             setShowSuccess(true);
-            if (onDownload) onDownload();
-        }, 3000);
+        }, 2000);
     };
 
     const formatBRL = (val: number) =>
