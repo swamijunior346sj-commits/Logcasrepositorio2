@@ -637,16 +637,14 @@ const App: React.FC = () => {
             />
           </div>
         ) : activeTab === 'profile' ? (
-          <div className="animate-in fade-in duration-500">
-            <EliteProfile
-              userName={userName}
-              onBack={() => setActiveTab('dash')}
-              onLogout={() => setConfirmingAction('LOGOUT')}
-              onTaxData={() => setActiveTab('tax-data')}
-              onPersonalData={() => setActiveTab('personal-data')}
-              onSettings={() => setActiveTab('settings')}
-            />
-          </div>
+          <EliteProfile
+            userName={userName}
+            onBack={() => setActiveTab('dash')}
+            onLogout={() => setConfirmingAction('LOGOUT')}
+            onTaxData={() => setActiveTab('tax-data')}
+            onPersonalData={() => setActiveTab('personal-data')}
+            onSettings={() => setActiveTab('settings')}
+          />
         ) : activeTab === 'tax-invoice' ? (
           <div className="animate-in fade-in duration-500">
             <EliteTaxInvoice

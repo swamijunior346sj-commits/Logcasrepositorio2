@@ -12,7 +12,7 @@ interface EliteProfileProps {
 
 const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings }) => {
     return (
-        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10">
+        <div className="flex flex-col items-center pb-10">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .carbon-texture {
@@ -40,7 +40,7 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
         }
       `}} />
 
-            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 carbon-texture">
+            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] shadow-2xl ring-1 ring-white/5 bg-pitch-black pb-12">
                 {/* Header */}
                 <header className="flex items-center justify-end p-6 mt-4">
                     <button
@@ -67,26 +67,26 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                             <span className="text-[9px] font-black text-black uppercase tracking-widest">ELITE</span>
                         </div>
                     </div>
-                    <h1 className="text-2xl font-extrabold tracking-tight metallic-gold-text">{userName}</h1>
-                    <p className="text-[10px] font-bold text-[#D4AF37]/70 tracking-[0.2em] mt-1 uppercase">NÍVEL 15 — MESTRE DAS ROTAS</p>
+                    <h1 className="text-3xl font-black tracking-tight text-f5-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] mt-3 text-center">{userName}</h1>
+                    <p className="text-xs font-bold text-primary-gold tracking-[0.3em] mt-2 uppercase">NÍVEL 15 — MESTRE DAS ROTAS</p>
                 </div>
 
                 {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-3 px-6 mb-8">
-                    <div className="card-border rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-1">Nota Média</span>
-                        <span className="text-lg font-black text-white">4.9</span>
-                        <span className="material-symbols-outlined text-xs text-[#D4AF37] mt-1 uppercase">star</span>
+                <div className="grid grid-cols-3 gap-3 px-6 mb-8 mt-2">
+                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
+                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Nota Média</span>
+                        <span className="text-2xl font-black text-white drop-shadow-md">4.9</span>
+                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">star</span>
                     </div>
-                    <div className="card-border rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-1">Entregas</span>
-                        <span className="text-lg font-black text-white">12K</span>
-                        <span className="material-symbols-outlined text-xs text-[#D4AF37] mt-1 uppercase">package_2</span>
+                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
+                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Entregas</span>
+                        <span className="text-2xl font-black text-white drop-shadow-md">12K</span>
+                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">package_2</span>
                     </div>
-                    <div className="card-border rounded-2xl p-4 flex flex-col items-center justify-center text-center">
-                        <span className="text-[8px] font-bold text-white/40 uppercase tracking-widest mb-1">Anos Elite</span>
-                        <span className="text-lg font-black text-white">3</span>
-                        <span className="material-symbols-outlined text-xs text-[#D4AF37] mt-1 uppercase">workspace_premium</span>
+                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
+                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Anos Elite</span>
+                        <span className="text-2xl font-black text-white drop-shadow-md">3</span>
+                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">workspace_premium</span>
                     </div>
                 </div>
 
@@ -94,71 +94,71 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                 <div className="px-6 flex flex-col gap-3">
                     <button
                         onClick={onPersonalData}
-                        className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all"
+                        className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[#D4AF37] text-xl">person_edit</span>
+                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
+                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">person_edit</span>
                             </div>
-                            <span className="text-sm font-bold text-white/90 tracking-wide">Dados Pessoais</span>
+                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Dados Pessoais</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37]">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
                     <button
                         onClick={onTaxData}
-                        className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all"
+                        className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[#D4AF37] text-xl">account_balance_wallet</span>
+                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
+                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">account_balance_wallet</span>
                             </div>
-                            <span className="text-sm font-bold text-white/90 tracking-wide">Dados Fiscais</span>
+                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Dados Fiscais</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37]">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
-                    <button className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all">
+                    <button className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]">
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[#D4AF37] text-xl">local_shipping</span>
+                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
+                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">local_shipping</span>
                             </div>
-                            <span className="text-sm font-bold text-white/90 tracking-wide">Minha Frota</span>
+                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Minha Frota</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37]">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
-                    <button className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all">
+                    <button className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]">
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[#D4AF37] text-xl">trophy</span>
+                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
+                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">trophy</span>
                             </div>
-                            <span className="text-sm font-bold text-white/90 tracking-wide">Conquistas Desbloqueadas</span>
+                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Conquistas Desbloqueadas</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37]">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
-                    <button className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all">
+                    <button className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]">
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-[#D4AF37]/10 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-[#D4AF37] text-xl">support_agent</span>
+                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
+                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">support_agent</span>
                             </div>
-                            <span className="text-sm font-bold text-white/90 tracking-wide">Suporte VIP</span>
+                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Suporte VIP</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/20 group-hover:text-[#D4AF37]">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
                     </button>
 
                     <button
                         onClick={onLogout}
-                        className="w-full card-border rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all mt-6 !border-red-900/30"
+                        className="w-full bg-[#1A0505] border border-red-900/40 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#2A0505] mt-6"
                     >
                         <div className="flex items-center gap-4">
-                            <div className="size-10 rounded-xl bg-red-950/20 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-red-500 text-xl">logout</span>
+                            <div className="size-11 rounded-xl bg-red-950/40 flex items-center justify-center border border-red-900/50">
+                                <span className="material-symbols-outlined text-red-500 text-2xl">logout</span>
                             </div>
-                            <span className="text-sm font-bold text-red-500 tracking-wide">Sair da Conta</span>
+                            <span className="text-base font-extrabold text-red-500 tracking-wide">Sair da Conta</span>
                         </div>
-                        <span className="material-symbols-outlined text-red-500/20 group-hover:text-red-500">logout</span>
+                        <span className="material-symbols-outlined text-red-500/40 group-hover:text-red-500 transition-colors">logout</span>
                     </button>
                 </div>
             </div>

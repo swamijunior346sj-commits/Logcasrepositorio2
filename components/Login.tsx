@@ -34,13 +34,8 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         await supabaseService.signIn(email, password);
         localStorage.setItem('logcash_saved_email', email);
 
-        // Trigger transition animation
-        setIsAuthenticated(true);
-
-        // Wait for animation to finish before calling parent success handler
-        setTimeout(() => {
-          onLoginSuccess();
-        }, 1200);
+        // Trigger transition animation immediately, bypass animation delay
+        onLoginSuccess();
       }
     } catch (err: any) {
       setError(err.message || 'Erro na autenticação.');
