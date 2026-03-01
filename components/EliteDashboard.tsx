@@ -71,7 +71,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
 
             {/* Header / Profile */}
             <div className="flex items-center justify-between p-6 mt-4">
-                <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('profile')}>
+                <div className="flex items-center gap-4">
                     <div className="relative">
                         <div className="size-14 rounded-full border border-primary-gold/30 p-0.5 bg-gradient-to-tr from-deep-gold to-primary-gold shadow-lg">
                             <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-full filter contrast-125 grayscale brightness-90 border border-black/20"
@@ -88,7 +88,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
             </div>
 
             {/* Total Balance / Graph */}
-            <div className="px-6 mb-8 text-center cursor-pointer" onClick={() => onNavigate('stats')}>
+            <div className="px-6 mb-8 text-center">
                 <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/40 mb-2">GANHOS TOTAIS</p>
                 <h1 className="text-4xl font-extrabold tracking-tight">
                     <span className="text-primary-gold font-bold mr-1">R$</span>
@@ -121,8 +121,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
             <div className="grid grid-cols-1 gap-4 p-6 pt-0">
                 {/* Current Route Card */}
                 <div
-                    className="glass-card-premium rounded-2xl p-6 cursor-pointer active:scale-[0.98] transition-all"
-                    onClick={() => onNavigate('route')}
+                    className="glass-card-premium rounded-2xl p-6 transition-all"
                 >
                     <div className="flex justify-between items-start mb-6">
                         <div className="text-left">
@@ -191,8 +190,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                 <div className="flex items-center justify-between mb-5">
                     <h3 className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/30">CONQUISTAS LOGCASH</h3>
                     <span
-                        onClick={() => onNavigate('stats')}
-                        className="text-[8px] font-bold text-primary-gold/80 uppercase tracking-widest cursor-pointer hover:text-primary-gold transition-colors"
+                        className="text-[8px] font-bold text-primary-gold/80 uppercase tracking-widest"
                     >
                         DETALHES
                     </span>

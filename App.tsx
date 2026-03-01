@@ -60,6 +60,11 @@ const App: React.FC = () => {
   const [successType, setSuccessType] = useState<SystemActionType>('ENTRADA');
   const [premiumSuccessMsg, setPremiumSuccessMsg] = useState('Operação realizada com sucesso');
 
+  // Estados para Navegação Swipe
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const minSwipeDistance = 50;
+
   // Estado Unificado de Confirmação
   const [confirmingAction, setConfirmingAction] = useState<SystemActionType | null>(null);
   const [bulkActionPending, setBulkActionPending] = useState<{ type: 'ENTRADA' | 'SAIDA'; quantity: number } | null>(null);
@@ -470,6 +475,37 @@ const App: React.FC = () => {
     }
   };
 
+  // Handlers para Swipe
+  const onTouchStart = (e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    const mainTabs: any[] = ['dash', 'route', 'stats', 'profile'];
+    if (!mainTabs.includes(activeTab)) return;
+
+    const currentIndex = mainTabs.indexOf(activeTab);
+
+    if (isLeftSwipe && currentIndex < mainTabs.length - 1) {
+      setActiveTab(mainTabs[currentIndex + 1]);
+    }
+
+    if (isRightSwipe && currentIndex > 0) {
+      setActiveTab(mainTabs[currentIndex - 1]);
+    }
+  };
+
   const counts = useMemo(() => {
     const todayStr = new Date().toDateString();
     const now = new Date();
@@ -584,57 +620,6 @@ const App: React.FC = () => {
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>
           )}
-
-          {/* Luxury Tab Navigation (Only on main tabs) */}
-          {(['dash', 'stats', 'route', 'profile', 'tax-invoice', 'personal-data', 'tax-data', 'settings', 'extrato', 'express-report'].includes(activeTab)) && (
-            <nav className="flex items-center justify-between bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 mx-2 mb-2 relative overflow-hidden backdrop-blur-xl">
-              <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent"></div>
-
-              <button
-                onClick={() => setActiveTab('dash')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'dash'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'dash' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'dash' ? { fontVariationSettings: "'FILL' 1" } : {}}>dashboard</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'dash' ? 'text-[#D4AF37]' : 'text-white'}`}>INÍCIO</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('route')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'route'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'route' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'route' ? { fontVariationSettings: "'FILL' 1" } : {}}>explore</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'route' ? 'text-[#D4AF37]' : 'text-white'}`}>ATIVIDADE DA ROTA</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('stats')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'stats'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'stats' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'stats' ? { fontVariationSettings: "'FILL' 1" } : {}}>analytics</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'stats' ? 'text-[#D4AF37]' : 'text-white'}`}>RELATÓRIOS</span>
-              </button>
-
-              <button
-                onClick={() => setActiveTab('profile')}
-                className={`relative z-10 flex-1 flex flex-col items-center gap-1.5 py-2.5 rounded-xl transition-all duration-300 ${activeTab === 'profile'
-                  ? 'bg-gradient-to-b from-[#D4AF37]/20 to-[#D4AF37]/5 border border-[#D4AF37]/30 shadow-[0_10px_20px_rgba(212,175,55,0.15)] scale-[1.02]'
-                  : 'opacity-30 hover:opacity-100 grayscale-[50%]'
-                  }`}
-              >
-                <span className={`material-symbols-outlined text-[20px] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`} style={activeTab === 'profile' ? { fontVariationSettings: "'FILL' 1" } : {}}>shield_person</span>
-                <span className={`text-[8px] font-black uppercase tracking-[0.25em] ${activeTab === 'profile' ? 'text-[#D4AF37]' : 'text-white'}`}>PERFIL</span>
-              </button>
-            </nav>
-          )}
         </div>
       </header>
 
@@ -646,7 +631,12 @@ const App: React.FC = () => {
         </div>
       )}
 
-      <main className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8 pb-12 transition-all">
+      <main
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        className="flex-1 max-w-5xl mx-auto w-full p-4 md:p-8 space-y-8 pb-32 transition-all"
+      >
         {activeTab === 'dash' ? (
           <div className="animate-in fade-in duration-500">
             <div className="mb-2">
@@ -843,6 +833,64 @@ const App: React.FC = () => {
         onClose={() => setShowQuickEntry(false)}
         onExport={handleQuickEntryExport}
       />
+
+      {/* Barra de Navegação Inferior Elite */}
+      {(['dash', 'stats', 'route', 'profile', 'tax-invoice', 'personal-data', 'tax-data', 'settings', 'extrato', 'express-report'].includes(activeTab)) && (
+        <div className="fixed bottom-0 inset-x-0 z-[600] p-4 bg-gradient-to-t from-black via-black/80 to-transparent pointer-events-none">
+          <nav className="max-w-md mx-auto flex items-center justify-between bg-black-depth/40 backdrop-blur-2xl p-1.5 rounded-[2rem] border border-[#D4AF37]/20 shadow-[0_-15px_40px_rgba(0,0,0,0.8)] pointer-events-auto relative overflow-hidden group">
+            {/* Glow decorativo inferior */}
+            <div className={`absolute bottom-0 h-[2px] transition-all duration-500 ease-elite bg-gradient-to-r from-transparent via-[#D4AF37] to-transparent ${activeTab === 'dash' ? 'left-0 w-1/4 translate-x-0' :
+              activeTab === 'route' ? 'left-0 w-1/4 translate-x-full' :
+                activeTab === 'stats' ? 'left-0 w-1/4 translate-x-[200%]' :
+                  activeTab === 'profile' ? 'left-0 w-1/4 translate-x-[300%]' : 'opacity-0'
+              }`}></div>
+
+            <button
+              onClick={() => setActiveTab('dash')}
+              className={`relative z-10 flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all duration-500 ${activeTab === 'dash'
+                ? 'text-[#D4AF37] scale-105'
+                : 'text-white/30 hover:text-white/60'
+                }`}
+            >
+              <span className={`material-symbols-outlined text-[24px] ${activeTab === 'dash' ? 'drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]' : ''}`} style={activeTab === 'dash' ? { fontVariationSettings: "'FILL' 1" } : {}}>dashboard</span>
+              <span className={`text-[7px] font-black uppercase tracking-[0.2em] ${activeTab === 'dash' ? 'opacity-100' : 'opacity-0 scale-75'} transition-all`}>Início</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('route')}
+              className={`relative z-10 flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all duration-500 ${activeTab === 'route'
+                ? 'text-[#D4AF37] scale-105'
+                : 'text-white/30 hover:text-white/60'
+                }`}
+            >
+              <span className={`material-symbols-outlined text-[24px] ${activeTab === 'route' ? 'drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]' : ''}`} style={activeTab === 'route' ? { fontVariationSettings: "'FILL' 1" } : {}}>explore</span>
+              <span className={`text-[7px] font-black uppercase tracking-[0.2em] ${activeTab === 'route' ? 'opacity-100' : 'opacity-0 scale-75'} transition-all`}>Rota</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('stats')}
+              className={`relative z-10 flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all duration-500 ${activeTab === 'stats'
+                ? 'text-[#D4AF37] scale-105'
+                : 'text-white/30 hover:text-white/60'
+                }`}
+            >
+              <span className={`material-symbols-outlined text-[24px] ${activeTab === 'stats' ? 'drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]' : ''}`} style={activeTab === 'stats' ? { fontVariationSettings: "'FILL' 1" } : {}}>analytics</span>
+              <span className={`text-[7px] font-black uppercase tracking-[0.2em] ${activeTab === 'stats' ? 'opacity-100' : 'opacity-0 scale-75'} transition-all`}>Relatórios</span>
+            </button>
+
+            <button
+              onClick={() => setActiveTab('profile')}
+              className={`relative z-10 flex-1 flex flex-col items-center gap-1 py-3 rounded-2xl transition-all duration-500 ${activeTab === 'profile'
+                ? 'text-[#D4AF37] scale-105'
+                : 'text-white/30 hover:text-white/60'
+                }`}
+            >
+              <span className={`material-symbols-outlined text-[24px] ${activeTab === 'profile' ? 'drop-shadow-[0_0_8px_rgba(212,175,55,0.5)]' : ''}`} style={activeTab === 'profile' ? { fontVariationSettings: "'FILL' 1" } : {}}>shield_person</span>
+              <span className={`text-[7px] font-black uppercase tracking-[0.2em] ${activeTab === 'profile' ? 'opacity-100' : 'opacity-0 scale-75'} transition-all`}>Perfil</span>
+            </button>
+          </nav>
+        </div>
+      )}
 
       {/* Premium Success Popup */}
       <PremiumSuccessPopup
