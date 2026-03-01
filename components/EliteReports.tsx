@@ -13,6 +13,7 @@ interface EliteReportsProps {
     onSettle: () => void;
     onExportPDF: () => void;
     onEmitInvoice: () => void;
+    onExtrato: () => void;
     onBack?: () => void;
 }
 
@@ -23,6 +24,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     onSettle,
     onExportPDF,
     onEmitInvoice,
+    onExtrato,
     onBack
 }) => {
     const [period, setPeriod] = useState<'DIA' | 'SEMANA' | 'MÊS' | 'ANO'>('DIA');
@@ -67,7 +69,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     }, [logs]);
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-[0_0_100px_rgba(0,0,0,1)] ring-1 ring-white/5 pb-10">
+        <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-[0_0_100px_rgba(0,0,0,1)] ring-1 ring-white/5 pb-10">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .glass-card-elite {
@@ -150,7 +152,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
             </div>
             {/* Quick Actions */}
             <div className="px-6 py-2 flex flex-col gap-4 no-print">
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-3 gap-3">
                     <button
                         onClick={onEmitInvoice}
                         className="flex flex-col items-center justify-center gap-2 bg-white/5 border border-white/10 rounded-2xl py-4 hover:bg-white/10 transition-all active:scale-95 text-center px-2 group"
@@ -159,20 +161,20 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                         <span className="text-[9px] font-black tracking-widest text-white uppercase text-center leading-tight">EMITIR NOTA FISCAL (NF-E)</span>
                     </button>
                     <button
+                        onClick={onExtrato}
+                        className="flex flex-col items-center justify-center gap-2 bg-white/5 border border-white/10 rounded-2xl py-4 hover:bg-white/10 transition-all active:scale-95 text-center px-2 group"
+                    >
+                        <span className="material-symbols-outlined text-[#D4AF37] text-xl">account_balance_wallet</span>
+                        <span className="text-[9px] font-black tracking-widest text-white uppercase text-center leading-tight">GERAR RELATÓRIO SEMANAL</span>
+                    </button>
+                    <button
                         onClick={onExportPDF}
                         className="flex flex-col items-center justify-center gap-2 bg-white/5 border border-white/10 rounded-2xl py-4 hover:bg-white/10 transition-all active:scale-95 text-center px-2 group"
                     >
-                        <span className="material-symbols-outlined text-[#D4AF37] text-xl">picture_as_pdf</span>
-                        <span className="text-[9px] font-black tracking-widest text-white uppercase">EXPORTAR PDF</span>
+                        <span className="material-symbols-outlined text-[#D4AF37] text-xl">bolt</span>
+                        <span className="text-[9px] font-black tracking-widest text-white uppercase text-center leading-tight">RELATÓRIO EXPRESSO</span>
                     </button>
                 </div>
-
-                <button
-                    className="w-full gold-metallic-gradient neon-gold-glow flex items-center justify-center gap-3 rounded-2xl py-5 transition-all active:scale-[0.98] group"
-                >
-                    <span className="material-symbols-outlined text-black font-bold text-2xl">bolt</span>
-                    <span className="text-[11px] font-black tracking-[0.2em] text-black uppercase">EMITIR RELATÓRIO EXPRESSO</span>
-                </button>
             </div>
 
             {/* Transactions Table */}

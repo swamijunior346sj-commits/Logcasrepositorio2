@@ -8,7 +8,7 @@ interface EliteSettingsProps {
 
 const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout }) => {
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .carbon-texture {
@@ -53,7 +53,7 @@ const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout }) => {
         }
       `}} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl carbon-texture">
+            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 carbon-texture">
                 <div className="pt-4"></div>
 
                 <div className="px-6 mt-6 flex flex-col gap-6">

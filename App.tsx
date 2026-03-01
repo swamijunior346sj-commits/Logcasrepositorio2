@@ -26,6 +26,7 @@ import ElitePersonalData from './components/ElitePersonalData';
 import EliteSettings from './components/EliteSettings';
 import EliteTaxInvoiceSuccessScreen from './components/EliteTaxInvoiceSuccess';
 import EliteMap from './components/EliteMap';
+import EliteExtrato from './components/EliteExtrato';
 
 
 
@@ -65,7 +66,7 @@ const App: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
 
   const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
-  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings'>('dash');
+  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato'>('dash');
   const [showSettings, setShowSettings] = useState(false);
   const [showQuickEntry, setShowQuickEntry] = useState(false);
 
@@ -505,7 +506,7 @@ const App: React.FC = () => {
                 onClick={() => {
                   if (activeTab === 'personal-data' || activeTab === 'tax-data' || activeTab === 'settings') {
                     setActiveTab('profile');
-                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view') {
+                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato') {
                     setActiveTab('stats');
                   } else if (activeTab === 'invoice-success') {
                     setActiveTab('dash');
@@ -524,7 +525,8 @@ const App: React.FC = () => {
                       activeTab === 'tax-invoice' ? 'EMITIR NOTA' :
                         activeTab === 'invoice-success' ? 'SUCESSO' :
                           activeTab === 'pdf-view' ? 'VISUALIZAÇÃO PDF' :
-                            'SISTEMA ELITE'}
+                            activeTab === 'extrato' ? 'EXTRATO' :
+                              'SISTEMA ELITE'}
               </span>
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>
@@ -617,11 +619,11 @@ const App: React.FC = () => {
 
           </div>
         ) : activeTab === 'map' ? (
-          <div className="animate-in fade-in duration-500 min-h-screen bg-black -mx-4 md:-mx-8 -mt-8 overflow-hidden">
+          <div className="animate-in fade-in duration-500">
             <EliteMap onBack={() => setActiveTab('dash')} />
           </div>
         ) : activeTab === 'stats' ? (
-          <div className="animate-in fade-in duration-500 min-h-screen bg-black overflow-hidden px-0">
+          <div className="animate-in fade-in duration-500">
             <EliteReports
               logs={logs}
               userName={userName}
@@ -629,6 +631,7 @@ const App: React.FC = () => {
               onSettle={() => setConfirmingAction('SETTLE_WALLET')}
               onExportPDF={() => setConfirmingAction('EXPORT_PDF')}
               onEmitInvoice={() => setActiveTab('tax-invoice')}
+              onExtrato={() => setActiveTab('extrato')}
               onBack={() => setActiveTab('dash')}
             />
           </div>
@@ -699,8 +702,21 @@ const App: React.FC = () => {
               onLogout={() => setConfirmingAction('LOGOUT')}
             />
           </div>
+        ) : activeTab === 'extrato' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteExtrato
+              logs={logs}
+              userName={userName}
+              valorPorPacote={VALOR_POR_PACOTE}
+              onBack={() => setActiveTab('stats')}
+              onExport={() => {
+                generatePDF(logs, userName);
+                triggerSuccess('EXPORT_PDF');
+              }}
+            />
+          </div>
         ) : (
-          <div className="animate-in fade-in duration-500 min-h-screen bg-black overflow-hidden px-0">
+          <div className="animate-in fade-in duration-500">
             <RouteActivity
               onBack={() => setActiveTab('dash')}
               counts={counts}

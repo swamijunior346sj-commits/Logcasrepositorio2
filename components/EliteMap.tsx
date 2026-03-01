@@ -7,7 +7,7 @@ interface EliteMapProps {
 
 const EliteMap: React.FC<EliteMapProps> = ({ onBack }) => {
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-0 overflow-hidden relative">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-0 overflow-hidden relative">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .glass-card {
@@ -30,7 +30,7 @@ const EliteMap: React.FC<EliteMapProps> = ({ onBack }) => {
         }
       `}} />
 
-            <div className="relative flex h-screen w-full flex-col max-w-[430px] mx-auto overflow-hidden shadow-2xl bg-background-dark">
+            <div className="relative flex w-full flex-col max-w-[430px] mx-auto overflow-hidden shadow-2xl bg-black ring-1 ring-white/5" style={{ height: 'calc(100vh - 120px)' }}>
                 {/* Header / Status Bar Area - Internal Header for Map Info */}
                 <div className="absolute top-0 left-0 w-full z-20 px-6 pt-12 pb-6 bg-gradient-to-b from-black to-transparent">
                     <div className="flex items-center justify-between">

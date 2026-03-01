@@ -21,7 +21,7 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10 overflow-y-auto">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10 overflow-y-auto">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .gold-glow-input {
@@ -78,7 +78,7 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
         }
       `}} />
 
-            <div className="relative flex min-h-screen w-full flex-col max-w-[430px] bg-black shadow-2xl">
+            <div className="relative flex w-full flex-col max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5">
                 <div className="pt-4"></div>
 
                 <main className="flex-1 px-6 pb-10">

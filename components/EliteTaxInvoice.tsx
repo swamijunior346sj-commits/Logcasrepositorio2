@@ -24,7 +24,7 @@ const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBac
     };
 
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10 overflow-y-auto">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10 overflow-y-auto">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .gold-glow {
@@ -66,7 +66,7 @@ const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBac
         }
       `}} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl pb-10 gold-glow">
+            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 pb-10 gold-glow">
                 <div className="pt-4"></div>
 
                 <div className="px-6 flex-1">

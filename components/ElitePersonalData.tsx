@@ -9,7 +9,7 @@ interface ElitePersonalDataProps {
 
 const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, onBack, onSave }) => {
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .carbon-texture {
@@ -42,7 +42,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, onBack,
         }
       `}} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl carbon-texture pb-10">
+            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 carbon-texture pb-10">
                 <div className="pt-4"></div>
 
                 {/* Profile Picture */}

@@ -12,7 +12,7 @@ interface EliteProfileProps {
 
 const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings }) => {
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .carbon-texture {
@@ -40,7 +40,7 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
         }
       `}} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl carbon-texture">
+            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 carbon-texture">
                 {/* Header */}
                 <header className="flex items-center justify-between p-6 mt-4">
                     <button

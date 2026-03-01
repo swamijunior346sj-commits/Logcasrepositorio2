@@ -12,7 +12,7 @@ const EliteTaxInvoiceSuccess: React.FC<EliteTaxInvoiceSuccessProps> = ({ totalVa
     const protocol = Math.floor(100000 + Math.random() * 900000);
 
     return (
-        <div className="flex flex-col items-center min-h-screen bg-black animate-in fade-in duration-700 pb-10 overflow-hidden relative">
+        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10 overflow-hidden relative">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .gold-glow-success {
@@ -60,7 +60,7 @@ const EliteTaxInvoiceSuccess: React.FC<EliteTaxInvoiceSuccessProps> = ({ totalVa
             <div className="floating-particles opacity-30"></div>
             <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-64 h-64 bg-[#D4AF37]/10 rounded-full blur-[100px] pulse-glow"></div>
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-hidden max-w-[430px] bg-black shadow-2xl pb-10">
+            <div className="relative flex w-full flex-col overflow-hidden max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5 pb-10" style={{ minHeight: 'calc(100vh - 120px)' }}>
                 <div className="pt-4"></div>
 
                 <div className="flex-1 flex flex-col items-center justify-center px-8 z-10 text-center">

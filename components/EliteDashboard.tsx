@@ -29,7 +29,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
     const decPart = (totalCumulative % 1).toFixed(2).substring(2);
 
     return (
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl ring-1 ring-white/5 pb-10 animate-in fade-in duration-700">
+        <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl ring-1 ring-white/5 pb-10 animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
                 __html: `
         .glass-card-elite {
