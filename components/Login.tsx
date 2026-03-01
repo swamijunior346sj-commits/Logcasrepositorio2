@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { supabaseService } from '../services/supabaseService';
 
 interface LoginProps {
@@ -13,70 +13,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [error, setError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
     setMounted(true);
     const savedEmail = localStorage.getItem('logcash_saved_email');
     if (savedEmail) setEmail(savedEmail);
-  }, []);
-
-  // Animated golden particle canvas
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    const dpr = window.devicePixelRatio || 1;
-
-    const resize = () => {
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + 'px';
-      canvas.style.height = window.innerHeight + 'px';
-      ctx.scale(dpr, dpr);
-    };
-    resize();
-    window.addEventListener('resize', resize);
-
-    interface Particle {
-      x: number; y: number; r: number; speed: number; opacity: number; drift: number;
-    }
-
-    const particles: Particle[] = Array.from({ length: 35 }, () => ({
-      x: Math.random() * window.innerWidth,
-      y: Math.random() * window.innerHeight,
-      r: Math.random() * 1.5 + 0.3,
-      speed: Math.random() * 0.4 + 0.15,
-      opacity: Math.random() * 0.35 + 0.05,
-      drift: (Math.random() - 0.5) * 0.3,
-    }));
-
-    const draw = () => {
-      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      particles.forEach(p => {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(235, 192, 81, ${p.opacity})`;
-        ctx.fill();
-
-        p.y -= p.speed;
-        p.x += p.drift;
-        if (p.y < -10) {
-          p.y = window.innerHeight + 10;
-          p.x = Math.random() * window.innerWidth;
-        }
-      });
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', resize);
-    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -91,7 +33,14 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
       } else {
         await supabaseService.signIn(email, password);
         localStorage.setItem('logcash_saved_email', email);
-        onLoginSuccess();
+
+        // Trigger transition animation
+        setIsAuthenticated(true);
+
+        // Wait for animation to finish before calling parent success handler
+        setTimeout(() => {
+          onLoginSuccess();
+        }, 1200);
       }
     } catch (err: any) {
       setError(err.message || 'Erro na autenticação.');
@@ -101,266 +50,266 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black overflow-hidden flex items-center justify-center">
-      {/* === BACKGROUND LAYERS === */}
-      <canvas ref={canvasRef} className="fixed inset-0 pointer-events-none z-0" />
+    <div className={`fixed inset-0 bg-pure-black font-display text-white-text antialiased overflow-hidden flex items-center justify-center ${isAuthenticated ? 'state-authenticated' : ''}`}>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+                @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+                
+                @keyframes float-particle {
+                    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.2; }
+                    50% { transform: translateY(-100px) translateX(20px); opacity: 0.5; }
+                }
+                @keyframes subtle-pulse {
+                    0%, 100% { opacity: 0.15; transform: scale(1); }
+                    50% { opacity: 0.25; transform: scale(1.1); }
+                }
+                @keyframes reveal-glow {
+                    0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; filter: blur(20px); }
+                    50% { opacity: 0.8; filter: blur(60px); }
+                    100% { transform: translate(-50%, -50%) scale(4); opacity: 0; filter: blur(100px); }
+                }
+                .animate-particle {
+                    animation: float-particle var(--duration) ease-in-out infinite;
+                    animation-delay: var(--delay);
+                }
+                .animate-glow-idle {
+                    animation: subtle-pulse 8s ease-in-out infinite;
+                }
+                .glass-input {
+                    background: #121210;
+                    border: 1px solid #2A2A26;
+                    transition: all 0.3s ease;
+                }
+                .glass-input:focus-within {
+                    border-color: #EBC051;
+                    box-shadow: 0 0 15px rgba(235, 192, 81, 0.1);
+                }
+                .minimal-luxury-button {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                    color: #EBC051;
+                    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                    text-shadow: 0 0 10px rgba(235, 192, 81, 0.3);
+                }
+                .minimal-luxury-button:active {
+                    transform: scale(0.95);
+                    background: rgba(235, 192, 81, 0.1);
+                }
+                #login-form, #logo-container, #dashboard-content {
+                    transition: all 0.8s cubic-bezier(0.65, 0, 0.35, 1);
+                }
+                .state-authenticated #login-form {
+                    transform: translateY(100px);
+                    opacity: 0;
+                    pointer-events: none;
+                }
+                .state-authenticated #logo-container {
+                    transform: translateY(-35vh) scale(0.6);
+                }
+                .state-authenticated #dashboard-content {
+                    opacity: 1;
+                    transform: translateY(0);
+                    pointer-events: auto;
+                    backdrop-filter: blur(12px);
+                }
+                .state-authenticated #central-glow {
+                    animation: reveal-glow 1.2s forwards ease-out;
+                }
+                .state-authenticated #tagline {
+                    opacity: 0;
+                }
+                .dashboard-card {
+                    background: rgba(18, 18, 16, 0.6);
+                    border: 1px solid rgba(42, 42, 38, 0.5);
+                    backdrop-filter: blur(20px);
+                }
+                .font-display { font-family: 'Space Grotesk', sans-serif; }
+                `
+      }} />
 
-      {/* Carbon pattern overlay */}
-      <div className="fixed inset-0 carbon-texture opacity-30 pointer-events-none z-[1]" />
+      {/* Background Layer */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        <div className="animate-particle absolute top-[20%] left-[15%] w-1 h-1 bg-primary-gold rounded-full" style={{ '--duration': '15s', '--delay': '0s' } as any}></div>
+        <div className="animate-particle absolute top-[60%] left-[25%] w-1.5 h-1.5 bg-dark-gold rounded-full" style={{ '--duration': '22s', '--delay': '-5s' } as any}></div>
+        <div className="animate-particle absolute top-[40%] right-[20%] w-1 h-1 bg-primary-gold rounded-full" style={{ '--duration': '18s', '--delay': '-2s' } as any}></div>
+        <div className="animate-particle absolute bottom-[15%] left-[40%] w-0.5 h-0.5 bg-primary-gold rounded-full" style={{ '--duration': '25s', '--delay': '-10s' } as any}></div>
+        <div className="animate-particle absolute bottom-[30%] right-[15%] w-1.5 h-1.5 bg-dark-gold rounded-full" style={{ '--duration': '20s', '--delay': '-7s' } as any}></div>
+        <div className="animate-particle absolute top-[80%] left-[10%] w-1 h-1 bg-primary-gold rounded-full" style={{ '--duration': '17s', '--delay': '-3s' } as any}></div>
+      </div>
 
-      {/* Ambient gold glow top-right */}
-      <div className="fixed -top-32 -right-32 w-80 h-80 rounded-full pointer-events-none z-[1]"
-        style={{ background: 'radial-gradient(circle, rgba(235,192,81,0.08) 0%, transparent 70%)' }} />
-      {/* Ambient gold glow bottom-left */}
-      <div className="fixed -bottom-40 -left-40 w-96 h-96 rounded-full pointer-events-none z-[1]"
-        style={{ background: 'radial-gradient(circle, rgba(184,143,53,0.06) 0%, transparent 70%)' }} />
+      {/* Central Glow (Animated on Auth) */}
+      <div
+        className={`fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-primary-gold rounded-full opacity-0 pointer-events-none z-20`}
+        id="central-glow"
+      ></div>
 
-      {/* === MAIN CARD === */}
-      <div className={`relative z-10 w-full max-w-[400px] mx-4 transition-all duration-700 ease-out ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}>
+      <main className="relative h-screen w-full flex flex-col items-center justify-center p-6 z-10">
 
-        {/* Glass card container */}
-        <div className="relative rounded-[28px] overflow-hidden"
-          style={{
-            background: 'linear-gradient(165deg, rgba(18,18,16,0.95) 0%, rgba(0,0,0,0.98) 100%)',
-            border: '1px solid rgba(235,192,81,0.12)',
-            boxShadow: '0 30px 80px -10px rgba(0,0,0,0.9), 0 0 60px -15px rgba(235,192,81,0.08)',
-          }}>
-
-          {/* Top gold accent line */}
-          <div className="absolute top-0 left-0 right-0 h-[1px]"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(235,192,81,0.4), transparent)' }} />
-
-          {/* Inner content */}
-          <div className="px-8 pt-12 pb-10">
-
-            {/* ──── LOGO SECTION ──── */}
-            <div className="flex flex-col items-center mb-10">
-              {/* Icon with glow ring */}
-              <div className="relative mb-5">
-                <div className="absolute inset-0 rounded-full animate-pulse"
-                  style={{ background: 'radial-gradient(circle, rgba(235,192,81,0.15) 0%, transparent 70%)', transform: 'scale(2.5)' }} />
-                <div className="relative w-20 h-20 rounded-full flex items-center justify-center"
-                  style={{
-                    background: 'linear-gradient(145deg, rgba(235,192,81,0.15) 0%, rgba(18,18,16,1) 100%)',
-                    border: '1px solid rgba(235,192,81,0.25)',
-                    boxShadow: '0 0 40px rgba(235,192,81,0.1)',
-                  }}>
-                  <span className="material-symbols-outlined text-5xl"
-                    style={{
-                      fontVariationSettings: "'FILL' 1, 'wght' 300",
-                      background: 'linear-gradient(135deg, #F9E29C, #EBC051, #B88F35)',
-                      WebkitBackgroundClip: 'text',
-                      WebkitTextFillColor: 'transparent',
-                    }}>payments</span>
-                </div>
-              </div>
-
-              {/* Brand name */}
-              <h1 className="text-[32px] font-bold tracking-tight mb-1" style={{ fontFamily: 'Space Grotesk, sans-serif' }}>
-                <span className="text-white">LOG</span>
-                <span style={{
-                  background: 'linear-gradient(135deg, #F9E29C, #EBC051, #B88F35)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                }}>CASH</span>
+        {/* Logo Section */}
+        <div className="flex flex-col items-center gap-6 mb-16" id="logo-container">
+          <div className="relative">
+            <div className="animate-glow-idle absolute inset-0 bg-primary-gold/20 rounded-full blur-[80px] scale-[2.5]"></div>
+            <div className="text-center space-y-2 relative z-10">
+              <h1 className="text-5xl font-bold tracking-tight text-white-text font-display transition-all duration-700">
+                LOG<span className="text-primary-gold">CASH</span>
               </h1>
-              <p className="text-[9px] font-bold uppercase tracking-[0.45em]"
-                style={{ color: 'rgba(235,192,81,0.5)' }}>
-                {isSignUp ? 'Crie sua Conta Elite' : 'Inteligência em Entregas'}
-              </p>
-            </div>
-
-            {/* ──── FORM ──── */}
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {error && (
-                <div className="rounded-xl px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider"
-                  style={{
-                    background: error.includes('criada') ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
-                    border: error.includes('criada') ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(239,68,68,0.15)',
-                    color: error.includes('criada') ? '#34d399' : '#f87171',
-                  }}>
-                  {error}
-                </div>
-              )}
-
-              {/* Email input */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] mb-2"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  E-mail ou Usuário
-                </label>
-                <div className="flex items-center rounded-2xl px-4 group transition-all duration-300"
-                  style={{
-                    background: '#0a0a0a',
-                    border: '1px solid rgba(235,192,81,0.12)',
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(235,192,81,0.4)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(235,192,81,0.06)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(235,192,81,0.12)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}>
-                  <span className="material-symbols-outlined text-lg transition-colors duration-300"
-                    style={{ color: 'rgba(122,122,122,0.7)', fontVariationSettings: "'wght' 300" }}>
-                    mail
-                  </span>
-                  <input
-                    type="email"
-                    required
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="motorista@logcash.app"
-                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none py-4 px-3 text-sm font-medium text-white placeholder:text-white/15"
-                  />
-                </div>
-              </div>
-
-              {/* Password input */}
-              <div>
-                <label className="block text-[10px] font-bold uppercase tracking-[0.15em] mb-2"
-                  style={{ color: 'rgba(255,255,255,0.3)' }}>
-                  Senha de Acesso
-                </label>
-                <div className="flex items-center rounded-2xl px-4 group transition-all duration-300"
-                  style={{
-                    background: '#0a0a0a',
-                    border: '1px solid rgba(235,192,81,0.12)',
-                  }}
-                  onFocus={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(235,192,81,0.4)';
-                    e.currentTarget.style.boxShadow = '0 0 20px rgba(235,192,81,0.06)';
-                  }}
-                  onBlur={(e) => {
-                    e.currentTarget.style.borderColor = 'rgba(235,192,81,0.12)';
-                    e.currentTarget.style.boxShadow = 'none';
-                  }}>
-                  <span className="material-symbols-outlined text-lg transition-colors duration-300"
-                    style={{ color: 'rgba(122,122,122,0.7)', fontVariationSettings: "'wght' 300" }}>
-                    lock
-                  </span>
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    required
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-transparent border-none focus:ring-0 focus:outline-none py-4 px-3 text-sm font-medium text-white placeholder:text-white/15"
-                  />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="flex-shrink-0 transition-colors duration-300 hover:text-primary-gold"
-                    style={{ color: 'rgba(122,122,122,0.5)' }}>
-                    <span className="material-symbols-outlined text-lg"
-                      style={{ fontVariationSettings: "'wght' 300" }}>
-                      {showPassword ? 'visibility' : 'visibility_off'}
-                    </span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Forgot password */}
-              {!isSignUp && (
-                <div className="flex justify-end pt-0.5">
-                  <a href="#" className="text-[11px] font-medium transition-colors duration-300 hover:text-primary-gold"
-                    style={{ color: 'rgba(122,122,122,0.7)' }}>
-                    Esqueceu a senha?
-                  </a>
-                </div>
-              )}
-
-              {/* ──── SUBMIT BUTTON ──── */}
-              <div className="pt-3">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="w-full h-[56px] rounded-2xl font-bold text-sm tracking-[0.15em] uppercase flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.97] disabled:opacity-50 relative overflow-hidden"
-                  style={{
-                    background: 'linear-gradient(135deg, #EBC051 0%, #B88F35 100%)',
-                    color: '#000',
-                    boxShadow: '0 8px 30px -4px rgba(235,192,81,0.25), inset 0 1px 0 rgba(255,255,255,0.2)',
-                  }}>
-                  {/* Shine sweep effect */}
-                  <div className="absolute inset-0 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 50%, transparent 100%)',
-                      animation: 'shine-sweep 3s ease-in-out infinite',
-                    }} />
-                  {loading ? (
-                    <div className="w-5 h-5 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-                  ) : (
-                    <span className="relative z-10">{isSignUp ? 'Criar Conta' : 'Entrar'}</span>
-                  )}
-                </button>
-              </div>
-            </form>
-
-            {/* ──── DIVIDER + BIOMETRICS ──── */}
-            {!isSignUp && (
-              <div className="mt-7">
-                <div className="flex items-center gap-4 mb-5">
-                  <div className="flex-1 h-[1px]" style={{ background: 'rgba(42,42,38,0.8)' }} />
-                  <span className="text-[9px] font-bold uppercase tracking-[0.3em]"
-                    style={{ color: 'rgba(122,122,122,0.5)' }}>
-                    acesso rápido
-                  </span>
-                  <div className="flex-1 h-[1px]" style={{ background: 'rgba(42,42,38,0.8)' }} />
-                </div>
-                <div className="flex justify-center gap-4">
-                  {[
-                    { icon: 'face', label: 'Face ID' },
-                    { icon: 'fingerprint', label: 'Digital' },
-                  ].map((item) => (
-                    <button key={item.icon} type="button"
-                      className="w-[72px] h-[72px] rounded-2xl flex flex-col items-center justify-center gap-1 transition-all duration-300 active:scale-90 hover:border-primary-gold/40"
-                      style={{
-                        background: 'rgba(18,18,16,0.8)',
-                        border: '1px solid rgba(42,42,38,0.8)',
-                      }}>
-                      <span className="material-symbols-outlined text-3xl"
-                        style={{
-                          fontVariationSettings: "'wght' 200",
-                          color: '#EBC051',
-                        }}>{item.icon}</span>
-                      <span className="text-[8px] font-bold uppercase tracking-wider"
-                        style={{ color: 'rgba(122,122,122,0.5)' }}>{item.label}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* ──── FOOTER TOGGLE ──── */}
-            <div className="mt-8 text-center">
-              <p className="text-xs font-medium" style={{ color: 'rgba(122,122,122,0.6)' }}>
-                {isSignUp ? 'Já possui acesso?' : 'Novo na plataforma?'}
-                <button
-                  type="button"
-                  onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
-                  className="ml-1.5 font-bold transition-colors duration-300 hover:brightness-125"
-                  style={{
-                    color: '#EBC051',
-                    borderBottom: '1px solid rgba(235,192,81,0.3)',
-                    paddingBottom: 1,
-                  }}>
-                  {isSignUp ? 'Fazer Login' : 'Solicitar Acesso'}
-                </button>
+              <p className="text-secondary-gray text-[11px] font-bold uppercase tracking-[0.5em] opacity-80 transition-opacity duration-500 font-display" id="tagline">
+                {isSignUp ? 'Elite Access Request' : 'Refined Delivery Excellence'}
               </p>
             </div>
           </div>
-
-          {/* Bottom gold accent line */}
-          <div className="absolute bottom-0 left-0 right-0 h-[1px]"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(235,192,81,0.2), transparent)' }} />
         </div>
 
-        {/* Subtle bottom brand */}
-        <p className="text-center mt-6 text-[9px] font-bold uppercase tracking-[0.4em]"
-          style={{ color: 'rgba(122,122,122,0.2)' }}>
-          © 2026 LogCash Elite
-        </p>
+        {/* Form Section */}
+        <div
+          className={`w-full max-w-[400px] space-y-6 transition-all duration-700 ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
+          id="login-form"
+        >
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <div className="rounded-xl px-4 py-3 text-center text-[10px] font-bold uppercase tracking-wider"
+                style={{
+                  background: error.includes('criada') ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.08)',
+                  border: error.includes('criada') ? '1px solid rgba(16,185,129,0.2)' : '1px solid rgba(239,68,68,0.15)',
+                  color: error.includes('criada') ? '#34d399' : '#f87171',
+                }}>
+                {error}
+              </div>
+            )}
+
+            <div className="space-y-1.5">
+              <div className="flex items-center glass-input rounded-2xl px-4 py-1 group">
+                <span className="material-symbols-outlined text-secondary-gray text-xl group-focus-within:text-primary-gold transition-colors">person</span>
+                <input
+                  className="bg-transparent border-none focus:ring-0 w-full text-white-text placeholder:text-secondary-gray py-4 px-3 text-sm font-medium focus:outline-none"
+                  placeholder="E-mail ou Usuário"
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <div className="flex items-center glass-input rounded-2xl px-4 py-1 group">
+                <span className="material-symbols-outlined text-secondary-gray text-xl group-focus-within:text-primary-gold transition-colors">lock</span>
+                <input
+                  className="bg-transparent border-none focus:ring-0 w-full text-white-text placeholder:text-secondary-gray py-4 px-3 text-sm font-medium focus:outline-none"
+                  placeholder="Senha de Acesso"
+                  type={showPassword ? "text" : "password"}
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                />
+                <span
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="material-symbols-outlined text-secondary-gray text-xl cursor-pointer hover:text-primary-gold transition-colors"
+                >
+                  {showPassword ? 'visibility' : 'visibility_off'}
+                </span>
+              </div>
+            </div>
+
+            {!isSignUp && (
+              <div className="flex justify-end px-1">
+                <button type="button" className="text-xs text-secondary-gray hover:text-primary-gold transition-colors font-medium">
+                  Esqueceu a senha?
+                </button>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || isAuthenticated}
+              className={`w-full minimal-luxury-button py-4 rounded-2xl font-bold text-sm tracking-[0.2em] h-[58px] flex items-center justify-center uppercase active:scale-95 transition-all disabled:opacity-50`}
+            >
+              {loading ? (
+                <div className="w-5 h-5 border-2 border-primary-gold/30 border-t-primary-gold rounded-full animate-spin"></div>
+              ) : (
+                isSignUp ? 'Solicitar Acesso' : 'ENTRAR'
+              )}
+            </button>
+          </form>
+
+          <div className="pt-8 text-center">
+            <p className="text-secondary-gray text-xs font-medium tracking-wide">
+              {isSignUp ? 'Já possui acesso?' : 'Novo por aqui?'}
+              <span
+                onClick={() => { setIsSignUp(!isSignUp); setError(null); }}
+                className="text-primary-gold font-bold ml-1 cursor-pointer border-b border-primary-gold/30 hover:brightness-110 transition-all font-display"
+              >
+                {isSignUp ? 'Fazer Login' : 'Solicitar Acesso'}
+              </span>
+            </p>
+          </div>
+        </div>
+
+        {/* Dashboard Transition Content (Placeholder) */}
+        <div
+          className="absolute inset-x-0 pt-32 px-6 flex flex-col gap-6 opacity-0 translate-y-12 pointer-events-none"
+          id="dashboard-content"
+        >
+          <div className="flex justify-between items-center mb-2">
+            <div>
+              <p className="text-secondary-gray text-[10px] uppercase tracking-widest font-bold">Patrimônio Total</p>
+              <h2 className="text-2xl font-bold text-white-text font-display">R$ 1.240.500,00</h2>
+            </div>
+            <div className="w-10 h-10 rounded-full border border-primary-gold/30 flex items-center justify-center bg-[#121210]">
+              <span className="material-symbols-outlined text-primary-gold text-xl">notifications</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="dashboard-card p-5 rounded-3xl">
+              <span className="material-symbols-outlined text-primary-gold mb-3">trending_up</span>
+              <p className="text-secondary-gray text-[10px] uppercase font-bold tracking-tighter">Ganhos Mensais</p>
+              <p className="text-lg font-bold text-white-text font-display">+14.2%</p>
+            </div>
+            <div className="dashboard-card p-5 rounded-3xl">
+              <span className="material-symbols-outlined text-primary-gold mb-3">account_balance_wallet</span>
+              <p className="text-secondary-gray text-[10px] uppercase font-bold tracking-tighter">Disponível</p>
+              <p className="text-lg font-bold text-white-text font-display">R$ 82.3k</p>
+            </div>
+          </div>
+
+          <div className="dashboard-card p-6 rounded-3xl flex-1 flex flex-col justify-between overflow-hidden relative">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="text-white-text font-bold text-lg font-display">Operações Ativas</h3>
+                <p className="text-secondary-gray text-xs">Acompanhamento em tempo real</p>
+              </div>
+              <div className="bg-primary-gold/10 px-3 py-1 rounded-full border border-primary-gold/20">
+                <span className="text-primary-gold text-[10px] font-bold uppercase">Ao Vivo</span>
+              </div>
+            </div>
+
+            <div className="space-y-4 mt-6">
+              <div className="flex items-center justify-between border-b border-white/5 pb-3">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-xl bg-primary-gold/5 border border-primary-gold/10 flex items-center justify-center">
+                    <span className="material-symbols-outlined text-primary-gold text-sm">rocket_launch</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium">Logistics Alpha</p>
+                    <p className="text-[10px] text-secondary-gray">Em trânsito • SP/RJ</p>
+                  </div>
+                </div>
+                <p className="text-sm font-bold text-primary-gold">R$ 12.4k</p>
+              </div>
+            </div>
+
+            <button className="w-full bg-primary-gold text-pure-black font-bold py-3.5 rounded-2xl text-[10px] tracking-widest mt-6 uppercase">
+              Nova Operação
+            </button>
+          </div>
+        </div>
+      </main>
+
+      {/* Hidden Images for caching */}
+      <div className="hidden">
+        <img alt="Ref" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWyPINr-NDKzNXBa9r9slqhCy0POXMVqjFZY3nsNNgVRdeUNBthVVB1YmCboPAOvg2G3BcSPgAiwu8y5lY5k71k5QXelHQENfQekirYoQv9NwB2N-KUt9f_zySG-K5BV64y6I5L6TEcZjAM8KsmEGmBU9irK77juhequFEpwCIXbyzJcFyB15nwTh3VID0kyxJI5eBvscOt5xUe9hQEnSJdqnWnN5eL2_6B1Sc3eAa1-vjEwEVXfWgTnmdjrpf4VRf69mOaJ4B_lKI" />
+        <img alt="Ref" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOQKUG-2AsjpZuFj8cDHqGFta1HLkTKgIpr3twLe9_SSD7gdWvteWS2FajZfKPa99y619NhxGDbNVsisnp10PQ_bbLuqJsmLPeXgxh0egG1O6blqFBmrIGP00pIsVHNfG6sajc8CT79pMox2vzHWHkAq9O8OhrchKRAFliBegVxOVvbStzfEZXYWhRV-i93xKAW3YfO97LgzbQCYg0ktuElD5etFmF9w1E80W4YthLQff9OC1mDTv9PSPuKQd-2zISPB_FS-1jsOL_" />
       </div>
     </div>
   );

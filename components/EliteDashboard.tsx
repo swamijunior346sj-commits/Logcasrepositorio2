@@ -1,10 +1,11 @@
 import React from 'react';
-import { LogEntry } from '../types';
 
 interface EliteDashboardProps {
     userName: string;
     counts: {
         todaySaida: number;
+        todayEntrada: number;
+        todayDevolucao: number;
         week: number;
         year: number;
         wallet: {
@@ -14,7 +15,7 @@ interface EliteDashboardProps {
         }
     };
     valorPorPacote: number;
-    onNavigate: (tab: 'dash' | 'stats' | 'route') => void;
+    onNavigate: (tab: 'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report') => void;
 }
 
 const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valorPorPacote, onNavigate }) => {
@@ -24,74 +25,86 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
     const annualProjection = counts.year * valorPorPacote;
     const totalCumulative = counts.wallet.cumulative;
 
-    // Numerical parts for total earnings display
-    const intPart = Math.floor(totalCumulative);
-    const decPart = (totalCumulative % 1).toFixed(2).substring(2);
+    const formatCurrency = (val: number) =>
+        val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
     return (
-        <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl ring-1 ring-white/5 pb-10 animate-in fade-in duration-700">
+        <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl ring-1 ring-white/5 pb-32 animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
                 __html: `
-        .glass-card-elite {
-            background: linear-gradient(165deg, rgba(25, 25, 25, 0.8) 0%, rgba(5, 5, 5, 0.95) 100%);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(212, 175, 55, 0.15);
-            box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.7);
-        }
-        .gold-pinstripe {
-            border-left: 2px solid #D4AF37;
-            position: relative;
-        }
-        .gold-pinstripe::after {
-            content: '';
-            position: absolute;
-            top: 0; right: 0; bottom: 0; left: 0;
-            background: linear-gradient(90deg, rgba(212, 175, 55, 0.05) 0%, transparent 100%);
-            pointer-events: none;
-        }
-        .metallic-3d-gold {
-            background: linear-gradient(145deg, #fcebb6 0%, #D4AF37 45%, #AA771C 55%, #fcebb6 100%);
-            box-shadow: 
-                inset -2px -2px 4px rgba(0,0,0,0.4),
-                inset 2px 2px 4px rgba(255,255,255,0.4),
-                0 8px 16px -4px rgba(0,0,0,0.6);
-        }
-        .metallic-icon-text {
-            background: linear-gradient(135deg, #fff 0%, #D4AF37 50%, #8a6d1c 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .graph-line {
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 0;
-            animation: dash 3s ease-in-out forwards;
-        }
-        @keyframes dash {
-            from { stroke-dashoffset: 1000; }
-            to { stroke-dashoffset: 0; }
-        }
-        .scrollbar-hide::-webkit-scrollbar {
-            display: none;
-        }
-      `}} />
+                .glass-card-premium {
+                    background: rgba(18, 18, 18, 0.75);
+                    backdrop-filter: blur(24px);
+                    -webkit-backdrop-filter: blur(24px);
+                    border: 0.5px solid #EBC051;
+                    box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.8);
+                }
+                .achievement-glass {
+                    background: rgba(255, 255, 255, 0.02);
+                    backdrop-filter: blur(12px);
+                    -webkit-backdrop-filter: blur(12px);
+                    border: 0.5px solid rgba(235, 192, 81, 0.2);
+                }
+                .icon-outline-gold {
+                    border: 1px solid #EBC051;
+                    background: transparent;
+                }
+                .metallic-icon-text {
+                    background: linear-gradient(135deg, #FFFFFF 0%, #EBC051 50%, #8a6d1c 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+                .graph-line {
+                    stroke-dasharray: 1000;
+                    stroke-dashoffset: 0;
+                    animation: dash-animation 3s ease-in-out forwards;
+                }
+                @keyframes dash-animation {
+                    from { stroke-dashoffset: 1000; }
+                    to { stroke-dashoffset: 0; }
+                }
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                `
+            }} />
 
-            <div className="pt-8"></div>
+            {/* Header / Profile */}
+            <div className="flex items-center justify-between p-6 mt-4">
+                <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('profile')}>
+                    <div className="relative">
+                        <div className="size-14 rounded-full border border-primary-gold/30 p-0.5 bg-gradient-to-tr from-deep-gold to-primary-gold shadow-lg">
+                            <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-full filter contrast-125 grayscale brightness-90 border border-black/20"
+                                style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlP_6m46cIx9G_FjX3ku2YaZwMvrfuyj4hQcf8xv7fAjTuzgSadvH49RYNSfu0UCU-L5UZp5I2y0Sn4kft4mYucmwGhEPsIi0hGtD62kD_ZLmldrXSqt9j8I8DaHcJFN81eauwKQcGbwshg1YO9KUWsElYrK-IHKuGVFVOVxDYaSI7_83oI1N7UfOVpnysry8y5V0QFDicN1tywt_1WP2IxuPM0ev4dx7JYogKpeaAYsLMSJjGbrfGwMfv_r50U4uzFZ7Zxe3KjKLJ")' }}>
+                            </div>
+                        </div>
+                        <div className="absolute -bottom-1 -right-1 bg-gradient-to-b from-primary-gold to-deep-gold text-black text-[9px] font-black px-2 py-0.5 rounded-full border border-black/50 shadow-md">LVL 15</div>
+                    </div>
+                    <div className="text-left">
+                        <p className="text-[9px] tracking-[0.2em] text-primary-gold font-bold uppercase opacity-80">LogCash Premium</p>
+                        <h2 className="text-lg font-bold text-f5-white">{userName || 'Alex Driver'}</h2>
+                    </div>
+                </div>
+                <button className="flex size-10 items-center justify-center rounded-xl bg-white/5 border border-white/10 text-primary-gold active:scale-90 transition-transform">
+                    <span className="material-symbols-outlined text-xl">notifications</span>
+                </button>
+            </div>
 
             {/* Total Balance / Graph */}
-            <div className="px-6 mb-8 text-center" onClick={() => onNavigate('stats')}>
-                <p className="text-[11px] uppercase tracking-[0.5em] font-extrabold text-white/40 mb-1">GANHOS TOTAIS</p>
-                <h1 className="text-6xl font-black text-white tracking-tighter mb-4">
-                    R$ {intPart.toLocaleString('pt-BR')}<span className="text-2xl text-[#D4AF37]">,{decPart}</span>
+            <div className="px-6 mb-8 text-center cursor-pointer" onClick={() => onNavigate('stats')}>
+                <p className="text-[10px] uppercase tracking-[0.4em] font-bold text-white/40 mb-2">GANHOS TOTAIS</p>
+                <h1 className="text-4xl font-extrabold tracking-tight">
+                    <span className="text-primary-gold font-bold mr-1">R$</span>
+                    <span className="text-f5-white">{formatCurrency(totalCumulative)}</span>
                 </h1>
 
-                <div className="relative h-24 w-full mt-6 flex items-end justify-between px-2">
+                <div className="relative h-20 w-full mt-8 flex items-end justify-between px-2">
                     <svg className="absolute inset-0 w-full h-full overflow-visible" viewBox="0 0 400 100">
-                        <path className="graph-line" d="M0,80 Q50,75 100,50 T200,60 T300,20 T400,40" fill="none" stroke="url(#goldGradient)" strokeWidth="3"></path>
+                        <path className="graph-line" d="M0,80 Q50,75 100,50 T200,60 T300,20 T400,40" fill="none" stroke="url(#goldGradientDash)" strokeWidth="2.5"></path>
                         <defs>
-                            <linearGradient id="goldGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+                            <linearGradient id="goldGradientDash" x1="0%" x2="100%" y1="0%" y2="0%">
                                 <stop offset="0%" style={{ stopColor: '#AA771C', stopOpacity: 1 }}></stop>
-                                <stop offset="50%" style={{ stopColor: '#F9E29C', stopOpacity: 1 }}></stop>
+                                <stop offset="50%" style={{ stopColor: '#EBC051', stopOpacity: 1 }}></stop>
                                 <stop offset="100%" style={{ stopColor: '#D4AF37', stopOpacity: 1 }}></stop>
                             </linearGradient>
                         </defs>
@@ -107,67 +120,70 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                 </div>
             </div>
 
-            {/* Route Stats Section */}
+            {/* Cards Grid */}
             <div className="grid grid-cols-1 gap-4 p-6 pt-0">
                 {/* Current Route Card */}
                 <div
-                    className="glass-card-elite rounded-3xl p-6 gold-pinstripe cursor-pointer active:scale-[0.98] transition-all"
+                    className="glass-card-premium rounded-2xl p-6 cursor-pointer active:scale-[0.98] transition-all"
                     onClick={() => onNavigate('route')}
                 >
                     <div className="flex justify-between items-start mb-6">
-                        <div>
-                            <p className="text-[10px] uppercase tracking-[0.3em] font-black text-white/40 mb-1">ROTA ATUAL</p>
-                            <h3 className="text-4xl font-black text-white tracking-tighter">R$ {todayEarnings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h3>
+                        <div className="text-left">
+                            <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/40 mb-1">ROTA ATUAL</p>
+                            <h3 className="text-3xl font-extrabold text-f5-white tracking-tighter">R$ {formatCurrency(todayEarnings)}</h3>
                         </div>
-                        <div className="bg-[#D4AF37]/10 px-3 py-1 rounded-lg border border-[#D4AF37]/20">
-                            <span className="text-[10px] font-black text-[#D4AF37] uppercase tracking-tighter">EM CURSO</span>
+                        <div className="bg-primary-gold/10 px-3 py-1 rounded-lg border border-primary-gold/20">
+                            <span className="text-[9px] font-bold text-primary-gold uppercase tracking-tighter">EM CURSO</span>
                         </div>
                     </div>
                     <div className="flex items-center gap-3">
                         <div className="flex-1">
-                            <div className="flex justify-between text-[9px] font-bold text-white/40 uppercase mb-1.5 tracking-widest text-left">
+                            <div className="flex justify-between text-[8px] font-bold text-white/40 uppercase mb-1.5 tracking-widest text-left">
                                 <span>PROGRESSO</span>
-                                <span>{Math.max(0, 18 - counts.todaySaida)} PARADAS RESTANTES</span>
+                                <span>12 PARADAS</span>
                             </div>
-                            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
-                                <div className="h-full bg-gradient-to-r from-[#AA771C] to-[#F9E29C] rounded-full" style={{ width: `${Math.min(100, (counts.todaySaida / 18) * 100)}%` }}></div>
+                            <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden">
+                                <div
+                                    className="h-full bg-gradient-to-r from-deep-gold to-primary-gold rounded-full"
+                                    style={{ width: `${Math.min(100, (counts.todaySaida / 12) * 100)}%` }}
+                                ></div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-center size-10 rounded-xl bg-white/5 border border-white/10">
-                            <span className="material-symbols-outlined text-white/60 text-lg">map</span>
+                        <div className="flex items-center justify-center size-9 rounded-xl bg-white/5 border border-white/10">
+                            <span className="material-symbols-outlined text-white/60 text-base">map</span>
                         </div>
                     </div>
                 </div>
 
-                {/* Secondary Summary Cards */}
-                <div className="grid grid-cols-2 gap-4 text-left">
-                    <div className="glass-card-elite rounded-2xl p-5">
+                {/* Secondary Cards Gap */}
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="glass-card-premium rounded-2xl p-5 text-left">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="material-symbols-outlined text-[#D4AF37] text-sm">calendar_today</span>
-                            <p className="text-[9px] uppercase tracking-[0.2em] font-black text-white/30">SEMANAL</p>
+                            <span className="material-symbols-outlined text-primary-gold text-sm">calendar_today</span>
+                            <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/30">SEMANAL</p>
                         </div>
-                        <h4 className="text-lg font-extrabold text-white tracking-tight">R$ {weeklyEarnings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
-                        <div className="mt-3 text-[9px] font-black text-[#D4AF37] uppercase tracking-tighter">+12% GANHO</div>
+                        <h4 className="text-lg font-bold text-f5-white tracking-tight">R$ {formatCurrency(weeklyEarnings)}</h4>
+                        <div className="mt-3 text-[9px] font-bold text-primary-gold uppercase tracking-tighter">+12% ESTE MÊS</div>
                     </div>
-                    <div className="glass-card-elite rounded-2xl p-5">
+                    <div className="glass-card-premium rounded-2xl p-5 text-left">
                         <div className="flex items-center gap-2 mb-3">
-                            <span className="material-symbols-outlined text-[#D4AF37] text-sm">military_tech</span>
-                            <p className="text-[9px] uppercase tracking-[0.2em] font-black text-white/30">MENSAL</p>
+                            <span className="material-symbols-outlined text-primary-gold text-sm">military_tech</span>
+                            <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/30">MENSAL</p>
                         </div>
-                        <h4 className="text-lg font-extrabold text-white tracking-tight">R$ {monthlyEarnings.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
-                        <div className="mt-3 text-[9px] font-black text-[#D4AF37] uppercase tracking-tighter">NÍVEL ELITE</div>
+                        <h4 className="text-lg font-bold text-f5-white tracking-tight">R$ {formatCurrency(monthlyEarnings)}</h4>
+                        <div className="mt-3 text-[9px] font-bold text-primary-gold uppercase tracking-tighter">ELITE VIP</div>
                     </div>
                 </div>
 
                 {/* Yearly Projection */}
-                <div className="glass-card-elite rounded-2xl p-5 relative overflow-hidden text-left">
+                <div className="glass-card-premium rounded-2xl p-5 relative overflow-hidden text-left">
                     <div className="flex justify-between items-center relative z-10">
                         <div>
-                            <p className="text-[9px] uppercase tracking-[0.2em] font-black text-white/30 mb-1">PROJEÇÃO ANUAL</p>
-                            <h4 className="text-2xl font-black text-white tracking-tighter">R$ {annualProjection.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</h4>
+                            <p className="text-[9px] uppercase tracking-[0.2em] font-bold text-white/30 mb-1">PROJEÇÃO ANUAL</p>
+                            <h4 className="text-2xl font-extrabold text-f5-white tracking-tighter">R$ {formatCurrency(annualProjection)}</h4>
                         </div>
-                        <div className="size-12 rounded-xl bg-gradient-to-br from-white/10 to-transparent flex items-center justify-center border border-white/10 shadow-inner">
-                            <span className="material-symbols-outlined text-[#D4AF37] text-2xl">insights</span>
+                        <div className="size-10 rounded-xl bg-white/5 flex items-center justify-center border border-white/10 shadow-inner">
+                            <span className="material-symbols-outlined text-primary-gold text-xl">insights</span>
                         </div>
                     </div>
                 </div>
@@ -175,33 +191,31 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
 
             {/* Achievements Section */}
             <div className="px-6 pb-6 text-left">
-                <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-[10px] font-black uppercase tracking-[0.4em] text-white/30">CONQUISTAS EXCLUSIVAS</h3>
+                <div className="flex items-center justify-between mb-5">
+                    <h3 className="text-[9px] font-bold uppercase tracking-[0.4em] text-white/30">CONQUISTAS LOGCASH</h3>
                     <span
                         onClick={() => onNavigate('stats')}
-                        className="text-[9px] font-bold text-[#D4AF37]/60 uppercase tracking-widest cursor-pointer hover:text-[#D4AF37] transition-colors"
+                        className="text-[8px] font-bold text-primary-gold/80 uppercase tracking-widest cursor-pointer hover:text-primary-gold transition-colors"
                     >
-                        VER TUDO
+                        DETALHES
                     </span>
                 </div>
-                <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-hide">
+                <div className="flex gap-3 overflow-x-auto pb-4 scrollbar-hide">
                     {[
                         { icon: 'grade', label: 'LENDA' },
                         { icon: 'bolt', label: 'RÁPIDO' },
                         { icon: 'diamond', label: 'DIAMANTE' },
                         { icon: 'verified_user', label: 'SEGURO' }
                     ].map((ach, i) => (
-                        <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3">
-                            <div className="size-16 rounded-2xl metallic-3d-gold flex items-center justify-center relative group overflow-hidden">
-                                <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
-                                <span className="material-symbols-outlined text-3xl text-black/80 font-black" style={{ fontVariationSettings: "'FILL' 1" }}>{ach.icon}</span>
+                        <div key={i} className="flex-shrink-0 flex flex-col items-center gap-3 achievement-glass p-5 rounded-2xl w-[100px]">
+                            <div className="size-14 rounded-xl icon-outline-gold flex items-center justify-center">
+                                <span className="material-symbols-outlined text-2xl text-primary-gold font-light" style={{ fontVariationSettings: "'FILL' 0, 'wght' 200" }}>{ach.icon}</span>
                             </div>
-                            <span className="text-[9px] font-black uppercase tracking-widest metallic-icon-text text-center">{ach.label}</span>
+                            <span className="text-[8px] font-bold uppercase tracking-widest text-f5-white/90">{ach.label}</span>
                         </div>
                     ))}
                 </div>
             </div>
-
         </div>
     );
 };

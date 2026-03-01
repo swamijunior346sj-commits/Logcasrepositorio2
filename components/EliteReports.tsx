@@ -14,6 +14,7 @@ interface EliteReportsProps {
     onExportPDF: () => void;
     onEmitInvoice: () => void;
     onExtrato: () => void;
+    onExpressReport: () => void;
     onBack?: () => void;
 }
 
@@ -25,6 +26,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     onExportPDF,
     onEmitInvoice,
     onExtrato,
+    onExpressReport,
     onBack
 }) => {
     const [period, setPeriod] = useState<'DIA' | 'SEMANA' | 'MÊS' | 'ANO'>('DIA');
@@ -168,7 +170,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                         <span className="text-[9px] font-black tracking-widest text-white uppercase text-center leading-tight">GERAR RELATÓRIO SEMANAL</span>
                     </button>
                     <button
-                        onClick={onExportPDF}
+                        onClick={onExpressReport}
                         className="flex flex-col items-center justify-center gap-2 bg-white/5 border border-white/10 rounded-2xl py-4 hover:bg-white/10 transition-all active:scale-95 text-center px-2 group"
                     >
                         <span className="material-symbols-outlined text-[#D4AF37] text-xl">bolt</span>

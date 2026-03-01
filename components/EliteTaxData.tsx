@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 interface EliteTaxDataProps {
@@ -21,77 +20,91 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
     };
 
     return (
-        <div className="flex flex-col items-center bg-black animate-in fade-in duration-700 pb-10 overflow-y-auto">
+        <div className="flex flex-col items-center bg-pitch-black animate-in fade-in duration-700 min-h-screen">
             <style dangerouslySetInnerHTML={{
                 __html: `
-        .gold-glow-input {
-            box-shadow: 0 0 15px -5px rgba(212, 175, 55, 0.15);
-        }
-        .gold-glow-input:focus-within {
-            box-shadow: 0 0 20px -5px rgba(212, 175, 55, 0.3);
-            border-color: rgba(212, 175, 55, 0.5);
-        }
-        .metallic-gold-text {
-            background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .btn-3d-gold {
-            background: linear-gradient(180deg, #F9E29C 0%, #D4AF37 40%, #AA771C 100%);
-            box-shadow: 0 4px 0 #8B6914, 0 10px 20px rgba(0, 0, 0, 0.4);
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.3);
-        }
-        .btn-3d-gold:active {
-            transform: translateY(2px);
-            box-shadow: 0 2px 0 #8B6914, 0 5px 10px rgba(0, 0, 0, 0.4);
-        }
-        .gold-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
-        }
-        .custom-toggle {
-            width: 44px;
-            height: 24px;
-            background: #262626;
-            border-radius: 100px;
-            position: relative;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        .custom-toggle::after {
-            content: '';
-            position: absolute;
-            left: 2px;
-            top: 2px;
-            width: 20px;
-            height: 20px;
-            background: #555;
-            border-radius: 50%;
-            transition: all 0.3s;
-        }
-        .toggle-active .custom-toggle {
-            background: #D4AF37;
-        }
-        .toggle-active .custom-toggle::after {
-            left: calc(100% - 22px);
-            background: #000;
-        }
-      `}} />
+                .gold-glow-input {
+                    box-shadow: 0 0 15px -5px rgba(235, 192, 81, 0.15);
+                }
+                .gold-glow-input:focus-within {
+                    box-shadow: 0 0 20px -5px rgba(235, 192, 81, 0.3);
+                    border-color: rgba(235, 192, 81, 0.5);
+                }
+                .metallic-gold-text {
+                    background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+                .btn-luxury-outline {
+                    border: 1px solid #EBC051;
+                    background: transparent;
+                    color: #EBC051;
+                    text-shadow: 0 0 8px rgba(235, 192, 81, 0.3);
+                }
+                .btn-luxury-outline:active {
+                    background: rgba(235, 192, 81, 0.05);
+                    transform: translateY(2px);
+                }
+                .gold-divider {
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(235, 192, 81, 0.3), transparent);
+                }
+                .custom-toggle {
+                    width: 44px;
+                    height: 24px;
+                    background: #262626;
+                    border-radius: 100px;
+                    position: relative;
+                    transition: all 0.3s;
+                    cursor: pointer;
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                }
+                .custom-toggle::after {
+                    content: '';
+                    position: absolute;
+                    left: 2px;
+                    top: 2px;
+                    width: 18px;
+                    height: 18px;
+                    background: #555;
+                    border-radius: 50%;
+                    transition: all 0.3s;
+                }
+                .toggle-active .custom-toggle {
+                    background: #EBC051;
+                    border-color: #EBC051;
+                }
+                .toggle-active .custom-toggle::after {
+                    left: calc(100% - 20px);
+                    background: #000;
+                }
+                `
+            }} />
 
-            <div className="relative flex w-full flex-col max-w-[430px] bg-black shadow-2xl ring-1 ring-white/5">
-                <div className="pt-4"></div>
+            <div className="relative flex min-h-screen w-full flex-col max-w-[430px] bg-pitch-black shadow-2xl pb-12">
+                {/* Header */}
+                <div className="flex items-center justify-between p-6 mt-4">
+                    <button
+                        onClick={onBack}
+                        className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-primary-gold active:scale-90 transition-all"
+                    >
+                        <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+                    </button>
+                    <h2 className="text-[12px] font-black tracking-[0.4em] text-white uppercase text-center">DADOS FISCAIS</h2>
+                    <div className="size-11"></div>
+                </div>
 
-                <main className="flex-1 px-6 pb-10">
+                <main className="flex-1 px-6 pt-2 pb-24">
                     {/* Informações da Empresa */}
                     <section className="mt-4">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-[#D4AF37]/60 uppercase">Informações da Empresa</span>
-                            <div className="flex-1 gold-divider"></div>
+                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Informações da Empresa</span>
+                            <div className="flex-1 gold-divider text-left"></div>
                         </div>
 
                         <div className="space-y-4">
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 text-left">Razão Social</label>
+                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
+                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Razão Social</label>
                                 <input
                                     className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
@@ -99,8 +112,8 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                                     onChange={(e) => setFormData({ ...formData, razaoSocial: e.target.value })}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 text-left">CNPJ</label>
+                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
+                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">CNPJ</label>
                                 <input
                                     className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
@@ -114,13 +127,13 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                     {/* Endereço Fiscal */}
                     <section className="mt-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-[#D4AF37]/60 uppercase">Endereço Fiscal</span>
+                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Endereço Fiscal</span>
                             <div className="flex-1 gold-divider"></div>
                         </div>
 
                         <div className="space-y-4">
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 text-left">CEP</label>
+                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
+                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">CEP</label>
                                 <input
                                     className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
@@ -128,8 +141,8 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                                     onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 text-left">Logradouro</label>
+                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
+                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Logradouro</label>
                                 <input
                                     className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
@@ -137,8 +150,8 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                                     onChange={(e) => setFormData({ ...formData, logradouro: e.target.value })}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1 text-left">Número</label>
+                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
+                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Número</label>
                                 <input
                                     className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
@@ -152,45 +165,38 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                     {/* Configuração de Impostos */}
                     <section className="mt-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-[#D4AF37]/60 uppercase">Configuração de Impostos</span>
+                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Configuração de Impostos</span>
                             <div className="flex-1 gold-divider"></div>
                         </div>
 
-                        <div className="bg-[#121212] border border-white/5 rounded-2xl p-5 gold-glow-input flex items-center justify-between transition-all">
+                        <div
+                            className={`bg-[#121212] border border-white/5 rounded-2xl p-5 gold-glow-input flex items-center justify-between transition-all cursor-pointer ${formData.isMei ? 'toggle-active' : ''}`}
+                            onClick={() => setFormData({ ...formData, isMei: !formData.isMei })}
+                        >
                             <div className="text-left">
                                 <h4 className="text-sm font-bold text-white">Optante pelo MEI</h4>
                                 <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-semibold">Microempreendedor Individual</p>
                             </div>
-                            <div
-                                className={formData.isMei ? "toggle-active" : ""}
-                                onClick={() => setFormData({ ...formData, isMei: !formData.isMei })}
-                            >
-                                <div className="custom-toggle"></div>
-                            </div>
+                            <div className="custom-toggle"></div>
                         </div>
                     </section>
                 </main>
 
                 {/* Action Button */}
-                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black via-black to-transparent pt-12 z-20">
+                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] p-6 bg-gradient-to-t from-pitch-black via-pitch-black to-transparent pt-12 z-20">
                     <button
                         onClick={handleSave}
-                        className="w-full btn-3d-gold text-black py-5 rounded-2xl font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3 active:scale-95 transition-all"
+                        className="w-full btn-luxury-outline py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.35em] flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
                     >
+                        <span className="material-symbols-outlined text-base">verified</span>
                         Salvar Alterações
                     </button>
 
                     <div className="flex justify-center items-center gap-2 pt-6 opacity-20">
-                        <div className="h-[1px] w-8 bg-[#D4AF37]"></div>
-                        <span className="material-symbols-outlined text-[10px] text-[#D4AF37]">verified_user</span>
-                        <div className="h-[1px] w-8 bg-[#D4AF37]"></div>
+                        <div className="h-[1px] w-8 bg-primary-gold"></div>
+                        <span className="material-symbols-outlined text-[10px] text-primary-gold">security</span>
+                        <div className="h-[1px] w-8 bg-primary-gold"></div>
                     </div>
-                </div>
-
-                {/* Decorative background glows */}
-                <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full pointer-events-none overflow-hidden -z-10">
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
                 </div>
             </div>
         </div>

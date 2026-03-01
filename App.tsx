@@ -24,7 +24,7 @@ import EliteTaxInvoice from './components/EliteTaxInvoice';
 import EliteTaxData from './components/EliteTaxData';
 import ElitePersonalData from './components/ElitePersonalData';
 import EliteSettings from './components/EliteSettings';
-import EliteTaxInvoiceSuccessScreen from './components/EliteTaxInvoiceSuccess';
+import EliteInvoiceSuccess from './components/EliteInvoiceSuccess';
 import EliteMap from './components/EliteMap';
 import EliteExtrato from './components/EliteExtrato';
 import EliteExpressReport from './components/EliteExpressReport';
@@ -33,7 +33,7 @@ import PremiumSuccessPopup from './components/PremiumSuccessPopup';
 
 
 
-type SystemActionType = LogActionType | 'EXPORT_PDF' | 'LOGOUT' | 'RESET_SYSTEM' | 'SETTLE_WALLET' | 'QUICK_ENTRY';
+type SystemActionType = LogActionType | 'EXPORT_PDF' | 'LOGOUT' | 'RESET_SYSTEM' | 'SETTLE_WALLET' | 'QUICK_ENTRY' | 'SAVE_SUCCESS';
 
 const App: React.FC = () => {
   const [session, setSession] = useState<any>(null);
@@ -68,8 +68,9 @@ const App: React.FC = () => {
   // Controle de Execução (Bloqueio de duplo clique)
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
-  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato'>('dash');
+  const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Alex Driver');
+  const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Mercedes-Benz Sprinter');
+  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report'>('dash');
   const [showSettings, setShowSettings] = useState(false);
   const [showQuickEntry, setShowQuickEntry] = useState(false);
 
@@ -142,6 +143,10 @@ const App: React.FC = () => {
     localStorage.setItem('logcash_user_name', userName);
   }, [userName]);
 
+  useEffect(() => {
+    localStorage.setItem('logcash_vehicle_name', vehicleName);
+  }, [vehicleName]);
+
   // Filtered Logs Calculation
   const filteredLogs = useMemo(() => {
     return logs.filter(log => {
@@ -209,11 +214,12 @@ const App: React.FC = () => {
     // Set contextual message
     const msg = type === 'EXPORT_PDF' ? 'Relatório gerado com sucesso' :
       type === 'SETTLE_WALLET' ? 'Saldo liquidado com sucesso' :
-        type === 'LOGOUT' ? 'Sessão encerrada' :
-          type === 'RESET_SYSTEM' ? 'Sistema resetado com sucesso' :
-            type === 'ENTRADA' ? `${count} pacote${count > 1 ? 's' : ''} carregado${count > 1 ? 's' : ''}` :
-              type === 'SAIDA' ? `${count} entrega${count > 1 ? 's' : ''} confirmada${count > 1 ? 's' : ''}` :
-                'Operação realizada com sucesso';
+        type === 'SAVE_SUCCESS' ? 'Dados salvos com sucesso' :
+          type === 'LOGOUT' ? 'Sessão encerrada' :
+            type === 'RESET_SYSTEM' ? 'Sistema resetado com sucesso' :
+              type === 'ENTRADA' ? `${count} pacote${count > 1 ? 's' : ''} carregado${count > 1 ? 's' : ''}` :
+                type === 'SAIDA' ? `${count} entrega${count > 1 ? 's' : ''} confirmada${count > 1 ? 's' : ''}` :
+                  'Operação realizada com sucesso';
     setPremiumSuccessMsg(msg);
 
     setTimeout(() => {
@@ -537,7 +543,7 @@ const App: React.FC = () => {
           )}
 
           {/* Luxury Tab Navigation (Only on main tabs) */}
-          {['dash', 'route', 'map', 'stats', 'profile'].includes(activeTab) && (
+          {(['dash', 'stats', 'route', 'profile', 'tax-invoice', 'personal-data', 'tax-data', 'settings', 'extrato', 'express-report'].includes(activeTab)) && (
             <nav className="flex items-center justify-between bg-white/[0.03] p-1.5 rounded-2xl border border-white/5 mx-2 mb-2 relative overflow-hidden backdrop-blur-xl">
               <div className="absolute inset-x-0 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#D4AF37]/20 to-transparent"></div>
 
@@ -636,6 +642,7 @@ const App: React.FC = () => {
               onExportPDF={() => setActiveTab('express-report')}
               onEmitInvoice={() => setActiveTab('tax-invoice')}
               onExtrato={() => setActiveTab('extrato')}
+              onExpressReport={() => setActiveTab('express-report')}
               onBack={() => setActiveTab('dash')}
             />
           </div>
@@ -671,10 +678,12 @@ const App: React.FC = () => {
           </div>
         ) : activeTab === 'invoice-success' ? (
           <div className="animate-in fade-in duration-500">
-            <EliteTaxInvoiceSuccessScreen
-              totalValue={counts.wallet.pending}
-              onBack={() => setActiveTab('dash')}
-              onViewNF={() => console.log("Visualizar NF")}
+            <EliteInvoiceSuccess
+              valuePaid={counts.wallet.pending}
+              protocol="982734"
+              onBackToHome={() => setActiveTab('dash')}
+              onViewInvoice={() => console.log("Visualizar NF-e")}
+              onClose={() => setActiveTab('dash')}
             />
           </div>
         ) : activeTab === 'tax-data' ? (
@@ -683,7 +692,7 @@ const App: React.FC = () => {
               onBack={() => setActiveTab('profile')}
               onSave={(data) => {
                 console.log("Dados Fiscais Salvos:", data);
-                triggerSuccess('EXPORT_PDF'); // Reusing success feedback
+                triggerSuccess('SAVE_SUCCESS');
                 setActiveTab('profile');
               }}
             />
@@ -692,9 +701,12 @@ const App: React.FC = () => {
           <div className="animate-in fade-in duration-500">
             <ElitePersonalData
               userName={userName}
+              vehicleName={vehicleName}
               onBack={() => setActiveTab('profile')}
               onSave={(data) => {
-                console.log("Dados Pessoais Salvos:", data);
+                setUserName(data.userName);
+                setVehicleName(data.vehicleName);
+                triggerSuccess('SAVE_SUCCESS');
                 setActiveTab('profile');
               }}
             />
@@ -711,6 +723,7 @@ const App: React.FC = () => {
             <EliteExtrato
               logs={logs}
               userName={userName}
+              vehicleName={vehicleName}
               valorPorPacote={VALOR_POR_PACOTE}
               onBack={() => setActiveTab('stats')}
               onExport={() => {
@@ -723,6 +736,7 @@ const App: React.FC = () => {
             <EliteExpressReport
               logs={logs}
               userName={userName}
+              vehicleName={vehicleName}
               onBack={() => setActiveTab('stats')}
               onExportPDF={() => {
                 generatePDF(logs, userName);
