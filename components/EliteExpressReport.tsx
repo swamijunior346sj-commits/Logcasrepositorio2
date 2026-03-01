@@ -366,10 +366,10 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBac
                             <p className="text-sm font-semibold text-primary-gold tracking-wide font-jakarta">Seu extrato foi gerado com sucesso</p>
                         </div>
                         <button
-                            onClick={handleOpenPDF}
+                            onClick={onBack}
                             className="minimal-gold-button w-full py-4 rounded-[20px] text-primary-gold font-extrabold text-[11px] uppercase tracking-[0.4em] transition-all active:scale-95 hover:bg-primary-gold/5 font-jakarta"
                         >
-                            ABRIR ARQUIVO
+                            VOLTAR AO INÍCIO
                         </button>
                     </div>
                 </div>

@@ -710,18 +710,8 @@ const App: React.FC = () => {
                 generateQuickPDF(rows, userName);
               }}
               onViewPDF={(rows) => {
-                setExpressRows(rows);
-                setActiveTab('express-pdf');
+                // Feature removed - buttons return back now.
               }}
-            />
-          </div>
-        ) : activeTab === 'express-pdf' ? (
-          <div className="animate-in fade-in duration-500">
-            <EliteExpressPDF
-              userName={userName}
-              vehicleName={vehicleName}
-              rows={expressRows}
-              onBack={() => setActiveTab('express-report')}
             />
           </div>
         ) : activeTab === 'profile' ? (
@@ -810,14 +800,9 @@ const App: React.FC = () => {
             onDownload={() => {
               generateWeeklyPDF({ userName, vehicleName, counts });
             }}
-            onViewPDF={() => setActiveTab('weekly-pdf')}
-          />
-        ) : activeTab === 'weekly-pdf' ? (
-          <EliteWeeklyPDF
-            userName={userName}
-            vehicleName={vehicleName}
-            rows={summaryRows}
-            onBack={() => setActiveTab('weekly-report')}
+            onViewPDF={() => {
+              // Feature removed - buttons return back now.
+            }}
           />
         ) : (
           <div className="animate-in fade-in duration-500">

@@ -258,10 +258,10 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                             </div>
 
                             <button
-                                onClick={onViewPDF}
+                                onClick={onBack}
                                 className="w-full py-4 rounded-[20px] border border-primary-gold text-primary-gold font-extrabold text-[11px] uppercase tracking-[0.4em] transition-all active:scale-95 hover:bg-primary-gold/5"
                             >
-                                ABRIR ARQUIVO
+                                VOLTAR AO INÍCIO
                             </button>
                         </div>
                     </div>
