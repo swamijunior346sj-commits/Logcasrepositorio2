@@ -160,7 +160,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 LOG<span className="text-primary-gold">CASH</span>
               </h1>
               <p className="text-secondary-gray text-[11px] font-bold uppercase tracking-[0.5em] opacity-80 transition-opacity duration-500 font-display" id="tagline">
-                {isSignUp ? 'Elite Access Request' : 'Refined Delivery Excellence'}
+                {isSignUp ? 'Elite Access Request' : ''}
               </p>
             </div>
           </div>
