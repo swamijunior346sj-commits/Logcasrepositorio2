@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 interface EliteProfileProps {
@@ -9,142 +8,140 @@ interface EliteProfileProps {
     onPersonalData: () => void;
     onSettings: () => void;
     onReset: () => void;
+    onTaxInvoice?: () => void;
 }
 
-const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset }) => {
+const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset, onTaxInvoice }) => {
     return (
-        <div className="flex flex-col items-center pb-10">
+        <div className="flex justify-center items-start min-h-screen animate-in fade-in duration-700 bg-pitch-black">
             <style dangerouslySetInnerHTML={{
                 __html: `
-        .carbon-texture {
-            background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.02) 1px, transparent 0);
-            background-size: 4px 4px;
-        }
-        .gold-glow {
-            box-shadow: 0 0 20px rgba(212, 175, 55, 0.4);
-        }
-        .metallic-gold-text {
-            background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .metallic-gold-bg {
-            background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
-        }
-        .card-border {
-            border: 1px solid rgba(212, 175, 55, 0.2);
-            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);
-        }
-        .gold-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.3), transparent);
-        }
-      `}} />
+                .pinstripe-border {
+                    border: 0.5px solid rgba(212, 175, 55, 0.3);
+                    background: transparent;
+                }
+                .aura-gold {
+                    box-shadow: 0 0 60px rgba(212, 175, 55, 0.08), 0 0 100px rgba(212, 175, 55, 0.02);
+                }
+                .neon-border {
+                    box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
+                }
+                .metallic-text {
+                    background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                }
+                .thin-outline {
+                    border: 1px solid rgba(212, 175, 55, 0.5);
+                }
+                .nfs-button-border {
+                    border: 1px solid #EBC051;
+                }
+                `
+            }} />
 
-            <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] shadow-2xl ring-1 ring-white/5 bg-pitch-black pb-12">
-                {/* Header */}
-                <header className="flex items-center justify-end p-6 mt-4">
-                    <button
-                        onClick={onSettings}
-                        className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-[#D4AF37] active:scale-90 transition-all"
-                    >
+            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black pb-12">
+                <div className="flex items-center justify-between px-6 pt-6">
+                    <button onClick={onBack} className="p-2 -ml-2 text-white/50 active:scale-95 transition-all">
+                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
+                    </button>
+                    <button onClick={onSettings} className="p-2 -mr-2 text-primary-gold/50 active:scale-95 transition-all">
                         <span className="material-symbols-outlined text-2xl">settings</span>
                     </button>
-                </header>
+                </div>
 
-                {/* Profile Info */}
-                <div className="flex flex-col items-center px-6 mt-4 mb-8">
-                    <div className="relative mb-6">
-                        <div className="size-32 rounded-full p-[2px] metallic-gold-bg gold-glow">
-                            <div className="size-full rounded-full border-4 border-black overflow-hidden bg-[#121212]">
-                                <img
-                                    alt={userName}
-                                    className="w-full h-full object-cover"
-                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF"
-                                />
+                <div className="flex flex-col items-center px-6 pt-4 mb-10">
+                    <div className="relative mb-8">
+                        <div className="absolute inset-0 rounded-full aura-gold scale-125"></div>
+                        <div className="relative size-36 rounded-full p-[1px] bg-gradient-to-b from-[#F9E29C] to-[#AA771C] neon-border">
+                            <div className="size-full rounded-full border-[4px] border-pitch-black overflow-hidden bg-black">
+                                <img alt={userName} className="w-full h-full object-cover grayscale-[0.2]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF" />
                             </div>
                         </div>
-                        <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 px-4 py-1 metallic-gold-bg rounded-full shadow-lg">
-                            <span className="text-[9px] font-black text-black uppercase tracking-widest">ELITE</span>
+                        <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-5 py-1 thin-outline bg-pitch-black rounded-full shadow-lg">
+                            <span className="text-[8px] font-bold text-primary-gold uppercase tracking-[0.4em]">ELITE</span>
                         </div>
                     </div>
-                    <h1 className="text-3xl font-black tracking-tight text-f5-white drop-shadow-[0_2px_10px_rgba(255,255,255,0.2)] mt-3 text-center">{userName}</h1>
-                    <p className="text-xs font-bold text-primary-gold tracking-[0.3em] mt-2 uppercase">NÍVEL 15 — MESTRE DAS ROTAS</p>
-                </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-3 px-6 mb-8 mt-2">
-                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Nota Média</span>
-                        <span className="text-2xl font-black text-white drop-shadow-md">4.9</span>
-                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">star</span>
-                    </div>
-                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Entregas</span>
-                        <span className="text-2xl font-black text-white drop-shadow-md">12K</span>
-                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">package_2</span>
-                    </div>
-                    <div className="bg-[#121212] border border-[#D4AF37]/20 rounded-2xl p-4 flex flex-col items-center justify-center text-center shadow-lg">
-                        <span className="text-[9px] font-bold text-white/50 uppercase tracking-widest mb-1">Anos Elite</span>
-                        <span className="text-2xl font-black text-white drop-shadow-md">3</span>
-                        <span className="material-symbols-outlined text-sm text-[#D4AF37] mt-1">workspace_premium</span>
+                    <div className="text-center space-y-2">
+                        <h1 className="text-3xl font-extralight tracking-tight text-white flex gap-2">
+                            {userName.split(' ')[0]} <span className="font-bold metallic-text">{userName.split(' ').slice(1).join(' ') || ''}</span>
+                        </h1>
+                        <p className="text-[9px] font-medium text-white/40 tracking-[0.4em] uppercase">Motorista Verificado • Nível 15</p>
                     </div>
                 </div>
 
-                {/* Profile Options */}
-                <div className="px-6 flex flex-col gap-3">
+                <div className="grid grid-cols-3 gap-3 px-8 mb-12">
+                    <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
+                        <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Nota</span>
+                        <span className="text-xl font-light text-white">4.9</span>
+                    </div>
+                    <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
+                        <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Viagens</span>
+                        <span className="text-xl font-light text-white">12.4k</span>
+                    </div>
+                    <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
+                        <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Anos</span>
+                        <span className="text-xl font-light text-white">3</span>
+                    </div>
+                </div>
+
+                <div className="px-8 flex flex-col gap-4 mb-16">
                     <button
                         onClick={onPersonalData}
-                        className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]"
+                        className="w-full pinstripe-border rounded-[2rem] p-6 flex items-center justify-between group active:bg-white/5 transition-all"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
-                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">person_edit</span>
+                        <div className="flex items-center gap-5">
+                            <div className="size-11 rounded-full flex items-center justify-center bg-primary-gold/5 border border-primary-gold/10">
+                                <span className="material-symbols-outlined text-primary-gold font-light text-xl">person</span>
                             </div>
-                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Dados Pessoais</span>
+                            <div className="flex flex-col items-start text-left">
+                                <span className="text-[11px] font-bold text-white/80 tracking-widest uppercase">Dados Pessoais</span>
+                                <span className="text-[8px] text-white/30 uppercase tracking-tight mt-0.5">Gestão de conta e segurança</span>
+                            </div>
                         </div>
-                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
+                        <span className="material-symbols-outlined text-white/20 text-sm">arrow_forward_ios</span>
                     </button>
 
-                    <button
-                        onClick={onTaxData}
-                        className="w-full bg-[#0A0A0A] border border-[#D4AF37]/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#121212]"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-gradient-to-br from-[#D4AF37]/20 to-transparent flex items-center justify-center border border-[#D4AF37]/30">
-                                <span className="material-symbols-outlined text-primary-gold text-2xl drop-shadow-[0_0_8px_rgba(212,175,55,0.4)]">account_balance_wallet</span>
+                    <div className="w-full pinstripe-border rounded-[2rem] p-6 flex flex-col gap-6 bg-white/[0.01]">
+                        <div
+                            onClick={onTaxData}
+                            className="flex items-center justify-between w-full cursor-pointer active:opacity-50 transition-opacity text-left"
+                        >
+                            <div className="flex items-center gap-5">
+                                <div className="size-11 rounded-full flex items-center justify-center bg-primary-gold/5 border border-primary-gold/10">
+                                    <span className="material-symbols-outlined text-primary-gold font-light text-xl">description</span>
+                                </div>
+                                <div className="flex flex-col items-start">
+                                    <span className="text-[11px] font-bold text-white/80 tracking-widest uppercase">Dados Fiscais</span>
+                                    <span className="text-[8px] text-white/30 uppercase tracking-tight mt-0.5">CNPJ e Faturamento Anual</span>
+                                </div>
                             </div>
-                            <span className="text-base font-extrabold text-[#F5F5F5] tracking-wide">Dados Fiscais</span>
+                            <span className="material-symbols-outlined text-white/20 text-sm">arrow_forward_ios</span>
                         </div>
-                        <span className="material-symbols-outlined text-white/40 group-hover:text-primary-gold transition-colors">chevron_right</span>
-                    </button>
 
-                    <button
-                        onClick={onReset}
-                        className="w-full bg-[#1A0505] border border-red-900/20 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-[#2A0505] mt-6"
-                    >
-                        <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-red-950/20 flex items-center justify-center border border-red-900/30">
-                                <span className="material-symbols-outlined text-red-500/70 text-2xl">delete_forever</span>
-                            </div>
-                            <span className="text-base font-extrabold text-red-500/70 tracking-wide">Apagar todos os dados</span>
-                        </div>
-                        <span className="material-symbols-outlined text-red-500/30 group-hover:text-red-500/70 transition-colors">chevron_right</span>
-                    </button>
+                        <button
+                            onClick={onTaxInvoice}
+                            className="w-full nfs-button-border py-3 rounded-full bg-transparent active:bg-[#EBC051]/10 transition-colors flex items-center justify-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-[#EBC051] text-base">receipt_long</span>
+                            <span className="text-[10px] font-bold text-[#EBC051] tracking-[0.25em] uppercase">Gerar NFS-e</span>
+                        </button>
+                    </div>
+                </div>
 
+                <div className="mt-auto px-8 text-center">
                     <button
                         onClick={onLogout}
-                        className="w-full bg-white/5 border border-white/10 shadow-[0_4px_15px_rgba(0,0,0,0.5)] rounded-2xl p-5 flex items-center justify-between group active:scale-[0.98] transition-all hover:bg-white/10 mt-2"
+                        className="text-[10px] font-medium text-white/20 hover:text-white/40 uppercase tracking-[0.5em] transition-colors py-4 inline-block"
                     >
-                        <div className="flex items-center gap-4">
-                            <div className="size-11 rounded-xl bg-white/5 flex items-center justify-center border border-white/10">
-                                <span className="material-symbols-outlined text-white/70 text-2xl">logout</span>
-                            </div>
-                            <span className="text-base font-extrabold text-white/70 tracking-wide">Sair da Conta</span>
-                        </div>
-                        <span className="material-symbols-outlined text-white/30 group-hover:text-white/70 transition-colors">logout</span>
+                        Encerrar Sessão
                     </button>
+                    <div className="w-16 h-[0.5px] bg-gradient-to-r from-transparent via-white/10 to-transparent mx-auto mt-4"></div>
+                    <div className="mt-6 text-[8px] text-white/10 uppercase tracking-[0.3em] font-light">
+                        LogCash Premium • v2.4.0
+                    </div>
                 </div>
+                <div className="w-32 h-1 bg-white/10 rounded-full mx-auto mt-10 mb-20"></div>
             </div>
         </div>
     );

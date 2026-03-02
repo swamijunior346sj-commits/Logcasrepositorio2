@@ -72,23 +72,10 @@ const EliteTaxInvoice: React.FC<EliteTaxInvoiceProps> = ({ pendingBalance, onBac
                 `
             }} />
 
-            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl pb-10 gold-glow">
+            <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden max-w-[430px] bg-pitch-black shadow-2xl pb-10">
 
-                <div className="flex items-center justify-between p-6 mt-4">
-                    <button onClick={onBack} className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-primary-gold active:scale-90 transition-all">
-                        <span className="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
-                    </button>
-                    <span className="text-[10px] font-black tracking-[0.4em] text-white/40 uppercase">EMISSÃO NF-E</span>
-                    <button className="flex size-11 items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-primary-gold">
-                        <span className="material-symbols-outlined text-2xl">help_outline</span>
-                    </button>
-                </div>
-
-                <div className="px-6 flex-1">
-                    <header className="mb-10 mt-4 text-center">
-                        <h1 className="text-xl font-black tracking-[0.25em] metallic-gold-text uppercase">EMISSÃO DE NOTA FISCAL</h1>
-                        <p className="text-[9px] font-bold text-white/30 tracking-widest uppercase mt-2">NOTA FISCAL ELETRÔNICA DE SERVIÇO</p>
-                    </header>
+                {/* Header Removido */}
+                <div className="px-6 flex-1 pt-6">
 
                     <div className="space-y-6">
                         <div className="group text-left">

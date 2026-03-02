@@ -31,6 +31,8 @@ import PremiumSuccessPopup from './components/PremiumSuccessPopup';
 import EliteWeeklyReport from './components/EliteWeeklyReport';
 import EliteWeeklyPDF from './components/EliteWeeklyPDF';
 import EliteExpressPDF from './components/EliteExpressPDF';
+import EliteVehicleRegistration from './components/EliteVehicleRegistration';
+import EliteInvoicePDF from './components/EliteInvoicePDF';
 
 
 
@@ -77,7 +79,7 @@ const App: React.FC = () => {
 
   const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
   const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Veículo Padrão');
-  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report' | 'weekly-report' | 'weekly-pdf' | 'express-pdf'>('dash');
+  const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report' | 'weekly-report' | 'weekly-pdf' | 'express-pdf' | 'vehicle-registration' | 'invoice-pdf'>('dash');
   const [showSettings, setShowSettings] = useState(false);
   const [showQuickEntry, setShowQuickEntry] = useState(false);
 
@@ -603,7 +605,9 @@ const App: React.FC = () => {
                 onClick={() => {
                   if (activeTab === 'personal-data' || activeTab === 'tax-data' || activeTab === 'settings') {
                     setActiveTab('profile');
-                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato' || activeTab === 'express-report' || activeTab === 'weekly-report') {
+                  } else if (activeTab === 'vehicle-registration') {
+                    setActiveTab('personal-data');
+                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato' || activeTab === 'express-report' || activeTab === 'weekly-report' || activeTab === 'invoice-pdf') {
                     setActiveTab('stats');
                   } else if (activeTab === 'invoice-success') {
                     setActiveTab('dash');
@@ -624,8 +628,9 @@ const App: React.FC = () => {
                           activeTab === 'pdf-view' ? 'VISUALIZAÇÃO PDF' :
                             activeTab === 'extrato' ? 'EXTRATO' :
                               activeTab === 'express-report' ? 'RELATÓRIO EXPRESSO' :
-                                activeTab === 'weekly-report' || activeTab === 'weekly-pdf' ? '' :
-                                  'SISTEMA ELITE'}
+                                activeTab === 'vehicle-registration' ? 'NOVO VEÍCULO' :
+                                  activeTab === 'weekly-report' || activeTab === 'weekly-pdf' ? '' :
+                                    'SISTEMA ELITE'}
               </span>
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>
@@ -704,6 +709,7 @@ const App: React.FC = () => {
             onPersonalData={() => setActiveTab('personal-data')}
             onSettings={() => setActiveTab('settings')}
             onReset={() => setConfirmingAction('RESET_SYSTEM')}
+            onTaxInvoice={() => setActiveTab('tax-invoice')}
           />
         ) : activeTab === 'tax-invoice' ? (
           <div className="animate-in fade-in duration-500">
@@ -722,8 +728,15 @@ const App: React.FC = () => {
               valuePaid={counts.wallet.pending}
               protocol="982734"
               onBackToHome={() => setActiveTab('dash')}
-              onViewInvoice={() => console.log("Visualizar NF-e")}
+              onViewInvoice={() => setActiveTab('invoice-pdf')}
               onClose={() => setActiveTab('dash')}
+            />
+          </div>
+        ) : activeTab === 'invoice-pdf' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteInvoicePDF
+              onBack={() => setActiveTab('dash')}
+              onComplete={() => setActiveTab('reports')}
             />
           </div>
         ) : activeTab === 'tax-data' ? (
@@ -747,6 +760,17 @@ const App: React.FC = () => {
                 setUserName(data.userName);
                 setVehicleName(data.vehicleName);
                 setActiveTab('profile');
+              }}
+              onAddVehicle={() => setActiveTab('vehicle-registration')}
+            />
+          </div>
+        ) : activeTab === 'vehicle-registration' ? (
+          <div className="animate-in fade-in duration-500">
+            <EliteVehicleRegistration
+              onBack={() => setActiveTab('personal-data')}
+              onSave={(model, plate) => {
+                setVehicleName(`${model} - ${plate}`);
+                setActiveTab('personal-data');
               }}
             />
           </div>

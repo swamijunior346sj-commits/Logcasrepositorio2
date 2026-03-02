@@ -6,10 +6,11 @@ interface ElitePersonalDataProps {
     userEmail: string;
     vehicleName: string;
     onBack: () => void;
-    onSave: (data: { userName: string, vehicleName: string }) => void;
+    onSave: (data: any) => void;
+    onAddVehicle?: () => void;
 }
 
-const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEmail, vehicleName, onBack, onSave }) => {
+const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEmail, vehicleName, onBack, onSave, onAddVehicle }) => {
     const [vehicle, setVehicle] = useState(vehicleName);
     const [name, setName] = useState(userName);
     const [email, setEmail] = useState(userEmail || '');
@@ -155,7 +156,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                                 </div>
                             </div>
 
-                            <button className="w-full border-[0.5px] border-dashed border-primary-gold/30 rounded-lg p-4 flex items-center justify-center group active:bg-primary-gold/5 transition-colors">
+                            <button onClick={onAddVehicle} className="w-full border-[0.5px] border-dashed border-primary-gold/30 rounded-lg p-4 flex items-center justify-center group active:bg-primary-gold/5 transition-colors">
                                 <span className="material-symbols-outlined text-primary-gold/40 mr-2 text-[18px] group-hover:text-primary-gold transition-colors">add</span>
                                 <span className="text-[9px] font-bold text-primary-gold/50 uppercase tracking-[0.2em] group-hover:text-primary-gold transition-colors">Cadastrar novo veículo</span>
                             </button>

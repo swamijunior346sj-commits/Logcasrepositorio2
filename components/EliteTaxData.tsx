@@ -12,8 +12,14 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
     const [logradouro, setLogradouro] = useState('Alameda Santos');
     const [numero, setNumero] = useState('2159');
     const [isMei, setIsMei] = useState(true);
+    const [showSuccess, setShowSuccess] = useState(false);
 
     const handleSave = () => {
+        setShowSuccess(true);
+    };
+
+    const handleConfirmSuccess = () => {
+        setShowSuccess(false);
         onSave({ razaoSocial, cnpj, cep, logradouro, numero, isMei });
     };
 
@@ -78,15 +84,42 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
                     background: #EBC051;
                     box-shadow: 0 0 10px rgba(235, 192, 81, 0.4);
                 }
+
+                /* MODAL CONFIRMACAO */
+                .glass-overlay {
+                    background: rgba(0, 0, 0, 0.92);
+                    backdrop-filter: blur(25px);
+                    -webkit-backdrop-filter: blur(25px);
+                }
+                .modal-border-only {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(235, 192, 81, 0.05);
+                }
+                .gold-glow {
+                    text-shadow: 0 0 30px rgba(235, 192, 81, 0.6);
+                }
+                .outline-button-gold {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                }
+                .outline-button-gold:active {
+                    background: rgba(235, 192, 81, 0.1);
+                    transform: scale(0.97);
+                }
+                @keyframes pulse-gold {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    50% { transform: scale(1.05); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+                .animate-pulse-gold {
+                    animation: pulse-gold 3s ease-in-out infinite;
+                }
                 `
             }} />
 
             <div className="relative flex min-h-screen w-full flex-col max-w-[430px] bg-pitch-black shadow-2xl overflow-hidden">
-                <header className="sticky top-0 z-30 flex items-center px-6 pt-14 pb-6 bg-pitch-black/80 backdrop-blur-xl">
-                    <h1 className="flex-1 text-center text-sm font-black tracking-[0.4em] metallic-gold-text uppercase">
-                        Dados Fiscais
-                    </h1>
-                </header>
+                {/* Header Removido */}
 
                 <main className="flex-1 px-6 pb-40 overflow-y-auto">
                     <section className="mt-4">
@@ -188,6 +221,31 @@ const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
 
                 <div className="fixed top-0 right-0 w-[300px] h-[300px] bg-primary-gold/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
                 <div className="fixed bottom-0 left-0 w-[300px] h-[300px] bg-primary-gold/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+
+                {/* MODAL SUCCESS */}
+                {showSuccess && (
+                    <div className="fixed inset-0 z-[100] glass-overlay flex items-center justify-center px-8">
+                        <div className="w-full max-w-[340px] modal-border-only rounded-[40px] overflow-hidden">
+                            <div className="p-10 text-center">
+                                <div className="relative size-24 mx-auto mb-8 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-[#EBC051]/15 blur-3xl rounded-full"></div>
+                                    <div className="relative flex items-center justify-center animate-pulse-gold">
+                                        <span className="material-symbols-outlined text-[#EBC051] text-[84px] leading-none gold-glow" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
+                                            check_circle
+                                        </span>
+                                    </div>
+                                </div>
+                                <h2 className="text-2xl font-black tracking-[0.2em] text-white uppercase mb-3">CONFIRMADO</h2>
+                                <p className="text-white/50 text-sm font-medium mb-12 leading-relaxed">
+                                    Operação realizada com sucesso
+                                </p>
+                                <button onClick={handleConfirmSuccess} className="w-full py-4 outline-button-gold rounded-[20px] flex items-center justify-center text-[#EBC051] font-bold uppercase tracking-[0.25em] text-[10px] transition-all duration-300">
+                                    ENTENDIDO
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

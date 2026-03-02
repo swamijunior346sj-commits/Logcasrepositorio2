@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { LogEntry } from '../types';
 import { VALOR_POR_PACOTE } from '../constants';
 import { BarChart3, Trash2, X } from 'lucide-react';
+import EliteDeleteReportPopup from './EliteDeleteReportPopup';
 
 interface DailyStatsTableProps {
   logs: LogEntry[];
@@ -14,6 +15,7 @@ type ViewMode = 'daily' | 'monthly';
 const DailyStatsTable: React.FC<DailyStatsTableProps> = ({ logs, onDeleteIds }) => {
   const [viewMode, setViewMode] = useState<ViewMode>('daily');
   const [selectedItem, setSelectedItem] = useState<{ ids: string[], label: string } | null>(null);
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
   const dailyGroups = logs.reduce((acc: any, log) => {
     const date = new Date(log.timestamp).toLocaleDateString('pt-BR');
@@ -100,7 +102,12 @@ const DailyStatsTable: React.FC<DailyStatsTableProps> = ({ logs, onDeleteIds }) 
               {displayData.map((item: any, idx: number) => (
                 <tr
                   key={idx}
-                  onClick={() => viewMode === 'daily' && onDeleteIds && setSelectedItem({ ids: item.ids, label: item.label })}
+                  onClick={() => {
+                    if (viewMode === 'daily' && onDeleteIds) {
+                      setSelectedItem({ ids: item.ids, label: item.label });
+                      setShowConfirmDelete(true);
+                    }
+                  }}
                   className={`transition-colors cursor-pointer ${selectedItem?.label === item.label ? 'bg-emerald-500/10' : 'hover:bg-white/[0.02] active:bg-white/[0.04]'}`}
                 >
                   <td className="px-4 py-3.5">
@@ -148,45 +155,20 @@ const DailyStatsTable: React.FC<DailyStatsTableProps> = ({ logs, onDeleteIds }) 
         </div>
       </div>
 
-      {/* COCKPIT MENU */}
+      {/* COCKPIT MENU ELITE DELETE */}
       {selectedItem && (
-        <div className="fixed inset-0 z-[700] flex items-end md:items-center justify-center bg-black/80 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="w-full max-w-sm bg-black border border-white/10 rounded-[2rem] p-6 shadow-2xl animate-in slide-in-from-bottom-10 zoom-in-95 duration-300 relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-blue-500 to-emerald-500 opacity-50"></div>
-
-            <div className="flex justify-between items-start mb-6">
-              <div>
-                <h3 className="text-white font-game font-black uppercase text-lg tracking-wide">Opções de Registro</h3>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-widest mt-1">Data: {selectedItem.label}</p>
-              </div>
-              <button onClick={() => setSelectedItem(null)} className="p-2 bg-white/5 rounded-full text-slate-400 hover:text-white transition-colors">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <button
-                onClick={() => {
-                  if (onDeleteIds) {
-                    onDeleteIds(selectedItem.ids, selectedItem.label);
-                    setSelectedItem(null);
-                  }
-                }}
-                className="w-full py-4 bg-red-500/10 hover:bg-red-500/20 border border-red-500/20 text-red-400 rounded-xl flex items-center justify-center gap-3 font-game font-black uppercase tracking-widest text-xs transition-all active:scale-95 group"
-              >
-                <Trash2 size={18} className="group-hover:scale-110 transition-transform" />
-                Excluir Registro
-              </button>
-
-              <button
-                onClick={() => setSelectedItem(null)}
-                className="w-full py-4 bg-white/5 hover:bg-white/10 text-slate-400 rounded-xl font-bold uppercase tracking-widest text-[10px] transition-all"
-              >
-                Cancelar
-              </button>
-            </div>
-          </div>
-        </div>
+        <EliteDeleteReportPopup
+          isOpen={showConfirmDelete}
+          onClose={() => {
+            setShowConfirmDelete(false);
+            setSelectedItem(null);
+          }}
+          onConfirm={() => {
+            if (onDeleteIds) {
+              onDeleteIds(selectedItem.ids, selectedItem.label);
+            }
+          }}
+        />
       )}
     </>
   );
