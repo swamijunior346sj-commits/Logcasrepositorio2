@@ -103,7 +103,8 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                 }
                 .animate-pulse-gentle { animation: pulse-gentle 3s ease-in-out infinite; }
                 .animate-float-particle { animation: float-particle 10s linear infinite; }
-                .animate-spin-slow { animation: spin 3s linear infinite; }
+                @keyframes spin-slow { to { transform: rotate(360deg); } }
+                .animate-spin-slow { animation: spin-slow 1.5s linear infinite; }
                 
                 .glass-modal {
                     background: rgba(255, 255, 255, 0.03);
@@ -210,62 +211,6 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                         <p className="text-[7px] text-white/20 tracking-[0.4em] uppercase">Autenticidade Verificada LogCash Digital</p>
                     </div>
                 </div>
-
-                {isExporting && (
-                    <div className="absolute inset-0 z-50 flex flex-col items-center justify-center glass-overlay rounded-sm overflow-hidden animate-in fade-in duration-300">
-                        <div className="absolute inset-0 pointer-events-none">
-                            <div className="particle animate-float-particle top-1/2 left-1/4" style={{ animationDelay: '0s' } as any}></div>
-                            <div className="particle animate-float-particle top-1/3 left-1/2" style={{ animationDelay: '2s' } as any}></div>
-                            <div className="particle animate-float-particle top-2/3 left-2/3" style={{ animationDelay: '4s' } as any}></div>
-                            <div className="particle animate-float-particle top-1/2 left-3/4" style={{ animationDelay: '1s' } as any}></div>
-                            <div className="particle animate-float-particle top-3/4 left-1/3" style={{ animationDelay: '3s' } as any}></div>
-                        </div>
-                        <div className="relative flex items-center justify-center animate-pulse-gentle">
-                            <div className="size-20 rounded-full metallic-gold-loader animate-spin-slow"></div>
-                            <div className="absolute size-14 rounded-full border border-primary-gold/20 flex items-center justify-center">
-                                <span className="material-symbols-outlined text-primary-gold text-3xl">description</span>
-                            </div>
-                        </div>
-                        <p className="mt-8 text-[11px] font-black tracking-[0.4em] text-ice-white uppercase animate-pulse">
-                            PROCESSANDO DOCUMENTO...
-                        </p>
-                    </div>
-                )}
-
-                {showSuccess && (
-                    <div className="absolute inset-0 z-[60] flex items-center justify-center px-4 animate-in zoom-in duration-300">
-                        <div className="glass-modal w-full max-w-[340px] rounded-[40px] p-10 flex flex-col items-center relative overflow-hidden">
-                            <div className="absolute inset-0 pointer-events-none">
-                                <div className="particle animate-float-particle top-10 left-10" style={{ animationDelay: '0s' } as any}></div>
-                                <div className="particle animate-float-particle top-40 right-12" style={{ animationDelay: '2s', width: '4px', height: '4px' } as any}></div>
-                                <div className="particle animate-float-particle bottom-20 left-20" style={{ animationDelay: '1.5s' } as any}></div>
-                            </div>
-
-                            <div className="relative mb-10">
-                                <div className="size-24 rounded-full flex items-center justify-center relative animate-glow-pulse">
-                                    <div className="absolute inset-0 rounded-full bg-primary-gold/20 blur-xl animate-inner-glow"></div>
-                                    <div className="relative animate-liquid-metallic flex items-center justify-center">
-                                        <span className="material-symbols-outlined text-7xl font-bold metallic-gradient drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 700" }}>
-                                            check_circle
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="text-center mb-10">
-                                <h2 className="text-xl font-black tracking-[0.25em] text-ice-white uppercase mb-3 drop-shadow-sm">DOCUMENTO PRONTO</h2>
-                                <p className="text-sm font-semibold text-primary-gold tracking-wide">Seu extrato foi gerado com sucesso</p>
-                            </div>
-
-                            <button
-                                onClick={onBack}
-                                className="w-full py-4 rounded-[20px] border border-primary-gold text-primary-gold font-extrabold text-[11px] uppercase tracking-[0.4em] transition-all active:scale-95 hover:bg-primary-gold/5"
-                            >
-                                VOLTAR AO INÍCIO
-                            </button>
-                        </div>
-                    </div>
-                )}
             </div>
 
             <div className={`px-8 flex flex-col gap-4 ${(isExporting || showSuccess) ? 'blur-md select-none pointer-events-none' : ''}`}>
@@ -284,6 +229,63 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                 <span className="text-[8px] font-bold tracking-[0.3em] text-primary-gold uppercase">Elite Document Service</span>
                 <div className="h-[1px] w-8 bg-primary-gold"></div>
             </div>
+
+            {/* OVERLAYS FULLSCREEN */}
+            {isExporting && (
+                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center glass-overlay rounded-sm overflow-hidden animate-in fade-in duration-300">
+                    <div className="absolute inset-0 pointer-events-none">
+                        <div className="particle animate-float-particle top-1/2 left-1/4" style={{ animationDelay: '0s' } as any}></div>
+                        <div className="particle animate-float-particle top-1/3 left-1/2" style={{ animationDelay: '2s' } as any}></div>
+                        <div className="particle animate-float-particle top-2/3 left-2/3" style={{ animationDelay: '4s' } as any}></div>
+                        <div className="particle animate-float-particle top-1/2 left-3/4" style={{ animationDelay: '1s' } as any}></div>
+                        <div className="particle animate-float-particle top-3/4 left-1/3" style={{ animationDelay: '3s' } as any}></div>
+                    </div>
+                    <div className="relative flex items-center justify-center animate-pulse-gentle">
+                        <div className="size-20 rounded-full metallic-gold-loader animate-spin-slow"></div>
+                        <div className="absolute size-14 rounded-full border border-primary-gold/20 flex items-center justify-center">
+                            <span className="material-symbols-outlined text-primary-gold text-3xl">description</span>
+                        </div>
+                    </div>
+                    <p className="mt-8 text-[11px] font-black tracking-[0.4em] text-ice-white uppercase animate-pulse">
+                        PROCESSANDO DOCUMENTO...
+                    </p>
+                </div>
+            )}
+
+            {showSuccess && (
+                <div className="absolute inset-0 z-[60] flex items-center justify-center px-4 animate-in zoom-in duration-300">
+                    <div className="glass-modal w-full max-w-[340px] rounded-[40px] p-10 flex flex-col items-center relative overflow-hidden">
+                        <div className="absolute inset-0 pointer-events-none">
+                            <div className="particle animate-float-particle top-10 left-10" style={{ animationDelay: '0s' } as any}></div>
+                            <div className="particle animate-float-particle top-40 right-12" style={{ animationDelay: '2s', width: '4px', height: '4px' } as any}></div>
+                            <div className="particle animate-float-particle bottom-20 left-20" style={{ animationDelay: '1.5s' } as any}></div>
+                        </div>
+
+                        <div className="relative mb-10">
+                            <div className="size-24 rounded-full flex items-center justify-center relative animate-glow-pulse">
+                                <div className="absolute inset-0 rounded-full bg-primary-gold/20 blur-xl animate-inner-glow"></div>
+                                <div className="relative animate-liquid-metallic flex items-center justify-center">
+                                    <span className="material-symbols-outlined text-7xl font-bold metallic-gradient drop-shadow-[0_10px_10px_rgba(0,0,0,0.5)]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 700" }}>
+                                        check_circle
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-center mb-10">
+                            <h2 className="text-xl font-black tracking-[0.25em] text-ice-white uppercase mb-3 drop-shadow-sm">DOCUMENTO PRONTO</h2>
+                            <p className="text-sm font-semibold text-primary-gold tracking-wide">Seu relatório foi gerado com sucesso</p>
+                        </div>
+
+                        <button
+                            onClick={onBack}
+                            className="w-full py-4 rounded-[20px] border border-primary-gold text-primary-gold font-extrabold text-[11px] uppercase tracking-[0.4em] transition-all active:scale-95 hover:bg-primary-gold/5"
+                        >
+                            VOLTAR AO INÍCIO
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

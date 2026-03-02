@@ -255,6 +255,164 @@ export const generatePDF = (logs: LogEntry[], userName: string = 'Operador Logí
 };
 
 
+const buildWeeklyHTMLTemplate = (
+  userName: string,
+  vehicleName: string,
+  loaded: number,
+  delivered: number,
+  returns: number,
+  gains: number,
+  bonus: number,
+  totalLiquid: number
+) => {
+  const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+  // calculate performance
+  const total = loaded > 0 ? loaded : 1;
+  const performance = loaded > 0 ? Math.round((delivered / loaded) * 100) : 0;
+
+  const idBadge = `#${Math.floor(Math.random() * 9000) + 1000}`; // Random ID or could use a hash
+
+  return `<!DOCTYPE html>
+<html class="dark" lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Relatório Operacional | LogCash</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+    tailwind.config = {
+        darkMode: "class",
+        theme: {
+            extend: {
+                colors: {
+                    "primary-gold": "#EBC051",
+                    "deep-gold": "#AA771C",
+                    "pitch-black": "#000000",
+                    "ice-white": "#F5F5F5",
+                },
+                fontFamily: {
+                    "sans": ["Plus Jakarta Sans", "sans-serif"]
+                },
+            },
+        },
+    }
+</script>
+<style type="text/tailwindcss">
+    @layer base { body { @apply bg-pitch-black text-white antialiased; } }
+    .metallic-gold-text {
+        background: linear-gradient(135deg, #F9E29C 0%, #EBC051 50%, #AA771C 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    .pdf-frame {
+        border: 1px solid #EBC051;
+        box-shadow: 0 0 25px rgba(235, 192, 81, 0.15);
+    }
+    .gold-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, #EBC051 50%, transparent 100%);
+        opacity: 0.5;
+    }
+    .section-header {
+        letter-spacing: 0.2em;
+        color: #EBC051;
+        font-weight: 700;
+        font-size: 10px;
+    }
+</style>
+<style>
+    body { min-height: 100dvh; margin: 0; padding: 0; background-color: #000; }
+    @media print { body { background-color: #000 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+</style>
+</head>
+<body class="flex justify-center items-center bg-pitch-black p-6">
+<div class="relative flex w-full flex-col max-w-[400px] pdf-container">
+<div class="pdf-frame bg-transparent w-full rounded-sm p-8 flex flex-col h-auto">
+    <div class="flex flex-col items-center mb-10 text-center">
+        <div class="text-[16px] font-black tracking-[0.5em] metallic-gold-text uppercase mb-2">LogCash</div>
+        <div class="w-10 h-[1.5px] bg-primary-gold mb-8"></div>
+        <h1 class="text-sm font-bold tracking-[0.3em] text-ice-white uppercase mb-2">Relatório Operacional</h1>
+        <p class="text-[10px] text-white/50 uppercase tracking-widest font-medium">Emissão: ${dateStr} • Ref: ${idBadge}</p>
+    </div>
+    
+    <div class="mb-10">
+        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+            Dados do Motorista
+        </h2>
+        <div class="space-y-4">
+            <div class="flex flex-col">
+                <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Condutor</span>
+                <span class="text-[13px] font-semibold text-ice-white">${userName}</span>
+            </div>
+            <div class="flex justify-between items-end">
+                <div class="flex flex-col">
+                    <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Identificação</span>
+                    <span class="text-[13px] font-semibold text-ice-white">${idBadge}</span>
+                </div>
+                <div class="flex flex-col text-right">
+                    <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Veículo</span>
+                    <span class="text-[13px] font-semibold text-ice-white">${vehicleName}</span>
+                </div>
+            </div>
+            <div class="gold-divider mt-2"></div>
+        </div>
+    </div>
+    
+    <div class="mb-10">
+        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+            Resumo da Rota
+        </h2>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Volumes Carregados</span>
+                <span class="text-[12px] font-bold text-ice-white">${loaded} Unid.</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Entregas Sucesso</span>
+                <span class="text-[12px] font-bold text-ice-white">${delivered} Unid.</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Acareações</span>
+                <span class="text-[12px] font-bold text-ice-white">${returns} Unid.</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Performance da Rota</span>
+                <span class="text-[12px] font-bold text-primary-gold">${performance}%</span>
+            </div>
+            <div class="gold-divider mt-2"></div>
+        </div>
+    </div>
+    
+    <div class="mb-2">
+        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+            Detalhamento Financeiro
+        </h2>
+        <div class="space-y-4">
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Ganhos de Rota</span>
+                <span class="text-[12px] font-bold text-ice-white">${formatCurrency(gains)}</span>
+            </div>
+            <div class="flex justify-between items-center">
+                <span class="text-[11px] text-white/70 font-medium">Bônus Performance</span>
+                <span class="text-[12px] font-bold text-ice-white">${formatCurrency(bonus)}</span>
+            </div>
+            <div class="flex justify-between items-center pt-3 mt-2">
+                <span class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.15em]">Valor Líquido</span>
+                <span class="text-xl font-bold metallic-gold-text">${formatCurrency(totalLiquid)}</span>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</body>
+</html>`;
+};
+
 export const generateWeeklyPDF = (data: {
   userName: string;
   vehicleName: string;
@@ -267,37 +425,32 @@ export const generateWeeklyPDF = (data: {
   rows?: DailySummary[]
 }) => {
   const costPerPackage = VALOR_POR_PACOTE || 2.50;
-  let rowsHtml = '';
-  let totalLiquid = 0;
+  let loaded = 0, delivered = 0, returns = 0, gains = 0;
 
   if (data.rows && data.rows.length > 0) {
-    const topRows = data.rows.slice(0, 10);
-    const routeEarnings = topRows.reduce((a, b) => a + (b.gains || 0), 0);
-    totalLiquid = routeEarnings + 180.0; // Bonus
-
-    rowsHtml = topRows.map(r =>
-      getRowHtml(r.date || '', r.loaded || 0, r.delivered || 0, r.returns || 0, formatCurrency(r.gains || 0))
-    ).join('');
+    loaded = data.rows.reduce((a, b) => a + (b.loaded || 0), 0);
+    delivered = data.rows.reduce((a, b) => a + (b.delivered || 0), 0);
+    returns = data.rows.reduce((a, b) => a + (b.returns || 0), 0);
+    gains = data.rows.reduce((a, b) => a + (b.gains || 0), 0);
   } else {
-    const dateStr = new Date().toLocaleDateString('pt-BR');
-    const routeEarnings = (data.counts?.delivered || 0) * costPerPackage;
-    totalLiquid = routeEarnings + 180.0; // Bonus
-
-    rowsHtml = getRowHtml(
-      dateStr,
-      data.counts?.todayEntrada || 0,
-      data.counts?.todaySaida || 0,
-      data.counts?.todayDevolucao || 0,
-      formatCurrency(routeEarnings)
-    );
+    loaded = data.counts?.todayEntrada || 0;
+    delivered = data.counts?.todaySaida || 0;
+    returns = data.counts?.todayDevolucao || 0;
+    gains = (data.counts?.delivered || 0) * costPerPackage;
   }
 
-  const fullHtml = buildHTMLTemplate(
-    'RELATÓRIO SEMANAL',
-    'Documento Oficial de Movimentação',
-    rowsHtml,
-    totalLiquid,
-    '(+BÔNUS)'
+  const bonus = 180.0; // Fixed bonus
+  const totalLiquid = gains + bonus;
+
+  const fullHtml = buildWeeklyHTMLTemplate(
+    data.userName,
+    data.vehicleName,
+    loaded,
+    delivered,
+    returns,
+    gains,
+    bonus,
+    totalLiquid
   );
 
   printHtmlPdf(fullHtml);
