@@ -1,13 +1,8 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Truck, Zap, FileText, Download, LayoutDashboard, Send, Table as TableIcon, ListPlus, LogOut, Layers, Settings, Trash2, AlertCircle, User, Sliders, ChevronRight, X, CheckCircle2, Check, Wallet, AlertTriangle, ArrowDownLeft, ArrowUpRight, RotateCcw, Sparkles, Package, LogIn, Database, Map, MapPin } from 'lucide-react';
-import DashboardCards from './components/DashboardCards';
-import DailyStatsTable from './components/DailyStatsTable';
-import DailyRouteHistory from './components/DailyRouteHistory';
 import BulkActionModal from './components/BulkActionModal';
-import WalletCard from './components/WalletCard';
 import Login from './components/Login';
-import DateRangeFilter from './components/DateRangeFilter';
 import { LogCashLogo } from './components/Logo';
 import { LogEntry, LogActionType, QuickEntryRow, TemporaryExpressRow, DailySummary } from './types';
 import { supabaseService } from './services/supabaseService';
@@ -29,8 +24,6 @@ import EliteExtrato from './components/EliteExtrato';
 import EliteExpressReport from './components/EliteExpressReport';
 import PremiumSuccessPopup from './components/PremiumSuccessPopup';
 import EliteWeeklyReport from './components/EliteWeeklyReport';
-import EliteWeeklyPDF from './components/EliteWeeklyPDF';
-import EliteExpressPDF from './components/EliteExpressPDF';
 import EliteVehicleRegistration from './components/EliteVehicleRegistration';
 import EliteInvoicePDF from './components/EliteInvoicePDF';
 import EliteEditRoute from './components/EliteEditRoute';
@@ -647,11 +640,20 @@ const App: React.FC = () => {
   const counts = useMemo(() => {
     const todayStr = new Date().toDateString();
     const now = new Date();
-    const startOfWeek = new Date(now);
-    startOfWeek.setDate(now.getDate() - now.getDay());
-    startOfWeek.setHours(0, 0, 0, 0);
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+
+    // Total da semana: soma de 7 dias
+    const sevenDaysAgo = new Date(now);
+    sevenDaysAgo.setDate(now.getDate() - 7);
+    sevenDaysAgo.setHours(0, 0, 0, 0);
+
+    // Total do mês: soma de 4 semanas (28 dias)
+    const twentyEightDaysAgo = new Date(now);
+    twentyEightDaysAgo.setDate(now.getDate() - 28);
+    twentyEightDaysAgo.setHours(0, 0, 0, 0);
+
+    // Total do ano: período anual (ano atual)
     const startOfYear = new Date(now.getFullYear(), 0, 1);
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1); // Para o cálculo da carteira
 
     const deliveredLogs = logs.filter(l => l.type === 'SAIDA');
     const todayLogs = logs.filter(l => new Date(l.timestamp).toDateString() === todayStr);
@@ -660,17 +662,39 @@ const App: React.FC = () => {
     const paidCurrentCycle = deliveredLogs.filter(l => l.isPaid && new Date(l.timestamp) >= startOfMonth).length * VALOR_POR_PACOTE;
     const totalCumulativePaid = deliveredLogs.filter(l => l.isPaid).length * VALOR_POR_PACOTE;
 
+    // Cálculo das Estatísticas de Perfil
+    const totalDelivered = deliveredLogs.length;
+    const totalReturns = logs.filter(l => l.type === 'DEVOLUCAO').length;
+
+    // Rating: Baseado no sucesso (0.0 a 5.0)
+    const efficiency = totalDelivered === 0 && totalReturns === 0 ? 5.0 : (totalDelivered / (totalDelivered + totalReturns || 1)) * 5;
+    const rating = Math.min(5.0, efficiency).toFixed(1);
+
+    // Earliest log to calculate "experience"
+    const earliestTimestamp = logs.length > 0
+      ? logs.reduce((min, log) => log.timestamp < min ? log.timestamp : min, logs[0].timestamp)
+      : new Date().toISOString();
+
+    const yearsDiff = (new Date().getTime() - new Date(earliestTimestamp).getTime()) / (1000 * 60 * 60 * 24 * 365);
+    const years = Math.max(1, Math.floor(yearsDiff + 1)); // Default starts at year 1
+
     return {
       today: todayLogs.filter(l => l.type === 'SAIDA').length,
       todayEntrada: todayLogs.filter(l => l.type === 'ENTRADA').length,
       todaySaida: todayLogs.filter(l => l.type === 'SAIDA').length,
       todayDevolucao: todayLogs.filter(l => l.type === 'DEVOLUCAO').length,
-      week: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= startOfWeek).length,
+      week: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= sevenDaysAgo).length,
+      month: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= twentyEightDaysAgo).length,
       year: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= startOfYear).length,
       wallet: {
         pending,
         paid: paidCurrentCycle,
         cumulative: totalCumulativePaid
+      },
+      profile: {
+        rating: Number(rating),
+        trips: totalDelivered,
+        years: years
       }
     };
   }, [logs]);
@@ -805,9 +829,6 @@ const App: React.FC = () => {
               onExportPDF={(rows: TemporaryExpressRow[]) => {
                 generateQuickPDF(rows, userName);
               }}
-              onViewPDF={(rows) => {
-                // Feature removed - buttons return back now.
-              }}
             />
           </div>
         ) : activeTab === 'profile' ? (
@@ -820,6 +841,7 @@ const App: React.FC = () => {
             onSettings={() => setActiveTab('settings')}
             onReset={() => setConfirmingAction('RESET_SYSTEM')}
             onTaxInvoice={() => setActiveTab('tax-invoice')}
+            stats={counts.profile}
           />
         ) : activeTab === 'tax-invoice' ? (
           <div className="animate-in fade-in duration-500">
@@ -846,7 +868,7 @@ const App: React.FC = () => {
           <div className="animate-in fade-in duration-500">
             <EliteInvoicePDF
               onBack={() => setActiveTab('dash')}
-              onComplete={() => setActiveTab('reports')}
+              onComplete={() => setActiveTab('stats')}
             />
           </div>
         ) : activeTab === 'tax-data' ? (
@@ -913,9 +935,6 @@ const App: React.FC = () => {
             onBack={() => setActiveTab('stats')}
             onDownload={() => {
               generateWeeklyPDF({ userName, vehicleName, counts });
-            }}
-            onViewPDF={() => {
-              // Feature removed - buttons return back now.
             }}
           />
         ) : (

@@ -7,6 +7,7 @@ interface EliteDashboardProps {
         todayEntrada: number;
         todayDevolucao: number;
         week: number;
+        month: number;
         year: number;
         wallet: {
             pending: number;
@@ -21,7 +22,7 @@ interface EliteDashboardProps {
 const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valorPorPacote, onNavigate }) => {
     const todayEarnings = counts.todaySaida * valorPorPacote;
     const weeklyEarnings = counts.week * valorPorPacote;
-    const monthlyEarnings = counts.wallet.paid;
+    const monthlyEarnings = counts.month * valorPorPacote;
     const annualProjection = counts.year * valorPorPacote;
     const totalCumulative = counts.wallet.cumulative;
 

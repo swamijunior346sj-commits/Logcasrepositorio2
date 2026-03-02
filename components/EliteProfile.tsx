@@ -9,9 +9,18 @@ interface EliteProfileProps {
     onSettings: () => void;
     onReset: () => void;
     onTaxInvoice?: () => void;
+    stats: {
+        rating: number;
+        trips: number;
+        years: number;
+    }
 }
 
-const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset, onTaxInvoice }) => {
+const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset, onTaxInvoice, stats }) => {
+    const formatCount = (num: number) => {
+        if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
+        return num.toString();
+    };
     return (
         <div className="flex justify-center items-start min-h-screen animate-in fade-in duration-700 bg-pitch-black">
             <style dangerouslySetInnerHTML={{
@@ -73,15 +82,15 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                 <div className="grid grid-cols-3 gap-3 px-8 mb-12">
                     <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
                         <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Nota</span>
-                        <span className="text-xl font-light text-white">4.9</span>
+                        <span className="text-xl font-light text-white">{stats.rating.toFixed(1)}</span>
                     </div>
                     <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
                         <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Viagens</span>
-                        <span className="text-xl font-light text-white">12.4k</span>
+                        <span className="text-xl font-light text-white">{formatCount(stats.trips)}</span>
                     </div>
                     <div className="pinstripe-border rounded-2xl py-5 flex flex-col items-center justify-center bg-white/[0.02]">
                         <span className="text-[7px] font-bold text-white/30 uppercase tracking-[0.2em] mb-2">Anos</span>
-                        <span className="text-xl font-light text-white">3</span>
+                        <span className="text-xl font-light text-white">{stats.years}</span>
                     </div>
                 </div>
 
