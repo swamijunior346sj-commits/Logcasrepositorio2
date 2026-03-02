@@ -17,7 +17,7 @@ const EliteExtrato: React.FC<EliteExtratoProps> = ({ logs, userName, valorPorPac
         return () => { document.title = prevTitle; };
     }, []);
 
-    const VALOR_POR_PACOTE = valorPorPacote || 2.50;
+    const VALOR_POR_PACOTE = valorPorPacote || 2.25;
 
     // Agrupando logs por dia (Mês Atual)
     const routeData = useMemo(() => {

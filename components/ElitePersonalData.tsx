@@ -4,19 +4,47 @@ import PremiumDeleteSuccessPopup from './PremiumDeleteSuccessPopup';
 interface ElitePersonalDataProps {
     userName: string;
     userEmail: string;
+    avatarUrl?: string; // New prop
+    onAvatarChange?: (url: string) => void; // New prop
     vehicleName: string;
     onBack: () => void;
     onSave: (data: any) => void;
     onAddVehicle?: () => void;
 }
 
-const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEmail, vehicleName, onBack, onSave, onAddVehicle }) => {
+const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEmail, avatarUrl, onAvatarChange, vehicleName, onBack, onSave, onAddVehicle }) => {
     const [vehicle, setVehicle] = useState(vehicleName);
     const [name, setName] = useState(userName);
     const [email, setEmail] = useState(userEmail || '');
     const [phone, setPhone] = useState('');
     const [showDeleteAnim, setShowDeleteAnim] = useState(false);
     const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onAvatarChange) return;
+
+        try {
+            setIsUploading(true);
+            const { supabaseService } = await import('../services/supabaseService');
+            const url = await supabaseService.uploadAvatar(file);
+            await supabaseService.updateProfile({ avatar_url: url });
+            onAvatarChange(url);
+        } catch (error) {
+            console.error("Erro ao fazer upload da avatar:", error);
+            alert("Falha ao atualizar foto de perfil.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF";
 
     return (
         <div className="flex justify-center items-start min-h-screen bg-pitch-black animate-in fade-in duration-700">
@@ -82,13 +110,33 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                 {/* Header Actions Removido */}
 
                 <div className="flex flex-col items-center px-6 mt-2 mb-10">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
                     <div className="relative">
                         <div className="size-28 rounded-full p-[1px] bg-primary-gold/40">
-                            <div className="size-full rounded-full border-[3px] border-pitch-black overflow-hidden bg-black">
-                                <img alt="User Profile" className="w-full h-full object-cover grayscale-[20%]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF" />
+                            <div className="size-full rounded-full border-[3px] border-pitch-black overflow-hidden bg-black relative">
+                                <img
+                                    alt="User Profile"
+                                    className={`w-full h-full object-cover grayscale-[20%] transition-transform duration-500 ${isUploading ? 'opacity-30' : ''}`}
+                                    src={avatarUrl || defaultAvatar}
+                                />
+                                {isUploading && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-6 h-6 border-2 border-primary-gold border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
                             </div>
                         </div>
-                        <button className="absolute bottom-0 right-0 size-9 rounded-full metallic-gold-bg border-2 border-pitch-black flex items-center justify-center text-black shadow-lg active:scale-90 transition-transform">
+                        <button
+                            onClick={handleAvatarClick}
+                            disabled={isUploading}
+                            className="absolute bottom-0 right-0 size-9 rounded-full metallic-gold-bg border-2 border-pitch-black flex items-center justify-center text-black shadow-lg active:scale-90 transition-transform disabled:opacity-50"
+                        >
                             <span className="material-symbols-outlined text-[18px] font-bold">edit</span>
                         </button>
                     </div>

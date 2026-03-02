@@ -72,6 +72,7 @@ const App: React.FC = () => {
   const [isExecuting, setIsExecuting] = useState(false);
 
   const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
+  const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('logcash_avatar_url') || '');
   const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Veículo Padrão');
   const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report' | 'weekly-report' | 'weekly-pdf' | 'express-pdf' | 'vehicle-registration' | 'invoice-pdf'>('dash');
   const [showSettings, setShowSettings] = useState(false);
@@ -91,9 +92,22 @@ const App: React.FC = () => {
   // 1. Verifica Sessão
   useEffect(() => {
     supabaseService.getSession()
-      .then(session => {
+      .then(async session => {
         setSession(session);
-        if (!session) setLoading(false);
+        if (!session) {
+          setLoading(false);
+        } else {
+          // Carregar perfil do Supabase
+          try {
+            const profile = await supabaseService.getProfile();
+            if (profile) {
+              if (profile.full_name) setUserName(profile.full_name);
+              if (profile.avatar_url) setAvatarUrl(profile.avatar_url);
+            }
+          } catch (err) {
+            console.error("Erro ao carregar perfil:", err);
+          }
+        }
       })
       .catch(err => {
         console.error("Falha ao verificar sessão:", err);
@@ -177,6 +191,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('logcash_user_name', userName);
   }, [userName]);
+
+  useEffect(() => {
+    localStorage.setItem('logcash_avatar_url', avatarUrl);
+  }, [avatarUrl]);
 
   useEffect(() => {
     localStorage.setItem('logcash_vehicle_name', vehicleName);
@@ -678,14 +696,43 @@ const App: React.FC = () => {
     const yearsDiff = (new Date().getTime() - new Date(earliestTimestamp).getTime()) / (1000 * 60 * 60 * 24 * 365);
     const years = Math.max(1, Math.floor(yearsDiff + 1)); // Default starts at year 1
 
+    const fourteenDaysAgo = new Date(now);
+    fourteenDaysAgo.setDate(now.getDate() - 14);
+    fourteenDaysAgo.setHours(0, 0, 0, 0);
+
+    const fiftySixDaysAgo = new Date(now);
+    fiftySixDaysAgo.setDate(now.getDate() - 56);
+    fiftySixDaysAgo.setHours(0, 0, 0, 0);
+
+    const startOfPrevYear = new Date(now.getFullYear() - 1, 0, 1);
+    const sameDayLastYear = new Date(now);
+    sameDayLastYear.setFullYear(now.getFullYear() - 1);
+
+    const weekCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= sevenDaysAgo).length;
+    const prevWeekCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= fourteenDaysAgo && new Date(l.timestamp) < sevenDaysAgo).length;
+
+    const monthCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= twentyEightDaysAgo).length;
+    const prevMonthCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= fiftySixDaysAgo && new Date(l.timestamp) < twentyEightDaysAgo).length;
+
+    const yearCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= startOfYear).length;
+    const prevYearCount = logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= startOfPrevYear && new Date(l.timestamp) <= sameDayLastYear).length;
+
+    const calcPercent = (curr: number, prev: number) => {
+      if (prev === 0) return curr > 0 ? 100 : 0;
+      return ((curr - prev) / prev) * 100;
+    };
+
     return {
       today: todayLogs.filter(l => l.type === 'SAIDA').length,
       todayEntrada: todayLogs.filter(l => l.type === 'ENTRADA').length,
       todaySaida: todayLogs.filter(l => l.type === 'SAIDA').length,
       todayDevolucao: todayLogs.filter(l => l.type === 'DEVOLUCAO').length,
-      week: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= sevenDaysAgo).length,
-      month: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= twentyEightDaysAgo).length,
-      year: logs.filter(l => l.type === 'SAIDA' && new Date(l.timestamp) >= startOfYear).length,
+      week: weekCount,
+      weekDiff: calcPercent(weekCount, prevWeekCount),
+      month: monthCount,
+      monthDiff: calcPercent(monthCount, prevMonthCount),
+      year: yearCount,
+      yearDiff: calcPercent(yearCount, prevYearCount),
       wallet: {
         pending,
         paid: paidCurrentCycle,
@@ -834,6 +881,8 @@ const App: React.FC = () => {
         ) : activeTab === 'profile' ? (
           <EliteProfile
             userName={userName}
+            avatarUrl={avatarUrl}
+            onAvatarChange={setAvatarUrl}
             onBack={() => setActiveTab('dash')}
             onLogout={() => setConfirmingAction('LOGOUT')}
             onTaxData={() => setActiveTab('tax-data')}
@@ -886,11 +935,24 @@ const App: React.FC = () => {
             <ElitePersonalData
               userName={userName}
               userEmail={session?.user?.email || ''}
+              avatarUrl={avatarUrl}
+              onAvatarChange={setAvatarUrl}
               vehicleName={vehicleName}
               onBack={() => setActiveTab('profile')}
-              onSave={(data) => {
+              onSave={async (data) => {
                 setUserName(data.userName);
                 setVehicleName(data.vehicleName);
+
+                // Sincronizar com Supabase
+                try {
+                  await supabaseService.updateProfile({
+                    full_name: data.userName,
+                    avatar_url: avatarUrl // avatarUrl já contém a URL atualizada se mudou
+                  });
+                } catch (err) {
+                  console.error("Erro ao salvar perfil no Supabase:", err);
+                }
+
                 setActiveTab('profile');
               }}
               onAddVehicle={() => setActiveTab('vehicle-registration')}

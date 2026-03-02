@@ -2,6 +2,8 @@ import React from 'react';
 
 interface EliteProfileProps {
     userName: string;
+    avatarUrl?: string; // New prop
+    onAvatarChange?: (url: string) => void; // New prop
     onBack: () => void;
     onLogout: () => void;
     onTaxData: () => void;
@@ -16,11 +18,39 @@ interface EliteProfileProps {
     }
 }
 
-const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset, onTaxInvoice, stats }) => {
+const EliteProfile: React.FC<EliteProfileProps> = ({ userName, avatarUrl, onAvatarChange, onBack, onLogout, onTaxData, onPersonalData, onSettings, onReset, onTaxInvoice, stats }) => {
+    const fileInputRef = React.useRef<HTMLInputElement>(null);
+    const [isUploading, setIsUploading] = React.useState(false);
+
     const formatCount = (num: number) => {
         if (num >= 1000) return (num / 1000).toFixed(1) + 'k';
         return num.toString();
     };
+
+    const handleAvatarClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onAvatarChange) return;
+
+        try {
+            setIsUploading(true);
+            const { supabaseService } = await import('../services/supabaseService');
+            const url = await supabaseService.uploadAvatar(file);
+            await supabaseService.updateProfile({ avatar_url: url });
+            onAvatarChange(url);
+        } catch (error) {
+            console.error("Erro ao fazer upload da avatar:", error);
+            alert("Falha ao atualizar foto de perfil.");
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const defaultAvatar = "https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF";
+
     return (
         <div className="flex justify-center items-start min-h-screen animate-in fade-in duration-700 bg-pitch-black">
             <style dangerouslySetInnerHTML={{
@@ -60,11 +90,30 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, onBack, onLogout,
                 </div>
 
                 <div className="flex flex-col items-center px-6 pt-4 mb-10">
-                    <div className="relative mb-8">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        accept="image/*"
+                        className="hidden"
+                    />
+                    <div className="relative mb-8 cursor-pointer group" onClick={handleAvatarClick}>
                         <div className="absolute inset-0 rounded-full aura-gold scale-125"></div>
                         <div className="relative size-36 rounded-full p-[1px] bg-gradient-to-b from-[#F9E29C] to-[#AA771C] neon-border">
-                            <div className="size-full rounded-full border-[4px] border-pitch-black overflow-hidden bg-black">
-                                <img alt={userName} className="w-full h-full object-cover grayscale-[0.2]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA1nEhj2i0eHOa4yvLOI-Dx4CqWgy1r6IMkLx-3M027NbZ1cNThkwpalKZztGYj5sSGca61nITxbzLudi0yBlOvvon8q2t93Vi_4csBT3YVnKBlkDlQWuT97fHVb7KTqKSzv4MfJqd28EGi0Kx5N1b6MNVe8ICvDN8Iabft_hh3-ZH7UuV7gKsKNQwb8YJXhSdAnvVNE8AdxofmUcHl0uLYrxEd2Js3lgD7G_nbyTxUMFMYF_WJrIUCjQZdhItrPaGAaK4z3KLrgHLF" />
+                            <div className="size-full rounded-full border-[4px] border-pitch-black overflow-hidden bg-black relative">
+                                <img
+                                    alt={userName}
+                                    className={`w-full h-full object-cover grayscale-[0.2] transition-all duration-500 ${isUploading ? 'opacity-30' : 'group-hover:scale-110'}`}
+                                    src={avatarUrl || defaultAvatar}
+                                />
+                                {isUploading && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="w-8 h-8 border-2 border-primary-gold border-t-transparent rounded-full animate-spin"></div>
+                                    </div>
+                                )}
+                                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                                    <span className="material-symbols-outlined text-white text-3xl">photo_camera</span>
+                                </div>
                             </div>
                         </div>
                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 px-5 py-1 thin-outline bg-pitch-black rounded-full shadow-lg">

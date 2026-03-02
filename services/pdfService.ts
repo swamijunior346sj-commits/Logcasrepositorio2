@@ -210,7 +210,7 @@ export const generateQuickPDF = (rows: TemporaryExpressRow[], userName: string =
 
 export const generatePDF = (logs: LogEntry[], userName: string = 'Operador Logístico') => {
   const dailyData: Record<string, DailySummary> = {};
-  const costPerPackage = VALOR_POR_PACOTE || 2.50;
+  const costPerPackage = VALOR_POR_PACOTE || 2.25;
 
   const routeDataKey = () => {
     logs.forEach(log => {
@@ -424,7 +424,7 @@ export const generateWeeklyPDF = (data: {
   },
   rows?: DailySummary[]
 }) => {
-  const costPerPackage = VALOR_POR_PACOTE || 2.50;
+  const costPerPackage = VALOR_POR_PACOTE || 2.25;
   let loaded = 0, delivered = 0, returns = 0, gains = 0;
 
   if (data.rows && data.rows.length > 0) {

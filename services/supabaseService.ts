@@ -253,5 +253,63 @@ export const supabaseService = {
 
       if (deleteError) handleSupabaseError(deleteError);
     }
+  },
+
+  // --- PROFILE METHODS ---
+  getProfile: async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) return null;
+
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', user.id)
+      .single();
+
+    if (error && error.code !== 'PGRST116') { // PGRST116 is 'no rows returned'
+      handleSupabaseError(error);
+    }
+    return data;
+  },
+
+  updateProfile: async (profile: { full_name?: string; avatar_url?: string; email?: string }) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) throw new Error("Usuário desconectado.");
+
+    const { error } = await supabase
+      .from('profiles')
+      .upsert({
+        id: user.id,
+        ...profile,
+        updated_at: new Date().toISOString()
+      });
+
+    if (error) handleSupabaseError(error);
+  },
+
+  uploadAvatar: async (file: File) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) throw new Error("Usuário desconectado.");
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user.id}/${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('avatars')
+      .upload(filePath, file, {
+        upsert: true
+      });
+
+    if (uploadError) handleSupabaseError(uploadError);
+
+    const { data: { publicUrl } } = supabase.storage
+      .from('avatars')
+      .getPublicUrl(filePath);
+
+    return publicUrl;
   }
 };

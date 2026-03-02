@@ -7,8 +7,11 @@ interface EliteDashboardProps {
         todayEntrada: number;
         todayDevolucao: number;
         week: number;
+        weekDiff: number;
         month: number;
+        monthDiff: number;
         year: number;
+        yearDiff: number;
         wallet: {
             pending: number;
             paid: number;
@@ -69,15 +72,10 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                 <div className="particle w-1 h-1 top-[85%] left-[20%]"></div>
             </div>
 
-            <header className="relative pt-12 px-8 flex justify-between items-center z-10">
-                <div className="flex items-center gap-4">
-                    <div className="size-11 rounded-full border border-primary-gold/20 p-[2px]">
-                        <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-full filter contrast-125 grayscale brightness-90" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlP_6m46cIx9G_FjX3ku2YaZwMvrfuyj4hQcf8xv7fAjTuzgSadvH49RYNSfu0UCU-L5UZp5I2y0Sn4kft4mYucmwGhEPsIi0hGtD62kD_ZLmldrXSqt9j8I8DaHcJFN81eauwKQcGbwshg1YO9KUWsElYrK-IHKuGVFVOVxDYaSI7_83oI1N7UfOVpnysry8y5V0QFDicN1tywt_1WP2IxuPM0ev4dx7JYogKpeaAYsLMSJjGbrfGwMfv_r50U4uzFZ7Zxe3KjKLJ")' }}></div>
-                    </div>
-                    <div className="text-left">
-                        <h2 className="text-[11px] font-semibold text-white tracking-[0.15em] uppercase">{userName || "A. Driver"}</h2>
-                        <p className="text-[8px] text-primary-gold/50 font-medium uppercase tracking-[0.25em]">Membro Elite</p>
-                    </div>
+            <header className="relative pt-16 px-8 z-10 flex flex-col items-center justify-center">
+                <div className="text-center space-y-1">
+                    <h2 className="text-[12px] font-bold text-white tracking-[0.3em] uppercase">{userName || "A. Driver"}</h2>
+                    <p className="text-[8px] text-primary-gold/40 font-medium uppercase tracking-[0.5em]">Operador Elite • Membro Confirmado</p>
                 </div>
             </header>
 
@@ -97,7 +95,7 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                     <div className="h-44 w-full relative">
                         <svg className="w-full h-full" preserveAspectRatio="none" viewBox="0 0 430 160">
                             <defs>
-                                <linearGradient id="goldGradient" x1="0%" x2="0%" y1="0%" y2="100%">
+                                <linearGradient id="goldGradient" x1="0%" x2="100%" y1="0%" y2="100%">
                                     <stop offset="0%" stopColor="#EBC051" stopOpacity="0.15"></stop>
                                     <stop offset="100%" stopColor="#EBC051" stopOpacity="0"></stop>
                                 </linearGradient>
@@ -126,8 +124,10 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                             <p className="text-xl font-light tracking-tight text-white">R$ {formatCurrency(weeklyEarnings)}</p>
                         </div>
                         <div className="text-right">
-                            <span className="text-[11px] text-primary-gold block font-medium tracking-wider mb-1">+12.4%</span>
-                            <div className="h-[1px] w-6 bg-primary-gold/30 ml-auto"></div>
+                            <span className={`text-[11px] block font-medium tracking-wider mb-1 ${counts.weekDiff >= 0 ? 'text-primary-gold' : 'text-red-400'}`}>
+                                {counts.weekDiff >= 0 ? '+' : ''}{counts.weekDiff.toFixed(1)}%
+                            </span>
+                            <div className={`h-[1px] w-6 ml-auto ${counts.weekDiff >= 0 ? 'bg-primary-gold/30' : 'bg-red-400/30'}`}></div>
                         </div>
                     </div>
 
@@ -137,8 +137,10 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                             <p className="text-xl font-light tracking-tight text-white">R$ {formatCurrency(monthlyEarnings)}</p>
                         </div>
                         <div className="text-right">
-                            <span className="text-[11px] text-primary-gold block font-medium tracking-wider mb-1">+15.2%</span>
-                            <div className="h-[1px] w-6 bg-primary-gold/30 ml-auto"></div>
+                            <span className={`text-[11px] block font-medium tracking-wider mb-1 ${counts.monthDiff >= 0 ? 'text-primary-gold' : 'text-red-400'}`}>
+                                {counts.monthDiff >= 0 ? '+' : ''}{counts.monthDiff.toFixed(1)}%
+                            </span>
+                            <div className={`h-[1px] w-6 ml-auto ${counts.monthDiff >= 0 ? 'bg-primary-gold/30' : 'bg-red-400/30'}`}></div>
                         </div>
                     </div>
 
@@ -148,8 +150,10 @@ const EliteDashboard: React.FC<EliteDashboardProps> = ({ userName, counts, valor
                             <p className="text-xl font-light tracking-tight text-white">R$ {formatCurrency(annualProjection)}</p>
                         </div>
                         <div className="text-right">
-                            <span className="text-[11px] text-primary-gold block font-medium tracking-wider mb-1">+8.4%</span>
-                            <div className="h-[1px] w-6 bg-primary-gold/30 ml-auto"></div>
+                            <span className={`text-[11px] block font-medium tracking-wider mb-1 ${counts.yearDiff >= 0 ? 'text-primary-gold' : 'text-red-400'}`}>
+                                {counts.yearDiff >= 0 ? '+' : ''}{counts.yearDiff.toFixed(1)}%
+                            </span>
+                            <div className={`h-[1px] w-6 ml-auto ${counts.yearDiff >= 0 ? 'bg-primary-gold/30' : 'bg-red-400/30'}`}></div>
                         </div>
                     </div>
                 </section>
