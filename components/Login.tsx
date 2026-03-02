@@ -14,11 +14,17 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
 
   useEffect(() => {
     setMounted(true);
     const savedEmail = localStorage.getItem('logcash_saved_email');
-    if (savedEmail) setEmail(savedEmail);
+    if (savedEmail) {
+      setEmail(savedEmail);
+      setRememberMe(true);
+    } else {
+      setRememberMe(false);
+    }
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,7 +38,12 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
         setIsSignUp(false);
       } else {
         await supabaseService.signIn(email, password);
-        localStorage.setItem('logcash_saved_email', email);
+
+        if (rememberMe) {
+          localStorage.setItem('logcash_saved_email', email);
+        } else {
+          localStorage.removeItem('logcash_saved_email');
+        }
 
         // Trigger transition animation immediately, bypass animation delay
         onLoginSuccess();
@@ -207,8 +218,17 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
             </div>
 
             {!isSignUp && (
-              <div className="flex justify-end px-1">
-                <button type="button" className="text-xs text-secondary-gray hover:text-primary-gold transition-colors font-medium">
+              <div className="flex justify-between items-center px-1">
+                <div
+                  className="flex items-center gap-2 cursor-pointer group"
+                  onClick={() => setRememberMe(!rememberMe)}
+                >
+                  <div className={`w-4 h-4 rounded border flex items-center justify-center transition-all duration-300 ${rememberMe ? 'bg-primary-gold border-primary-gold' : 'border-secondary-gray group-hover:border-primary-gold'}`}>
+                    {rememberMe && <span className="material-symbols-outlined text-pure-black text-[12px] font-bold">check</span>}
+                  </div>
+                  <span className="text-[10px] text-secondary-gray font-bold uppercase tracking-wider group-hover:text-primary-gold transition-colors">Manter conectado</span>
+                </div>
+                <button type="button" className="text-[10px] text-secondary-gray hover:text-primary-gold transition-colors font-bold uppercase tracking-wider">
                   Esqueceu a senha?
                 </button>
               </div>

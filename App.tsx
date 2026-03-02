@@ -33,6 +33,7 @@ import EliteWeeklyPDF from './components/EliteWeeklyPDF';
 import EliteExpressPDF from './components/EliteExpressPDF';
 import EliteVehicleRegistration from './components/EliteVehicleRegistration';
 import EliteInvoicePDF from './components/EliteInvoicePDF';
+import EliteEditRoute from './components/EliteEditRoute';
 
 
 
@@ -89,6 +90,10 @@ const App: React.FC = () => {
   });
 
   const [expressRows, setExpressRows] = useState<TemporaryExpressRow[]>([]);
+  const [editingRoute, setEditingRoute] = useState<{
+    dateStr: string;
+    data: { loaded: number, delivered: number, acareacao: number }
+  } | null>(null);
 
   // 1. Verifica Sessão
   useEffect(() => {
@@ -381,10 +386,81 @@ const App: React.FC = () => {
   };
 
   const handleEditLog = (dateStr: string) => {
-    // Para edição, vamos levar o usuário para o extrato filtrado ou para a tela de rota com essa data
-    // Por enquanto, apenas logar e talvez mudar para a aba de extrato
-    console.log('Editando logs de:', dateStr);
-    setActiveTab('extrato');
+    // 1. Filtrar logs que batem com a data enviada (formato dd/mmm)
+    const logsOfDay = logs.filter(log => {
+      const logDate = new Date(log.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase();
+      return logDate === dateStr;
+    });
+
+    if (logsOfDay.length === 0) return;
+
+    // 2. Contar tipos específicos
+    const data = {
+      loaded: logsOfDay.filter(l => l.type === 'ENTRADA').length,
+      delivered: logsOfDay.filter(l => l.type === 'SAIDA').length,
+      acareacao: logsOfDay.filter(l => l.type === 'DEVOLUCAO').length
+    };
+
+    setEditingRoute({ dateStr, data });
+  };
+
+  const handleSaveEditRoute = async (newData: { loaded: number, delivered: number, acareacao: number }) => {
+    if (!editingRoute) return;
+    setIsExecuting(true);
+    const dateStr = editingRoute.dateStr;
+    const previousLogs = [...logs];
+
+    try {
+      // 1. Encontrar um log representativo daquela data para pegar o timestamp correto (ano/mês)
+      const representativeLog = logs.find(log => {
+        const d = new Date(log.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase();
+        return d === dateStr;
+      });
+
+      const targetDate = representativeLog ? new Date(representativeLog.timestamp) : new Date();
+      targetDate.setHours(12, 0, 0, 0);
+      const timestamp = targetDate.toISOString();
+
+      // 2. Filtrar logs que NÃO são dessa data
+      const otherLogs = logs.filter(log => {
+        const d = new Date(log.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '').toUpperCase();
+        return d !== dateStr;
+      });
+
+      // 3. Preparar novos logs para a data editada
+      const newEntries: Omit<LogEntry, 'id'>[] = [];
+      for (let i = 0; i < newData.loaded; i++) {
+        newEntries.push({ type: 'ENTRADA', timestamp, value: 0, isPaid: false, user_id: session?.user?.id });
+      }
+      for (let i = 0; i < newData.delivered; i++) {
+        newEntries.push({ type: 'SAIDA', timestamp, value: VALOR_POR_PACOTE, isPaid: false, user_id: session?.user?.id });
+      }
+      for (let i = 0; i < newData.acareacao; i++) {
+        newEntries.push({ type: 'DEVOLUCAO', timestamp, value: 0, isPaid: false, user_id: session?.user?.id });
+      }
+
+      // Atualização Otimista
+      const newLocalLogs = [...otherLogs, ...newEntries.map(e => ({ ...e, id: `temp-${Math.random()}` } as LogEntry))];
+      setLogs(newLocalLogs);
+
+      // 4. Sincronizar com Backend
+      await supabaseService.deleteLogsByDate(dateStr);
+      if (newEntries.length > 0) {
+        await supabaseService.saveBulkLogs(newEntries);
+      }
+
+      setEditingRoute(null);
+      setToastMsg('Alterações salvas com sucesso.');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+
+    } catch (error: any) {
+      console.error('Erro ao salvar edição de rota:', error);
+      setLogs(previousLogs);
+      showError('Erro ao salvar as alterações.');
+    } finally {
+      setIsExecuting(false);
+    }
   };
 
   const handleGlobalConfirm = async () => {
@@ -984,6 +1060,16 @@ const App: React.FC = () => {
         title="CONFIRMADO"
         message="Operação realizada com sucesso"
       />
+
+      {editingRoute && (
+        <EliteEditRoute
+          dateStr={editingRoute.dateStr}
+          initialData={editingRoute.data}
+          valorPorPacote={VALOR_POR_PACOTE}
+          onCancel={() => setEditingRoute(null)}
+          onSave={handleSaveEditRoute}
+        />
+      )}
     </div>
   );
 };
