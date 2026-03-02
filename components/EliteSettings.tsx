@@ -3,9 +3,10 @@ import React from 'react';
 interface EliteSettingsProps {
     onBack: () => void;
     onLogout: () => void;
+    onResetSystem?: () => void;
 }
 
-const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout }) => {
+const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout, onResetSystem }) => {
     return (
         <div className="flex justify-center items-center bg-pitch-black min-h-screen animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
@@ -48,12 +49,8 @@ const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout }) => {
             }} />
 
             <div className="relative flex h-screen w-full flex-col max-w-[430px] bg-pitch-black shadow-2xl justify-center">
-                <div className="flex items-center justify-between p-6 mb-4 mt-6">
-                    <button onClick={onBack} className="p-2 -ml-2 text-primary-gold/50 active:scale-95 transition-all">
-                        <span className="material-symbols-outlined text-2xl">arrow_back</span>
-                    </button>
-                    <h1 className="text-xl font-extrabold tracking-tight metallic-gold-text uppercase mr-8">Configurações</h1>
-                    <div />
+                <div className="flex items-center justify-center p-6 mb-4 mt-6">
+                    <div className="h-4" />
                 </div>
 
                 <div className="px-6 flex flex-col gap-6 overflow-y-auto pb-24">
@@ -143,13 +140,23 @@ const EliteSettings: React.FC<EliteSettingsProps> = ({ onBack, onLogout }) => {
                         </div>
                     </div>
 
-                    <button
-                        onClick={onLogout}
-                        className="mt-4 w-full p-4 rounded-[1.2rem] bg-transparent border-[0.1px] border-red-500/40 flex items-center justify-center gap-3 group active:bg-red-500/10 transition-all font-jakarta uppercase"
-                    >
-                        <span className="material-symbols-outlined text-red-500/80 text-lg">logout</span>
-                        <span className="text-[11px] font-bold text-red-500/80 tracking-[0.2em] uppercase mt-0.5">Sair da Conta Elite</span>
-                    </button>
+                    <div className="flex flex-col gap-3">
+                        <button
+                            onClick={onLogout}
+                            className="w-full p-4 rounded-[1.2rem] bg-transparent border-[0.1px] border-red-500/40 flex items-center justify-center gap-3 group active:bg-red-500/10 transition-all font-jakarta uppercase"
+                        >
+                            <span className="material-symbols-outlined text-red-500/80 text-lg">logout</span>
+                            <span className="text-[11px] font-bold text-red-500/80 tracking-[0.2em] uppercase mt-0.5">Sair da Conta Elite</span>
+                        </button>
+
+                        <button
+                            onClick={onResetSystem}
+                            className="w-full p-4 rounded-[1.2rem] bg-transparent border-[0.1px] border-red-500/20 flex items-center justify-center gap-3 group active:bg-red-500/5 transition-all font-jakarta uppercase"
+                        >
+                            <span className="material-symbols-outlined text-red-500/40 text-lg">delete_forever</span>
+                            <span className="text-[10px] font-bold text-red-500/40 tracking-[0.2em] uppercase mt-0.5">Limpar todos os dados</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

@@ -225,6 +225,13 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
                 isSignUp ? 'Solicitar Acesso' : 'ENTRAR'
               )}
             </button>
+
+            <button
+              type="button"
+              className="w-full py-4 text-[9px] font-bold text-secondary-gray/50 uppercase tracking-[0.3em] hover:text-primary-gold transition-all active:scale-95"
+            >
+              Salvar para mais tarde
+            </button>
           </form>
 
           <div className="pt-8 text-center">

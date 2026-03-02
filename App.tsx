@@ -779,6 +779,7 @@ const App: React.FC = () => {
             <EliteSettings
               onBack={() => setActiveTab('profile')}
               onLogout={() => setConfirmingAction('LOGOUT')}
+              onResetSystem={() => setConfirmingAction('RESET_SYSTEM')}
             />
           </div>
         ) : activeTab === 'extrato' ? (
