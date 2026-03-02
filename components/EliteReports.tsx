@@ -16,6 +16,8 @@ interface EliteReportsProps {
     onExtrato: () => void;
     onExpressReport: () => void;
     onWeeklyReport: () => void;
+    onDeleteLog?: (dateStr: string) => void;
+    onEditLog?: (dateStr: string) => void;
     onBack?: () => void;
 }
 
@@ -29,10 +31,14 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     onExtrato,
     onExpressReport,
     onWeeklyReport,
+    onDeleteLog,
+    onEditLog,
     onBack
 }) => {
     const [period, setPeriod] = useState<'DIA' | 'SEM' | 'MÊS' | 'ANO'>('DIA');
     const [animateGauge, setAnimateGauge] = useState(false);
+    const [selectedRow, setSelectedRow] = useState<number | null>(null);
+    const [deletingRow, setDeletingRow] = useState<number | null>(null);
 
     useEffect(() => {
         // Trigger animation shortly after mount
@@ -137,6 +143,25 @@ const EliteReports: React.FC<EliteReportsProps> = ({
             stroke-dashoffset: 628; /* starts at 0 progress */
             transition: stroke-dashoffset 2s cubic-bezier(0.16, 1, 0.3, 1);
         }
+        .cockpit-float {
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(235, 192, 81, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            transform: translateY(-50%);
+            animation: cockpit-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+        @keyframes cockpit-in {
+            from { opacity: 0; transform: translateY(-30%) scale(0.9); }
+            to { opacity: 1; transform: translateY(-50%) scale(1); }
+        }
+        .row-slide-out {
+            animation: slide-out 0.5s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+        }
+        @keyframes slide-out {
+            0% { transform: translateX(0); opacity: 1; height: 72px; }
+            100% { transform: translateX(100%); opacity: 0; height: 0; margin: 0; padding: 0; }
+        }
         `}} />
 
             <header className="relative mb-6 flex flex-col items-center justify-center py-4">
@@ -215,11 +240,52 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                             {routeData.length > 0 ? (
                                 routeData.slice(0, 5).map((route, idx) => (
                                     <React.Fragment key={idx}>
-                                        <div className="grid grid-cols-4 px-2 py-4 items-center hover:bg-white/[0.02] transition-colors cursor-default">
+                                        <div
+                                            className={`relative grid grid-cols-4 px-2 py-4 items-center hover:bg-white/[0.02] transition-all cursor-pointer active:scale-[0.99] ${deletingRow === idx ? 'row-slide-out' : ''}`}
+                                            onClick={() => setSelectedRow(selectedRow === idx ? null : idx)}
+                                        >
                                             <span className="text-xs font-semibold text-white tracking-tight">{route.dateStr}</span>
                                             <span className="text-[10px] font-medium text-center text-zinc-400 uppercase tracking-tighter">{route.status}</span>
                                             <span className="text-xs font-light text-center text-zinc-400">{route.delivered}</span>
                                             <span className="text-sm font-bold text-right tracking-tight text-[#EBC051]">{route.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+
+                                            {selectedRow === idx && !deletingRow && (
+                                                <div className="absolute right-2 top-1/2 cockpit-float flex items-center gap-4 py-3 px-6 rounded-full z-50">
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setDeletingRow(idx);
+                                                            setTimeout(() => {
+                                                                if (onDeleteLog) onDeleteLog(route.dateStr);
+                                                                setDeletingRow(null);
+                                                                setSelectedRow(null);
+                                                            }, 500);
+                                                        }}
+                                                        className="flex flex-col items-center gap-1 group"
+                                                    >
+                                                        <div className="size-8 rounded-full flex items-center justify-center bg-red-500/10 border border-red-500/30 group-active:scale-90 transition-transform">
+                                                            <span className="material-symbols-outlined text-red-500 text-lg">delete</span>
+                                                        </div>
+                                                        <span className="text-[7px] font-black text-red-500 uppercase tracking-widest">Excluir</span>
+                                                    </button>
+
+                                                    <div className="w-[1px] h-6 bg-white/10"></div>
+
+                                                    <button
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            if (onEditLog) onEditLog(route.dateStr);
+                                                            setSelectedRow(null);
+                                                        }}
+                                                        className="flex flex-col items-center gap-1 group"
+                                                    >
+                                                        <div className="size-8 rounded-full flex items-center justify-center bg-blue-500/10 border border-blue-500/30 group-active:scale-90 transition-transform">
+                                                            <span className="material-symbols-outlined text-blue-500 text-lg">edit</span>
+                                                        </div>
+                                                        <span className="text-[7px] font-black text-blue-500 uppercase tracking-widest">Editar</span>
+                                                    </button>
+                                                </div>
+                                            )}
                                         </div>
                                         <div className="micro-divider"></div>
                                     </React.Fragment>

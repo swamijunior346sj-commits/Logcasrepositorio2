@@ -355,6 +355,38 @@ const App: React.FC = () => {
     }
   };
 
+  const handleDeleteLog = async (dateStr: string) => {
+    setIsExecuting(true);
+    const previousLogs = [...logs];
+    try {
+      // Filtrar logs que NÃO batem com a data enviada (formato dd/mmm)
+      const updatedLogs = logs.filter(log => {
+        const logDate = new Date(log.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+        return logDate !== dateStr;
+      });
+
+      setLogs(updatedLogs);
+
+      // No backend, precisaríamos deletar por range de data. 
+      // Para simplificar e manter a consistência, vamos deletar no banco todos os logs dessa data específica.
+      await supabaseService.deleteLogsByDate(dateStr);
+
+    } catch (error: any) {
+      console.error('Erro ao excluir logs:', error);
+      setLogs(previousLogs);
+      showError('Erro ao excluir registros.');
+    } finally {
+      setIsExecuting(false);
+    }
+  };
+
+  const handleEditLog = (dateStr: string) => {
+    // Para edição, vamos levar o usuário para o extrato filtrado ou para a tela de rota com essa data
+    // Por enquanto, apenas logar e talvez mudar para a aba de extrato
+    console.log('Editando logs de:', dateStr);
+    setActiveTab('extrato');
+  };
+
   const handleGlobalConfirm = async () => {
     if (isExecuting || !confirmingAction) return;
 
@@ -676,6 +708,8 @@ const App: React.FC = () => {
               onExtrato={() => setActiveTab('extrato')}
               onExpressReport={() => setActiveTab('express-report')}
               onWeeklyReport={() => setActiveTab('weekly-report')}
+              onDeleteLog={handleDeleteLog}
+              onEditLog={handleEditLog}
               onBack={() => setActiveTab('dash')}
             />
           </div>

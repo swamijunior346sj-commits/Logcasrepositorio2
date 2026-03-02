@@ -224,5 +224,34 @@ export const supabaseService = {
       .in('id', ids);
 
     if (error) handleSupabaseError(error);
+  },
+
+  deleteLogsByDate: async (dateStr: string) => {
+    const { data: { session } } = await supabase.auth.getSession();
+    const user = session?.user;
+    if (!user) return;
+
+    const { data, error: fetchError } = await supabase
+      .from(TABLE_NAME)
+      .select("id, timestamp")
+      .eq('user_id', user.id);
+
+    if (fetchError) handleSupabaseError(fetchError);
+
+    const idsToDelete = (data as any[])
+      .filter(log => {
+        const logDate = new Date(log.timestamp).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }).replace('.', '');
+        return logDate === dateStr;
+      })
+      .map(log => log.id);
+
+    if (idsToDelete.length > 0) {
+      const { error: deleteError } = await supabase
+        .from(TABLE_NAME)
+        .delete()
+        .in('id', idsToDelete);
+
+      if (deleteError) handleSupabaseError(deleteError);
+    }
   }
 };
