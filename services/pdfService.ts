@@ -66,7 +66,7 @@ const buildHTMLTemplate = (
 </style>
 </head>
 <body class="flex justify-center items-center p-4 bg-pitch-black">
-<div class="relative flex w-full flex-col max-w-[430px]">
+<div class="relative flex w-full flex-col max-w-[430px] pdf-container">
     <div class="flex flex-col bg-charcoal border border-primary-gold/20 rounded-2xl cinematic-glow overflow-hidden">
         
         <!-- Cabeçalho -->
@@ -128,7 +128,7 @@ const printHtmlPdf = (html: string) => {
     iframe.style.right = '0';
     iframe.style.bottom = '0';
     iframe.style.width = '430px'; // Set to match the container width
-    iframe.style.height = '1000px'; // Give it enough height to render
+    iframe.style.height = '3000px'; // Give it enough height to render long lists
     iframe.style.border = '0';
     iframe.style.opacity = '0'; // Hide it visually but allow rendering
     document.body.appendChild(iframe);
