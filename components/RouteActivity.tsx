@@ -11,9 +11,10 @@ interface RouteActivityProps {
     onSave: (data: { entrada: number, saida: number, devolucao: number }) => void;
 }
 
-const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave }) => {
+const RouteActivity: React.FC<RouteActivityProps> = ({ counts, onSave }) => {
     const [showBulkLoad, setShowBulkLoad] = useState(false);
     const [showBulkDeliver, setShowBulkDeliver] = useState(false);
+    const [showConfirmation, setShowConfirmation] = useState(false);
     const [bulkQty, setBulkQty] = useState(0);
     const [animatingCard, setAnimatingCard] = useState<'entrada' | 'saida' | 'devolucao' | null>(null);
 
@@ -35,55 +36,48 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
 
     const handleBulkConfirm = (type: 'entrada' | 'saida') => {
         if (bulkQty > 0) {
-            // Chama o onSave imediatamente
             onSave({
                 entrada: type === 'entrada' ? bulkQty : 0,
                 saida: type === 'saida' ? bulkQty : 0,
                 devolucao: 0
             });
-            // Removido popup local para agilizar a experiência
+            setShowConfirmation(true);
         }
         setBulkQty(0);
         setShowBulkLoad(false);
         setShowBulkDeliver(false);
     };
 
-    // Calculate progress for circular gauge (max 18 deliveries as per dashboard)
-    const goal = 18;
-    const progressPerc = Math.min(100, (counts.todaySaida / goal) * 100);
-    const strokeDashoffset = 301 - (301 * progressPerc) / 100; // 301 is approx circumference for r=48 (2 * pi * 48)
-
     return (
-        <div className="bg-log-black text-[#F5F5F5] min-h-screen font-sans antialiased overflow-x-hidden selection:bg-gold/30 animate-in fade-in duration-500">
+        <div className="bg-log-black text-[#F5F5F5] min-h-screen font-sans antialiased overflow-x-hidden overflow-y-auto selection:bg-gold/30 animate-in fade-in duration-500">
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .gold-gradient-text {
-                    background: linear-gradient(135deg, #FDF0D5 0%, #EBC051 50%, #A67C00 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
+                .neon-pulse {
+                    animation: neon-pulse-animation 3s infinite ease-in-out;
                 }
-                .glass-charcoal {
-                    background: rgba(18, 18, 16, 0.4);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
-                    border: 1px solid rgba(235, 192, 81, 0.15);
+                @keyframes neon-pulse-animation {
+                    0%, 100% { 
+                        filter: drop-shadow(0 0 2px rgba(235, 192, 81, 0.3)); 
+                        opacity: 0.7;
+                    }
+                    50% { 
+                        filter: drop-shadow(0 0 15px rgba(235, 192, 81, 0.9)); 
+                        opacity: 1;
+                    }
                 }
-                .cinematic-glow {
-                    box-shadow: 0 0 40px rgba(235, 192, 81, 0.08), inset 0 0 20px rgba(235, 192, 81, 0.03);
-                    border: 1px solid rgba(235, 192, 81, 0.2);
-                }
-                .glow-pulse {
-                    animation: glow-pulse-animation 4s infinite ease-in-out;
-                }
-                @keyframes glow-pulse-animation {
-                    0%, 100% { box-shadow: 0 0 10px rgba(235, 192, 81, 0.03); }
-                    50% { box-shadow: 0 0 20px rgba(235, 192, 81, 0.08); }
+                .stat-card-active:active {
+                    border-color: #EBC051;
+                    box-shadow: 0 0 25px rgba(235, 192, 81, 0.4);
+                    transform: scale(0.96);
                 }
                 .ios-safe-bottom {
                     padding-bottom: env(safe-area-inset-bottom);
                 }
                 .ios-safe-top {
                     padding-top: env(safe-area-inset-top);
+                }
+                .minimalist-border {
+                    border: 1px solid #EBC051;
                 }
                 /* One-click card animations */
                 @keyframes float-up-fade {
@@ -109,42 +103,66 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                 .oneclick-ripple { animation: ripple-ring 0.6s ease-out forwards; }
                 .oneclick-flash { animation: card-flash 0.5s ease-out forwards; }
                 .oneclick-check { animation: check-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+                .glass-overlay-dark {
+                    background: rgba(0, 0, 0, 0.9);
+                    backdrop-filter: blur(25px);
+                    -webkit-backdrop-filter: blur(25px);
+                }
+                .minimalist-border-modal {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                    box-shadow: 0 0 40px rgba(0, 0, 0, 0.5);
+                }
+                .outline-button-premium {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                }
+                .outline-button-premium:active {
+                    background: rgba(235, 192, 81, 0.1);
+                    transform: scale(0.98);
+                }
+                .modal-border-only {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(235, 192, 81, 0.05);
+                }
+                .gold-glow {
+                    text-shadow: 0 0 30px rgba(235, 192, 81, 0.6);
+                }
+                @keyframes pulse-gold {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    50% { transform: scale(1.05); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+                .animate-pulse-gold {
+                    animation: pulse-gold 3s ease-in-out infinite;
+                }
                 `
             }} />
 
-            <div className="max-w-md mx-auto p-6 flex flex-col relative z-20 h-full ios-safe-top pb-24">
-                {/* Header / Circular Gauge */}
-                <div className="glass-charcoal cinematic-glow rounded-[2.5rem] p-6 flex flex-col items-center justify-center relative mb-6 mt-2">
-                    <div className="relative w-48 h-48 flex items-center justify-center">
-                        <div className="absolute inset-0 rounded-full border-[1.5px] border-gold/10"></div>
-                        <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 100 100">
-                            <circle
-                                className="transition-all duration-1000 ease-out opacity-80"
-                                cx="50" cy="50" fill="none" r="48"
-                                stroke="#EBC051"
-                                strokeDasharray="301" // circumference 2*pi*48 = ~301
-                                strokeDashoffset={strokeDashoffset}
-                                strokeLinecap="round"
-                                strokeWidth="1.5"
-                            ></circle>
+            <div className="max-w-md mx-auto min-h-screen p-6 flex flex-col relative z-10 ios-safe-top pb-32">
+                <div className="flex flex-col items-center justify-center relative mb-14 mt-10">
+                    <div className="relative w-64 h-64 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full border-[1px] border-gold/10"></div>
+                        <svg className="absolute inset-0 w-full h-full -rotate-90 neon-pulse" viewBox="0 0 100 100">
+                            <circle cx="50" cy="50" fill="none" r="48" stroke="#EBC051" strokeDasharray="240" strokeDashoffset="65" strokeLinecap="round" strokeWidth="1.8"></circle>
                         </svg>
                         <div className="text-center z-10">
-                            <p className="text-[9px] font-bold tracking-[0.4em] text-gold/60 uppercase mb-2" style={{ fontFamily: "'Syncopate', sans-serif" }}>Total</p>
+                            <p className="text-[10px] font-display font-bold tracking-[0.5em] text-gold/60 uppercase mb-4" style={{ fontFamily: "'Syncopate', sans-serif" }}>Total</p>
                             <div className="flex flex-col items-center">
-                                <span className="text-[14px] font-medium text-gold/80 mb-1" style={{ fontFamily: "'Syncopate', sans-serif" }}>R$</span>
-                                <span className="text-4xl font-extrabold tracking-tight text-[#F5F5F5]">{formatCurrency(totalValue)}</span>
+                                <span className="text-[16px] font-display font-medium text-gold/80 mb-1" style={{ fontFamily: "'Syncopate', sans-serif" }}>R$</span>
+                                <span className="text-6xl font-sans font-extrabold tracking-tight text-[#F5F5F5]">{formatCurrency(totalValue)}</span>
                             </div>
-                            <p className="text-[8px] font-bold tracking-[0.2em] text-zinc-500 mt-3 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Hoje</p>
+                            <p className="text-[9px] font-display font-bold tracking-[0.3em] text-zinc-500 mt-5 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Hoje</p>
                         </div>
                     </div>
                 </div>
 
-                {/* Stats Grid - One-click buttons */}
-                <div className="grid grid-cols-3 gap-3 mb-6">
+                <div className="grid grid-cols-3 gap-4 mb-10">
                     <button
                         onClick={() => handleOneClick('entrada')}
-                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'entrada' ? 'border-yellow-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
-                            }`}
+                        className={`bg-[#1A1A1A]/40 border flex flex-col items-center justify-center py-5 px-2 rounded-3xl transition-all duration-300 stat-card-active relative overflow-hidden ${animatingCard === 'entrada' ? 'border-yellow-500 scale-95' : 'border-white/5'}`}
                     >
                         {animatingCard === 'entrada' && (
                             <>
@@ -156,18 +174,13 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-yellow-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Carregados</p>
-                        <div className={`text-xl font-bold transition-colors ${animatingCard === 'entrada' ? 'text-yellow-400' : 'text-[#F5F5F5]'}`}>
-                            {String(counts.todayEntrada).padStart(2, '0')}
-                        </div>
-                        <div className="mt-1.5 w-4 h-[1.5px] bg-yellow-500/40 rounded-full"></div>
+                        <p className="text-[8px] font-display font-bold tracking-[0.1em] text-zinc-400 mb-1 uppercase text-center" style={{ fontFamily: "'Syncopate', sans-serif" }}>Carregados</p>
+                        <div className={`text-2xl font-sans font-bold transition-colors ${animatingCard === 'entrada' ? 'text-yellow-400' : 'text-[#F5F5F5]'}`}>{String(counts.todayEntrada).padStart(2, '0')}</div>
+                        <div className="mt-2 w-5 h-[2px] bg-yellow-500/50 rounded-full"></div>
                     </button>
-
-                    {/* Entregues */}
                     <button
                         onClick={() => handleOneClick('saida')}
-                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'saida' ? 'border-emerald-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
-                            }`}
+                        className={`bg-[#1A1A1A]/40 border flex flex-col items-center justify-center py-5 px-2 rounded-3xl transition-all duration-300 stat-card-active relative overflow-hidden ${animatingCard === 'saida' ? 'border-emerald-500 scale-95' : 'border-white/5'}`}
                     >
                         {animatingCard === 'saida' && (
                             <>
@@ -179,18 +192,13 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-emerald-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Entregues</p>
-                        <div className={`text-xl font-bold transition-colors ${animatingCard === 'saida' ? 'text-emerald-400' : 'text-[#F5F5F5]'}`}>
-                            {String(counts.todaySaida).padStart(2, '0')}
-                        </div>
-                        <div className="mt-1.5 w-4 h-[1.5px] bg-emerald-500/40 rounded-full"></div>
+                        <p className="text-[8px] font-display font-bold tracking-[0.1em] text-zinc-400 mb-1 uppercase text-center" style={{ fontFamily: "'Syncopate', sans-serif" }}>Entregues</p>
+                        <div className={`text-2xl font-sans font-bold transition-colors ${animatingCard === 'saida' ? 'text-emerald-400' : 'text-[#F5F5F5]'}`}>{String(counts.todaySaida).padStart(2, '0')}</div>
+                        <div className="mt-2 w-5 h-[2px] bg-emerald-500/50 rounded-full"></div>
                     </button>
-
-                    {/* Insucessos */}
                     <button
                         onClick={() => handleOneClick('devolucao')}
-                        className={`flex flex-col items-center justify-center py-4 px-2 rounded-2xl bg-[#121210]/40 border transition-all active:scale-[0.98] relative overflow-hidden ${animatingCard === 'devolucao' ? 'border-red-500 scale-95' : 'border-[#2A2A26]/30 glow-pulse'
-                            }`}
+                        className={`bg-[#1A1A1A]/40 border flex flex-col items-center justify-center py-5 px-2 rounded-3xl transition-all duration-300 stat-card-active relative overflow-hidden ${animatingCard === 'devolucao' ? 'border-red-500 scale-95' : 'border-white/5'}`}
                     >
                         {animatingCard === 'devolucao' && (
                             <>
@@ -202,57 +210,62 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                 <span className="absolute bottom-2 left-1/2 -translate-x-1/2 material-symbols-outlined text-red-400 text-sm oneclick-check z-20">check</span>
                             </>
                         )}
-                        <p className="text-[7px] font-bold tracking-[0.15em] text-zinc-500 mb-1 uppercase" style={{ fontFamily: "'Syncopate', sans-serif" }}>Insucessos</p>
-                        <div className={`text-xl font-bold transition-colors ${animatingCard === 'devolucao' ? 'text-red-400' : 'text-[#F5F5F5]'}`}>
-                            {String(counts.todayDevolucao).padStart(2, '0')}
+                        <p className="text-[8px] font-display font-bold tracking-[0.1em] text-zinc-400 mb-1 uppercase text-center" style={{ fontFamily: "'Syncopate', sans-serif" }}>Insucessos</p>
+                        <div className={`text-2xl font-sans font-bold transition-colors ${animatingCard === 'devolucao' ? 'text-red-400' : 'text-[#F5F5F5]'}`}>{String(counts.todayDevolucao).padStart(2, '0')}</div>
+                        <div className="mt-2 w-5 h-[2px] bg-red-500/50 rounded-full"></div>
+                    </button>
+                </div>
+
+                <div className="flex flex-col gap-4 flex-grow justify-start">
+                    <button onClick={() => { setBulkQty(0); setShowBulkLoad(true); }} className="w-full py-6 rounded-3xl minimalist-border bg-transparent flex items-center justify-center gap-4 active:scale-[0.98] transition-all group">
+                        <span className="material-symbols-outlined text-[#EBC051] font-light text-2xl">layers</span>
+                        <span className="text-[#EBC051] font-display font-bold text-[11px] tracking-[0.25em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>CARREGAR EM MASSA</span>
+                    </button>
+                    <button onClick={() => { setBulkQty(0); setShowBulkDeliver(true); }} className="w-full py-6 rounded-3xl minimalist-border bg-transparent flex items-center justify-center gap-4 active:scale-[0.98] transition-all group">
+                        <span className="material-symbols-outlined text-[#EBC051] font-light text-2xl">task_alt</span>
+                        <span className="text-[#EBC051] font-display font-bold text-[11px] tracking-[0.25em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>ENTREGAS EM MASSA</span>
+                    </button>
+                </div>
+
+                <div className="mt-auto pt-4 pb-8 ios-safe-bottom">
+                    <div className="flex flex-col items-center gap-5">
+                        <div className="flex items-center gap-4 w-full px-6">
+                            <div className="h-[1px] flex-grow bg-gradient-to-r from-transparent via-gold/10 to-transparent"></div>
+                            <div className="flex gap-2.5 px-2">
+                                <div className="w-1.5 h-1.5 rounded-full bg-gold/5"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-gold/15"></div>
+                                <div className="w-4 h-1.5 rounded-full bg-gold/50"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-gold/15"></div>
+                                <div className="w-1.5 h-1.5 rounded-full bg-gold/5"></div>
+                            </div>
+                            <div className="h-[1px] flex-grow bg-gradient-to-l from-transparent via-gold/10 to-transparent"></div>
                         </div>
-                        <div className="mt-1.5 w-4 h-[1.5px] bg-red-500/40 rounded-full"></div>
-                    </button>
+                    </div>
                 </div>
-
-                {/* Bulk Action Buttons */}
-                <div className="flex flex-col gap-3 flex-grow justify-start">
-                    <button
-                        onClick={() => { setBulkQty(0); setShowBulkLoad(true); }}
-                        className="glass-charcoal w-full py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
-                    >
-                        <span className="material-symbols-outlined text-[#EBC051] font-light text-xl">layers</span>
-                        <span className="text-[#EBC051] font-bold text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>CARREGAR EM MASSA</span>
-                    </button>
-                    <button
-                        onClick={() => { setBulkQty(0); setShowBulkDeliver(true); }}
-                        className="glass-charcoal w-full py-4 rounded-2xl flex items-center justify-center gap-3 active:scale-[0.98] transition-all group overflow-hidden"
-                    >
-                        <span className="material-symbols-outlined text-[#EBC051] font-light text-xl">task_alt</span>
-                        <span className="text-[#EBC051] font-bold text-[10px] tracking-[0.2em]" style={{ fontFamily: "'Syncopate', sans-serif" }}>ENTREGAS EM MASSA</span>
-                    </button>
-                </div>
-
-                <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-32 h-1 bg-white/5 rounded-full z-10"></div>
             </div>
 
             {/* Bulk Actions Modals */}
             {
                 (showBulkLoad || showBulkDeliver) && (
-                    <div className="fixed inset-0 z-[200] flex items-center justify-center p-6 animate-in fade-in zoom-in duration-300 bg-black/80 backdrop-blur-xl">
-                        <div className="w-full max-w-[380px] rounded-[32px] overflow-hidden bg-zinc-900/40 border border-[#EBC051]/30 p-8 shadow-2xl">
-                            <div className="text-center">
-                                <div className="size-16 mx-auto mb-6 rounded-full flex items-center justify-center bg-gold/5 border border-gold/20">
+                    <div className="fixed inset-0 z-[200] glass-overlay-dark flex items-center justify-center px-6 animate-in fade-in zoom-in duration-300">
+                        <div className={`w-full max-w-[380px] bg-transparent ${showBulkLoad ? 'minimalist-border-modal rounded-[32px] overflow-hidden' : 'border border-[#EBC051]/40 rounded-[2.5rem]'}`}>
+                            <div className={showBulkLoad ? 'p-8 text-center' : 'p-10 text-center'}>
+                                <div className={`size-16 mx-auto ${showBulkLoad ? 'mb-6 bg-[#EBC051]/5' : 'mb-8 bg-transparent'} rounded-full border border-[#EBC051]/30 flex items-center justify-center`}>
                                     <span className="material-symbols-outlined text-[#EBC051] text-3xl">
                                         {showBulkLoad ? 'move_to_inbox' : 'done_all'}
                                     </span>
                                 </div>
-                                <h2 className="text-xl font-black tracking-widest text-white uppercase mb-4">
+                                <h2 className={`text-xl font-black text-white uppercase mb-3 ${showBulkLoad ? 'tracking-[0.1em]' : 'tracking-[0.25em]'}`} style={{ fontFamily: showBulkLoad ? 'inherit' : '"Plus Jakarta Sans", sans-serif' }}>
                                     {showBulkLoad ? 'CARREGAMENTO EM MASSA' : 'ENTREGUES EM MASSA'}
                                 </h2>
-                                <p className="text-white/60 text-sm font-medium mb-10 leading-relaxed px-4">
-                                    {showBulkLoad ? 'Confirme a quantidade de pacotes carregados na base:' : 'Confirme a quantidade de pacotes entregues com sucesso:'}
+                                <p className={`text-sm font-medium mb-10 leading-relaxed px-4 ${showBulkLoad ? 'text-white/80' : 'text-zinc-400'}`}>
+                                    {showBulkLoad ? 'Confirme a quantidade de unidades carregadas na base:' : 'Confirme a quantidade de pacotes entregues com sucesso:'}
                                 </p>
 
                                 <div className="relative flex items-center justify-center gap-8 mb-12">
                                     <button
                                         onClick={() => setBulkQty(prev => Math.max(0, prev - 1))}
-                                        className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
+                                        className="size-12 rounded-full border border-[#EBC051]/30 flex items-center justify-center text-[#EBC051] active:bg-[#EBC051]/20 transition-all font-bold"
                                     >
                                         <span className="material-symbols-outlined">remove</span>
                                     </button>
@@ -262,28 +275,28 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                                             type="number"
                                             value={bulkQty}
                                             onChange={(e) => setBulkQty(parseInt(e.target.value) || 0)}
-                                            className="w-24 bg-transparent border-none text-center text-5xl font-black text-white focus:ring-0 p-0"
+                                            className={`w-24 bg-transparent border-none text-center font-black text-white focus:ring-0 p-0 ${showBulkLoad ? 'text-4xl' : 'text-6xl'}`}
                                         />
-                                        <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 text-[10px] font-bold text-[#EBC051] uppercase tracking-[0.2em] opacity-60">UNIDADES</div>
+                                        <div className={`absolute left-1/2 -translate-x-1/2 text-[10px] font-black text-[#EBC051] uppercase opacity-80 ${showBulkLoad ? '-bottom-4 tracking-[0.2em]' : '-bottom-5 tracking-[0.3em]'}`}>UNIDADES</div>
                                     </div>
                                     <button
                                         onClick={() => setBulkQty(prev => prev + 1)}
-                                        className="size-12 rounded-full border border-gold/40 flex items-center justify-center text-[#EBC051] active:bg-gold/10 transition-all font-bold"
+                                        className="size-12 rounded-full border border-[#EBC051]/30 flex items-center justify-center text-[#EBC051] active:bg-[#EBC051]/20 transition-all font-bold"
                                     >
                                         <span className="material-symbols-outlined">add</span>
                                     </button>
                                 </div>
 
-                                <div className="space-y-4">
+                                <div className={`space-y-4 ${showBulkLoad ? '' : 'px-2'}`}>
                                     <button
                                         onClick={() => handleBulkConfirm(showBulkLoad ? 'entrada' : 'saida')}
-                                        className="w-full h-14 rounded-2xl flex items-center justify-center text-[#EBC051] border border-[#EBC051] font-bold uppercase tracking-[0.25em] text-xs transition-all active:scale-[0.98] hover:bg-gold/5"
+                                        className={`w-full outline-button-premium flex items-center justify-center text-[#EBC051] font-bold uppercase transition-all duration-300 ${showBulkLoad ? 'h-14 py-4 rounded-[22px] tracking-[0.25em] text-xs' : 'h-14 rounded-2xl tracking-[0.2em] text-sm'}`}
                                     >
-                                        CONFIRMAR LOTE
+                                        {showBulkLoad ? 'CONFIRMAR LOTE' : 'FINALIZAR LOTE'}
                                     </button>
                                     <button
                                         onClick={() => { setShowBulkLoad(false); setShowBulkDeliver(false); }}
-                                        className="w-full py-2 text-zinc-500 font-bold uppercase tracking-widest text-[11px] hover:text-white transition-colors"
+                                        className={`w-full text-zinc-500 font-bold uppercase hover:text-white transition-colors ${showBulkLoad ? 'py-2 tracking-[0.15em] text-[11px]' : 'h-12 tracking-[0.15em] text-[10px]'}`}
                                     >
                                         CANCELAR
                                     </button>
@@ -293,7 +306,37 @@ const RouteActivity: React.FC<RouteActivityProps> = ({ onBack, counts, onSave })
                     </div>
                 )
             }
-        </div >
+
+            {/* Premium Confirmation Modal */}
+            {
+                showConfirmation && (
+                    <div className="fixed inset-0 z-[200] glass-overlay-dark flex items-center justify-center px-8 animate-in fade-in zoom-in duration-300">
+                        <div className="w-full max-w-[340px] modal-border-only rounded-[40px] overflow-hidden">
+                            <div className="p-10 text-center">
+                                <div className="relative size-24 mx-auto mb-8 flex items-center justify-center">
+                                    <div className="absolute inset-0 bg-[#EBC051]/15 blur-3xl rounded-full"></div>
+                                    <div className="relative flex items-center justify-center animate-pulse-gold">
+                                        <span className="material-symbols-outlined text-[#EBC051] text-[84px] leading-none gold-glow" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
+                                            check_circle
+                                        </span>
+                                    </div>
+                                </div>
+                                <h2 className="text-2xl font-black tracking-[0.2em] text-white uppercase mb-3" style={{ fontFamily: '"Plus Jakarta Sans", sans-serif' }}>CONFIRMADO</h2>
+                                <p className="text-white/50 text-sm font-medium mb-12 leading-relaxed">
+                                    Operação realizada com sucesso
+                                </p>
+                                <button
+                                    onClick={() => setShowConfirmation(false)}
+                                    className="w-full py-4 outline-button-premium rounded-[20px] flex items-center justify-center text-[#EBC051] font-bold uppercase tracking-[0.25em] text-[10px] transition-all duration-300"
+                                >
+                                    ENTENDIDO
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )
+            }
+        </div>
     );
 };
 

@@ -594,35 +594,16 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-black text-slate-200 selection:bg-emerald-500/30 flex flex-col overflow-x-hidden relative">
-      <header className="bg-black/50 backdrop-blur-3xl border-b border-[#D4AF37]/10 px-4 sticky top-0 z-[100] pt-6 pb-2 transition-all">
-        <div className="max-w-lg mx-auto flex flex-col gap-6">
-          {/* Main Info Row / Sub-screen Header */}
-          {['dash', 'route', 'stats', 'profile'].includes(activeTab) ? (
-            <div className="flex justify-between items-center px-2">
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="size-12 rounded-full border border-[#D4AF37]/30 p-0.5 bg-gradient-to-tr from-[#AA771C] to-[#F9E29C] shadow-lg">
-                    <div className="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-full filter contrast-125 grayscale brightness-90 border border-black/20" style={{ backgroundImage: 'url("https://lh3.googleusercontent.com/aida-public/AB6AXuAlP_6m46cIx9G_FjX3ku2YaZwMvrfuyj4hQcf8xv7fAjTuzgSadvH49RYNSfu0UCU-L5UZp5I2y0Sn4kft4mYucmwGhEPsIi0hGtD62kD_ZLmldrXSqt9j8I8DaHcJFN81eauwKQcGbwshg1YO9KUWsElYrK-IHKuGVFVOVxDYaSI7_83oI1N7UfOVpnysry8y5V0QFDicN1tywt_1WP2IxuPM0ev4dx7JYogKpeaAYsLMSJjGbrfGwMfv_r50U4uzFZ7Zxe3KjKLJ")' }}></div>
-                  </div>
-                  <div className="absolute -bottom-1 -right-1 bg-gradient-to-b from-[#F9E29C] to-[#AA771C] text-black text-[7px] font-black px-1.5 py-0.5 rounded-full border border-black shadow-md">LV15</div>
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-md font-extrabold text-white leading-tight">{userName.split(' ')[0]}</h2>
-                    <div className="size-1.5 rounded-full bg-[#D4AF37] animate-pulse"></div>
-                  </div>
-                  <p className="text-[7px] tracking-[0.25em] text-[#D4AF37] font-black uppercase opacity-70">SINAL ELITE ESTÁVEL</p>
-                </div>
-              </div>
-
-            </div>
-          ) : (
+      {/* Sub-screen Header Only (Removed main profile header) */}
+      {!['dash', 'route', 'stats', 'profile'].includes(activeTab) && (
+        <header className="bg-black/50 backdrop-blur-3xl border-b border-[#D4AF37]/10 px-4 sticky top-0 z-[100] pt-6 pb-2 transition-all">
+          <div className="max-w-lg mx-auto flex flex-col gap-6">
             <div className="flex items-center justify-between px-2">
               <button
                 onClick={() => {
                   if (activeTab === 'personal-data' || activeTab === 'tax-data' || activeTab === 'settings') {
                     setActiveTab('profile');
-                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato' || activeTab === 'express-report') {
+                  } else if (activeTab === 'tax-invoice' || activeTab === 'pdf-view' || activeTab === 'extrato' || activeTab === 'express-report' || activeTab === 'weekly-report') {
                     setActiveTab('stats');
                   } else if (activeTab === 'invoice-success') {
                     setActiveTab('dash');
@@ -648,9 +629,9 @@ const App: React.FC = () => {
               </span>
               <div className="size-11"></div> {/* Spacer to center title */}
             </div>
-          )}
-        </div>
-      </header>
+          </div>
+        </header>
+      )}
 
       {showToast && (
         <div className="fixed top-24 left-1/2 -translate-x-1/2 z-[1000] animate-in slide-in-from-top-4 duration-300">
@@ -751,7 +732,6 @@ const App: React.FC = () => {
               onBack={() => setActiveTab('profile')}
               onSave={(data) => {
                 console.log("Dados Fiscais Salvos:", data);
-                triggerSuccess('SAVE_SUCCESS');
                 setActiveTab('profile');
               }}
             />
@@ -766,7 +746,6 @@ const App: React.FC = () => {
               onSave={(data) => {
                 setUserName(data.userName);
                 setVehicleName(data.vehicleName);
-                triggerSuccess('SAVE_SUCCESS');
                 setActiveTab('profile');
               }}
             />

@@ -13,6 +13,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
     const [vehicle, setVehicle] = useState(vehicleName);
     const [isVehicleMenuOpen, setIsVehicleMenuOpen] = useState(false);
     const [showDeleteAnim, setShowDeleteAnim] = useState(false);
+    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
 
     return (
         <div className="flex flex-col items-center bg-pitch-black animate-in fade-in duration-700 min-h-screen">
@@ -41,6 +42,35 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                 .outline-gold-btn:active {
                     background: rgba(235, 192, 81, 0.05);
                     transform: translateY(1px);
+                }
+                .glass-overlay-premium {
+                    background: rgba(0, 0, 0, 0.92);
+                    backdrop-filter: blur(25px);
+                    -webkit-backdrop-filter: blur(25px);
+                }
+                .modal-border-only {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(235, 192, 81, 0.05);
+                }
+                .gold-glow-icon {
+                    text-shadow: 0 0 30px rgba(235, 192, 81, 0.6);
+                }
+                .outline-button-gold-modal {
+                    background: transparent;
+                    border: 1px solid #EBC051;
+                }
+                .outline-button-gold-modal:active {
+                    background: rgba(235, 192, 81, 0.1);
+                    transform: scale(0.97);
+                }
+                @keyframes pulse-gold {
+                    0% { transform: scale(1); opacity: 0.8; }
+                    50% { transform: scale(1.05); opacity: 1; }
+                    100% { transform: scale(1); opacity: 0.8; }
+                }
+                .animate-pulse-gold {
+                    animation: pulse-gold 3s ease-in-out infinite;
                 }
                 `
             }} />
@@ -170,7 +200,7 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                 {/* Action Button */}
                 <div className="mt-12 px-6 mb-10">
                     <button
-                        onClick={() => onSave({ userName: userName, vehicleName: vehicle })}
+                        onClick={() => setShowSaveSuccess(true)}
                         className="w-full outline-gold-btn rounded-2xl py-5 font-black text-sm uppercase tracking-[0.2em] active:scale-[0.98] transition-all"
                     >
                         Salvar Alterações
@@ -186,6 +216,37 @@ const ElitePersonalData: React.FC<ElitePersonalDataProps> = ({ userName, userEma
                 isOpen={showDeleteAnim}
                 onClose={() => setShowDeleteAnim(false)}
             />
+
+            {/* Custom Confirm Save Popup */}
+            {showSaveSuccess && (
+                <div className="fixed inset-0 z-[100] glass-overlay-premium flex items-center justify-center px-8 animate-in fade-in duration-300">
+                    <div className="w-full max-w-[340px] modal-border-only rounded-[40px] overflow-hidden bg-pitch-black">
+                        <div className="p-10 text-center">
+                            <div className="relative size-24 mx-auto mb-8 flex items-center justify-center">
+                                <div className="absolute inset-0 bg-[#EBC051]/15 blur-3xl rounded-full"></div>
+                                <div className="relative flex items-center justify-center animate-pulse-gold">
+                                    <span className="material-symbols-outlined text-[#EBC051] text-[84px] leading-none gold-glow-icon" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
+                                        check_circle
+                                    </span>
+                                </div>
+                            </div>
+                            <h2 className="text-2xl font-black tracking-[0.2em] text-white uppercase mb-3">CONFIRMADO</h2>
+                            <p className="text-white/50 text-sm font-medium mb-12 leading-relaxed">
+                                Operação realizada com sucesso
+                            </p>
+                            <button
+                                onClick={() => {
+                                    setShowSaveSuccess(false);
+                                    onSave({ userName: userName, vehicleName: vehicle });
+                                }}
+                                className="w-full py-4 outline-button-gold-modal rounded-[20px] flex items-center justify-center text-[#EBC051] font-bold uppercase tracking-[0.25em] text-[10px] transition-all duration-300"
+                            >
+                                ENTENDIDO
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

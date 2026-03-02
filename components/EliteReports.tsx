@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { LogEntry } from '../types';
 
 interface EliteReportsProps {
@@ -31,7 +31,14 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     onWeeklyReport,
     onBack
 }) => {
-    const [period, setPeriod] = useState<'DIA' | 'SEMANA' | 'MÊS' | 'ANO'>('DIA');
+    const [period, setPeriod] = useState<'DIA' | 'SEM' | 'MÊS' | 'ANO'>('DIA');
+    const [animateGauge, setAnimateGauge] = useState(false);
+
+    useEffect(() => {
+        // Trigger animation shortly after mount
+        const timer = setTimeout(() => setAnimateGauge(true), 100);
+        return () => clearTimeout(timer);
+    }, []);
 
     const formatBRL = (val: number) => {
         const parts = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).formatToParts(val);
@@ -39,6 +46,12 @@ const EliteReports: React.FC<EliteReportsProps> = ({
         const value = parts.filter(p => p.type !== 'currency' && p.type !== 'literal').map(p => p.value).join('');
         return { currency, value };
     };
+
+    // Calculate maximum value over all periods to set gauge progress correctly, or use a fixed goal
+    const GAUGE_GOAL = 10000; // Arbitrary goal for the circle
+    const progressPercent = Math.min(100, (wallet.pending / GAUGE_GOAL) * 100);
+    const circleCircumference = 2 * Math.PI * 100; // r=100 -> ~628
+    const strokeDashoffset = circleCircumference - (circleCircumference * progressPercent / 100);
 
     // Group logs by day for the simplified table
     const routeData = useMemo(() => {
@@ -49,6 +62,7 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                 delivered: number;
                 acareacao: number;
                 value: number;
+                status: 'Concluído' | 'Pendente';
             }
         } = {};
 
@@ -62,7 +76,8 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                     loaded: 0,
                     delivered: 0,
                     acareacao: 0,
-                    value: 0
+                    value: 0,
+                    status: 'Concluído'
                 };
             }
 
@@ -71,6 +86,9 @@ const EliteReports: React.FC<EliteReportsProps> = ({
             if (log.type === 'DEVOLUCAO') groups[key].acareacao += 1;
 
             groups[key].value += log.value;
+            // Mock status logic
+            if (groups[key].value < 50) groups[key].status = 'Pendente';
+            else groups[key].status = 'Concluído';
         });
 
         return Object.values(groups).sort((a, b) => b.dateStr.localeCompare(a.dateStr));
@@ -79,116 +97,143 @@ const EliteReports: React.FC<EliteReportsProps> = ({
     const walletFormatted = formatBRL(wallet.pending);
 
     return (
-        <div className="relative flex w-full flex-col overflow-x-hidden max-w-[430px] min-h-[100dvh] bg-[#000000] text-zinc-100 font-sans selection:bg-[#EBC051]/30 pb-20">
+        <div className="max-w-md mx-auto min-h-screen relative flex flex-col pt-8 pb-32 px-6 bg-[#000000] text-zinc-100 font-sans selection:bg-[#EBC051]/30 overflow-x-hidden animate-in fade-in duration-500">
             <style dangerouslySetInnerHTML={{
                 __html: `
-        .glass-effect {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
+        :root {
+            --primary-gold: #EBC051;
+        }
+        .sharp-card {
+            background: #050505;
             border: 1px solid rgba(235, 192, 81, 0.1);
         }
-        .gold-radial-glow {
-            background: radial-gradient(circle at center, rgba(235, 192, 81, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
-        }
-        .pinstripe-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent 0%, rgba(235, 192, 81, 0.3) 50%, transparent 100%);
+        .micro-divider {
+            height: 0.5px;
+            background: rgba(235, 192, 81, 0.2);
             width: 100%;
         }
-      `}} />
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 200, 'GRAD' 0, 'opsz' 20;
+        }
+        .gauge-container {
+            position: relative;
+            width: 240px;
+            height: 240px;
+        }
+        .gauge-svg {
+            transform: rotate(-90deg);
+        }
+        .gauge-bg {
+            fill: none;
+            stroke: rgba(235, 192, 81, 0.05);
+            stroke-width: 4;
+        }
+        .gauge-progress {
+            fill: none;
+            stroke: var(--primary-gold);
+            stroke-width: 4;
+            stroke-linecap: round;
+            stroke-dasharray: 628;
+            stroke-dashoffset: 628; /* starts at 0 progress */
+            transition: stroke-dashoffset 2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        `}} />
 
-            <div className="flex flex-col pt-16 pb-8 px-6">
-                <header className="relative mb-8 flex flex-col items-center justify-center py-6">
-                    <div className="absolute inset-0 gold-radial-glow -z-10 scale-150"></div>
-                    <div className="text-center space-y-1">
-                        <p className="text-[10px] uppercase tracking-[0.5em] font-medium text-zinc-500 mb-4">Saldo a Receber</p>
-                        <div className="flex items-center justify-center gap-4">
-                            <h2 className="text-6xl font-extrabold font-display text-[#EBC051] tracking-tighter" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-                                <span className="text-3xl font-light mr-1">{walletFormatted.currency}</span>{walletFormatted.value}
-                            </h2>
-                            <button onClick={onSettle} className="px-5 py-1.5 rounded-full border border-[#EBC051]/40 text-[#EBC051] font-bold text-[9px] tracking-[0.25em] hover:bg-[#EBC051] hover:text-black transition-all duration-300 active:scale-95 bg-black/40 backdrop-blur-md uppercase">
-                                Sacar
+            <header className="relative mb-6 flex flex-col items-center justify-center py-4">
+                <div className="gauge-container flex items-center justify-center">
+                    <svg className="gauge-svg w-full h-full drop-shadow-[0_0_15px_rgba(235,192,81,0.2)]" viewBox="0 0 210 210">
+                        <circle className="gauge-bg" cx="105" cy="105" r="100"></circle>
+                        <circle
+                            className="gauge-progress"
+                            cx="105" cy="105" r="100"
+                            style={{ strokeDashoffset: animateGauge ? strokeDashoffset : 628 }}
+                        ></circle>
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                        <p className="text-[9px] uppercase tracking-[0.6em] font-medium text-zinc-500 mb-1">Saldo Total</p>
+                        <h2 className="text-4xl font-extrabold font-display text-white tracking-tighter" style={{ fontFamily: '"Montserrat", sans-serif' }}>
+                            <span className="text-xl font-light text-[#EBC051] mr-0.5">{walletFormatted.currency}</span>{walletFormatted.value}
+                        </h2>
+                        <div className="mt-4">
+                            <button onClick={onSettle} className="px-6 py-1.5 rounded-full border border-[#EBC051]/40 text-[#EBC051] font-bold text-[8px] tracking-[0.3em] hover:bg-[#EBC051] hover:text-black transition-all duration-300 bg-transparent active:scale-95">
+                                RESGATAR
                             </button>
                         </div>
-                        <div className="pt-6 flex flex-col items-center">
-                            <div className="pinstripe-divider opacity-40"></div>
-                            <p className="text-[9px] font-medium tracking-[0.3em] uppercase mt-4 text-zinc-500 flex items-center gap-2">
-                                <span className="w-1 h-1 bg-[#EBC051] rounded-full"></span>
-                                {userName}
-                            </p>
+                    </div>
+                </div>
+            </header>
+
+            <main className="space-y-8">
+                <div className="bg-zinc-900/30 p-1 rounded-full flex items-center border border-white/5 mx-auto max-w-[280px]">
+                    {['DIA', 'SEM', 'MÊS', 'ANO'].map((p) => (
+                        <button
+                            key={p}
+                            onClick={() => setPeriod(p as any)}
+                            className={`flex-1 py-1.5 rounded-full font-bold text-[8px] tracking-widest transition-all ${period === p
+                                ? 'bg-[#EBC051]/10 text-[#EBC051] border border-[#EBC051]/20'
+                                : 'text-zinc-600'
+                                }`}
+                        >
+                            {p}
+                        </button>
+                    ))}
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                    <button onClick={onEmitInvoice} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
+                        <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">description</span>
+                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">NF-e</span>
+                    </button>
+                    <button onClick={onWeeklyReport} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
+                        <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">account_balance_wallet</span>
+                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">RESUMO</span>
+                    </button>
+                    <button onClick={onExpressReport} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
+                        <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">bolt</span>
+                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">EXPRESSO</span>
+                    </button>
+                </div>
+
+                <section className="flex-1 pt-2">
+                    <div className="flex items-center justify-between mb-6 px-1">
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.5em] text-zinc-400">Atividade Recente</h3>
+                        <button onClick={onExtrato} className="active:scale-95 transition-transform flex items-center">
+                            <span className="material-symbols-outlined text-[#EBC051]/60 text-base">filter_list</span>
+                        </button>
+                    </div>
+
+                    <div className="w-full space-y-4">
+                        <div className="grid grid-cols-4 px-2">
+                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest">Data</span>
+                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest text-center">Status</span>
+                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest text-center">Qtd</span>
+                            <span className="text-[8px] font-black text-zinc-700 uppercase tracking-widest text-right">Valor</span>
                         </div>
-                    </div>
-                </header>
+                        <div className="space-y-0">
+                            <div className="micro-divider"></div>
 
-                <main className="space-y-10">
-                    <div className="bg-zinc-900/30 p-1 rounded-2xl flex items-center border border-white/5 backdrop-blur-md">
-                        {['DIA', 'SEMANA', 'MÊS', 'ANO'].map((p) => (
-                            <button
-                                key={p}
-                                onClick={() => setPeriod(p as any)}
-                                className={`flex-1 py-2.5 rounded-xl text-[10px] font-bold tracking-widest transition-all ${period === p
-                                    ? 'bg-[#EBC051]/10 text-[#EBC051] border border-[#EBC051]/20'
-                                    : 'text-zinc-500'
-                                    }`}
-                            >
-                                {p}
-                            </button>
-                        ))}
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-4">
-                        <button onClick={onEmitInvoice} className="flex flex-col items-center justify-center p-6 rounded-3xl glass-effect group active:scale-95 transition-transform">
-                            <span className="material-symbols-outlined text-[#EBC051] mb-3 text-2xl">description</span>
-                            <span className="text-[9px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-400">Emitir<br />NF-e</span>
-                        </button>
-                        <button onClick={onWeeklyReport} className="flex flex-col items-center justify-center p-6 rounded-3xl glass-effect group active:scale-95 transition-transform">
-                            <span className="material-symbols-outlined text-[#EBC051] mb-3 text-2xl">account_balance_wallet</span>
-                            <span className="text-[9px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-400">Relatório<br />Semanal</span>
-                        </button>
-                        <button onClick={onExpressReport} className="flex flex-col items-center justify-center p-6 rounded-3xl glass-effect group active:scale-95 transition-transform">
-                            <span className="material-symbols-outlined text-[#EBC051] mb-3 text-2xl">bolt</span>
-                            <span className="text-[9px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-400">Relatório<br />Expresso</span>
-                        </button>
-                    </div>
-
-                    <section className="flex-1 pt-4">
-                        <div className="flex items-center justify-between mb-8 px-1">
-                            <h3 className="text-[11px] font-bold uppercase tracking-[0.4em] text-zinc-500">Transações Recentes</h3>
-                            <button onClick={onExtrato} className="w-9 h-9 flex items-center justify-center rounded-xl bg-zinc-900/40 border border-white/5 active:scale-95 transition-all">
-                                <span className="material-symbols-outlined text-[#EBC051]/70 text-lg">calendar_month</span>
-                            </button>
-                        </div>
-
-                        <div className="w-full space-y-6">
-                            <div className="grid grid-cols-4 px-2 pb-2">
-                                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest">Data</span>
-                                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest text-center">Entrega</span>
-                                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest text-center">Acar.</span>
-                                <span className="text-[9px] font-bold text-zinc-600 uppercase tracking-widest text-right">Valor</span>
-                            </div>
-                            <div className="pinstripe-divider opacity-20"></div>
-
-                            <div className="space-y-4 mt-4">
-                                {routeData.length > 0 ? (
-                                    routeData.map((route, idx) => (
-                                        <div key={idx} className="grid grid-cols-4 px-2 items-center py-2 hover:bg-white/[0.02] rounded-lg transition-colors cursor-default">
-                                            <span className="text-sm font-medium tracking-tight text-zinc-300">{route.dateStr.replace('de ', '')}</span>
-                                            <span className="text-xs font-light text-center text-zinc-500">{route.loaded}/{route.delivered}</span>
-                                            <span className="text-xs font-light text-center text-zinc-500">{route.acareacao}</span>
+                            {routeData.length > 0 ? (
+                                routeData.slice(0, 5).map((route, idx) => (
+                                    <React.Fragment key={idx}>
+                                        <div className="grid grid-cols-4 px-2 py-4 items-center hover:bg-white/[0.02] transition-colors cursor-default">
+                                            <span className="text-xs font-semibold text-white tracking-tight">{route.dateStr}</span>
+                                            <span className="text-[10px] font-medium text-center text-zinc-400 uppercase tracking-tighter">{route.status}</span>
+                                            <span className="text-xs font-light text-center text-zinc-400">{route.delivered}</span>
                                             <span className="text-sm font-bold text-right tracking-tight text-[#EBC051]">{route.value.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
                                         </div>
-                                    ))
-                                ) : (
-                                    <div className="py-12 text-center flex flex-col items-center">
-                                        <span className="material-symbols-outlined text-4xl mb-2 text-zinc-700">history</span>
-                                        <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">Nenhuma transação encontrada</p>
-                                    </div>
-                                )}
-                            </div>
+                                        <div className="micro-divider"></div>
+                                    </React.Fragment>
+                                ))
+                            ) : (
+                                <div className="py-12 text-center flex flex-col items-center">
+                                    <span className="material-symbols-outlined text-4xl mb-2 text-zinc-700">history</span>
+                                    <p className="text-xs font-bold uppercase tracking-widest text-zinc-600">Nenhuma transação encontrada</p>
+                                </div>
+                            )}
                         </div>
-                    </section>
-                </main>
-            </div>
+                    </div>
+                </section>
+            </main>
         </div>
     );
 };
