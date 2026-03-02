@@ -1,5 +1,5 @@
-import React from 'react';
-import { LogEntry, TemporaryExpressRow, DailySummary } from '../types';
+import React, { useState } from 'react';
+import { DailySummary } from '../types';
 
 interface EliteWeeklyReportProps {
     userName: string;
@@ -25,12 +25,32 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
     onDownload,
     onViewPDF
 }) => {
-    const [isExporting, setIsExporting] = React.useState(false);
-    const [showSuccess, setShowSuccess] = React.useState(false);
-    const VALOR_POR_PACOTE = 5.0; // Padrão
-    const routeEarnings = (counts.delivered || 0) * VALOR_POR_PACOTE;
-    const bonusPerformance = 180.0; // Mock de acordo com o HTML fornecido
-    const totalValue = routeEarnings + bonusPerformance;
+    const [isExporting, setIsExporting] = useState(false);
+    const [showSuccess, setShowSuccess] = useState(false);
+
+    let loaded = 0, delivered = 0, returns = 0, gains = 0;
+
+    if (rows && rows.length > 0) {
+        loaded = rows.reduce((a, b) => a + (b.loaded || 0), 0);
+        delivered = rows.reduce((a, b) => a + (b.delivered || 0), 0);
+        returns = rows.reduce((a, b) => a + (b.returns || 0), 0);
+        gains = rows.reduce((a, b) => a + (b.gains || 0), 0);
+    } else {
+        loaded = counts?.todayEntrada || 0;
+        delivered = counts?.todaySaida || 0;
+        returns = counts?.todayDevolucao || 0;
+        gains = (counts?.delivered || 0) * 2.50;
+    }
+
+    const performance = loaded > 0 ? Math.round((delivered / loaded) * 100) : 0;
+    const bonus = 180.0;
+    const totalLiquid = gains + bonus;
+
+    const formatCurrency = (val: number) =>
+        new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(val);
+
+    const dateStr = new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' }).replace('.', '');
+    const idBadge = `#LC-${Math.floor(Math.random() * 9000) + 1000}`;
 
     const handleDownload = () => {
         if (onDownload) onDownload();
@@ -41,9 +61,6 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
         }, 2000);
     };
 
-    const formatBRL = (val: number) =>
-        val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
     return (
         <div className="relative flex min-h-screen w-full flex-col max-w-[430px] mx-auto bg-pitch-black overflow-y-auto pb-32 animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
@@ -53,19 +70,14 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
-                .minimalist-gold-btn {
+                .pdf-frame {
                     border: 1px solid #EBC051;
-                    background: transparent;
-                    color: #FFFFFF;
-                }
-                .pdf-page {
-                    box-shadow: 0 0 40px rgba(235, 192, 81, 0.08);
-                    border: 0.5px solid rgba(235, 192, 81, 0.2);
+                    box-shadow: 0 0 25px rgba(235, 192, 81, 0.15);
                 }
                 .gold-divider {
                     height: 1px;
                     background: linear-gradient(90deg, transparent 0%, #EBC051 50%, transparent 100%);
-                    opacity: 0.4;
+                    opacity: 0.5;
                 }
                 .section-header {
                     letter-spacing: 0.2em;
@@ -133,112 +145,114 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                 .animate-glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
                 .animate-liquid-metallic { animation: liquid-metallic 4s ease-in-out infinite; }
                 .animate-inner-glow { animation: inner-glow 2s ease-in-out infinite; }
-
-                /* Novos Estilos Cinemáticos */
-                .cinematic-glow {
-                    box-shadow: 0 0 60px -15px rgba(235, 192, 81, 0.12);
-                }
-                .spreadsheet-grid {
-                    display: grid;
-                    grid-template-columns: 1fr 1fr 1fr 1.2fr 1.5fr;
-                    align-items: center;
-                }
-                .row-divider {
-                    border-bottom: 0.5px solid rgba(235, 192, 81, 0.08);
-                }
-                .gold-gradient-text {
-                    background: linear-gradient(135deg, #EBC051 0%, #AA771C 100%);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
-                }
                 `
             }} />
 
+            <div className={`p-6 py-12 flex flex-col items-center justify-center transition-all duration-500 ${(isExporting || showSuccess) ? 'blur-[4px] select-none pointer-events-none' : ''}`}>
+                <div className="relative flex w-full flex-col max-w-[400px]">
+                    <div className="pdf-frame bg-transparent w-full rounded-sm p-8 flex flex-col h-auto">
+                        <div className="flex flex-col items-center mb-10 text-center">
+                            <div className="text-[16px] font-black tracking-[0.5em] metallic-gold-text uppercase mb-2">LogCash</div>
+                            <div className="w-10 h-[1.5px] bg-primary-gold mb-8"></div>
+                            <h1 className="text-sm font-bold tracking-[0.3em] text-ice-white uppercase mb-2">Relatório Semanal</h1>
+                            <p className="text-[10px] text-white/50 uppercase tracking-widest font-medium">Emissão: {dateStr} • Ref: {idBadge}</p>
+                        </div>
 
-            <div className="pt-12 mb-4 flex items-center justify-center">
-            </div>
-
-            <div className="px-5 mb-8 relative">
-                <div className={`pdf-page bg-charcoal w-full rounded-2xl cinematic-glow flex flex-col h-auto transition-all duration-500 overflow-hidden border border-primary-gold/20 ${(isExporting || showSuccess) ? 'blur-[4px] select-none pointer-events-none' : ''}`}>
-                    {/* Cabeçalho */}
-                    <div className="px-6 py-10 flex flex-col items-center gap-2 border-b border-primary-gold/10">
-                        <h1 className="text-[16px] font-bold tracking-[0.5em] gold-gradient-text uppercase text-center">RELATÓRIO OPERACIONAL</h1>
-                    </div>
-
-                    {/* Header da Tabela */}
-                    <div className="spreadsheet-grid px-6 py-4 bg-white/[0.02] border-b border-primary-gold/10">
-                        <div className="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase">DATA</div>
-                        <div className="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">CARREG.</div>
-                        <div className="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">ENTREG.</div>
-                        <div className="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-center">DEVOL.</div>
-                        <div className="text-[8px] font-black tracking-widest text-primary-gold/50 uppercase text-right">VALOR TOTAL</div>
-                    </div>
-
-                    {/* Linhas da Tabela */}
-                    <div className="flex flex-col">
-                        {rows.length > 0 ? rows.slice(0, 5).map((row, idx) => (
-                            <div key={idx} className="spreadsheet-grid px-6 py-5 row-divider">
-                                <div className="text-[11px] font-bold text-ice-white">{row.date.split('/')[0]}/{row.date.split('/')[1]}</div>
-                                <div className="text-[11px] font-medium text-white/90 text-center">{row.loaded}</div>
-                                <div className="text-[11px] font-medium text-white/90 text-center">{row.delivered}</div>
-                                <div className="text-[11px] font-medium text-primary-gold text-center">{row.returns}</div>
-                                <div className="text-[11px] font-bold text-ice-white text-right font-sans">R$ {row.gains.toFixed(2)}</div>
-                            </div>
-                        )) : (
-                            <div className="px-6 py-10 text-center text-[10px] text-white/20 uppercase tracking-widest">
-                                Nenhum registro neste período
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Resumo Financeiro */}
-                    <div className="px-6 py-10 bg-gradient-to-b from-transparent to-primary-gold/[0.03]">
-                        <div className="flex flex-col gap-4">
-                            <div className="flex justify-between items-center border-t border-primary-gold/20 pt-6">
-                                <span className="text-[10px] font-bold tracking-[0.3em] text-white/30 uppercase">RESUMO FINANCEIRO</span>
-                            </div>
-                            <div className="flex justify-between items-end">
+                        <div className="mb-10">
+                            <h2 className="section-header uppercase mb-5 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+                                Dados do Motorista
+                            </h2>
+                            <div className="space-y-4">
                                 <div className="flex flex-col">
-                                    <span className="text-[9px] text-primary-gold/50 uppercase tracking-[0.2em] mb-1">VALOR LÍQUIDO TOTAL</span>
-                                    <span className="text-3xl font-bold text-ice-white font-sans tracking-tight">{formatBRL(totalValue)}</span>
+                                    <span className="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Condutor</span>
+                                    <span className="text-[13px] font-semibold text-ice-white">{userName}</span>
+                                </div>
+                                <div className="flex justify-between items-end">
+                                    <div className="flex flex-col">
+                                        <span className="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Identificação</span>
+                                        <span className="text-[13px] font-semibold text-ice-white">{idBadge.split('-')[1] ? `#${idBadge.split('-')[1]}` : '#9921'}</span>
+                                    </div>
+                                    <div className="flex flex-col text-right">
+                                        <span className="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Veículo</span>
+                                        <span className="text-[13px] font-semibold text-ice-white">{vehicleName || 'Não Informado'}</span>
+                                    </div>
+                                </div>
+                                <div className="gold-divider mt-2"></div>
+                            </div>
+                        </div>
+
+                        <div className="mb-10">
+                            <h2 className="section-header uppercase mb-5 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+                                Resumo da Rota
+                            </h2>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Volumes Carregados</span>
+                                    <span className="text-[12px] font-bold text-ice-white">{String(loaded).padStart(2, '0')} Unid.</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Entregas Sucesso</span>
+                                    <span className="text-[12px] font-bold text-ice-white">{String(delivered).padStart(2, '0')} Unid.</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Acareações</span>
+                                    <span className="text-[12px] font-bold text-ice-white">{String(returns).padStart(2, '0')} Unid.</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Performance da Rota</span>
+                                    <span className="text-[12px] font-bold text-primary-gold">{performance}%</span>
+                                </div>
+                                <div className="gold-divider mt-2"></div>
+                            </div>
+                        </div>
+
+                        <div className="mb-2">
+                            <h2 className="section-header uppercase mb-5 flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+                                Detalhamento Financeiro
+                            </h2>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Ganhos de Rota</span>
+                                    <span className="text-[12px] font-bold text-ice-white">{formatCurrency(gains)}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-[11px] text-white/70 font-medium">Bônus Performance</span>
+                                    <span className="text-[12px] font-bold text-ice-white">{formatCurrency(bonus)}</span>
+                                </div>
+                                <div className="flex justify-between items-center pt-3 mt-2">
+                                    <span className="text-[11px] font-bold text-primary-gold uppercase tracking-[0.15em]">Valor Líquido</span>
+                                    <span className="text-xl font-bold metallic-gold-text">{formatCurrency(totalLiquid)}</span>
                                 </div>
                             </div>
                         </div>
+
                     </div>
 
-                    {/* Rodapé Interno */}
-                    <div className="px-6 py-6 flex justify-center border-t border-primary-gold/10 bg-black/40">
-                        <p className="text-[7px] text-white/20 tracking-[0.4em] uppercase">Autenticidade Verificada LogCash Digital</p>
+                    <div className="mt-10 px-4 w-full">
+                        <button
+                            onClick={handleDownload}
+                            disabled={isExporting}
+                            className="w-full py-4 border border-primary-gold rounded-xl bg-transparent flex items-center justify-center gap-2 group active:opacity-70 transition-all duration-300 disabled:opacity-50 disabled:pointer-events-none"
+                        >
+                            <span className="text-primary-gold font-bold text-[12px] tracking-[0.25em] uppercase">Exportar</span>
+                            <span className="material-symbols-outlined text-primary-gold text-[18px]">ios_share</span>
+                        </button>
                     </div>
                 </div>
             </div>
 
-            <div className={`px-8 flex flex-col gap-4 ${(isExporting || showSuccess) ? 'blur-md select-none pointer-events-none' : ''}`}>
-                <button
-                    onClick={handleDownload}
-                    disabled={isExporting}
-                    className="w-full minimalist-gold-btn py-4 rounded-lg font-bold text-[10px] uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all hover:bg-primary-gold/5 active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
-                >
-                    <span className="material-symbols-outlined text-lg">download</span>
-                    Exportar
-                </button>
-            </div>
-
-            <div className="flex justify-center items-center gap-3 pt-10 pb-4 opacity-30">
-                <div className="h-[1px] w-8 bg-primary-gold"></div>
-                <span className="text-[8px] font-bold tracking-[0.3em] text-primary-gold uppercase">Elite Document Service</span>
-                <div className="h-[1px] w-8 bg-primary-gold"></div>
-            </div>
-
             {/* OVERLAYS FULLSCREEN */}
             {isExporting && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center glass-overlay rounded-sm overflow-hidden animate-in fade-in duration-300">
+                <div className="fixed inset-0 z-50 flex flex-col items-center justify-center glass-overlay rounded-sm overflow-hidden animate-in fade-in duration-300">
                     <div className="absolute inset-0 pointer-events-none">
-                        <div className="particle animate-float-particle top-1/2 left-1/4" style={{ animationDelay: '0s' } as any}></div>
-                        <div className="particle animate-float-particle top-1/3 left-1/2" style={{ animationDelay: '2s' } as any}></div>
-                        <div className="particle animate-float-particle top-2/3 left-2/3" style={{ animationDelay: '4s' } as any}></div>
-                        <div className="particle animate-float-particle top-1/2 left-3/4" style={{ animationDelay: '1s' } as any}></div>
-                        <div className="particle animate-float-particle top-3/4 left-1/3" style={{ animationDelay: '3s' } as any}></div>
+                        <div className="particle animate-float-particle top-1/2 left-1/4" style={{ animationDelay: '0s' } as unknown as React.CSSProperties}></div>
+                        <div className="particle animate-float-particle top-1/3 left-1/2" style={{ animationDelay: '2s' } as unknown as React.CSSProperties}></div>
+                        <div className="particle animate-float-particle top-2/3 left-2/3" style={{ animationDelay: '4s' } as unknown as React.CSSProperties}></div>
+                        <div className="particle animate-float-particle top-1/2 left-3/4" style={{ animationDelay: '1s' } as unknown as React.CSSProperties}></div>
+                        <div className="particle animate-float-particle top-3/4 left-1/3" style={{ animationDelay: '3s' } as unknown as React.CSSProperties}></div>
                     </div>
                     <div className="relative flex items-center justify-center animate-pulse-gentle">
                         <div className="size-20 rounded-full metallic-gold-loader animate-spin-slow"></div>
@@ -253,12 +267,12 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
             )}
 
             {showSuccess && (
-                <div className="absolute inset-0 z-[60] flex items-center justify-center px-4 animate-in zoom-in duration-300">
+                <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 animate-in zoom-in duration-300">
                     <div className="glass-modal w-full max-w-[340px] rounded-[40px] p-10 flex flex-col items-center relative overflow-hidden">
                         <div className="absolute inset-0 pointer-events-none">
-                            <div className="particle animate-float-particle top-10 left-10" style={{ animationDelay: '0s' } as any}></div>
-                            <div className="particle animate-float-particle top-40 right-12" style={{ animationDelay: '2s', width: '4px', height: '4px' } as any}></div>
-                            <div className="particle animate-float-particle bottom-20 left-20" style={{ animationDelay: '1.5s' } as any}></div>
+                            <div className="particle animate-float-particle top-10 left-10" style={{ animationDelay: '0s' } as unknown as React.CSSProperties}></div>
+                            <div className="particle animate-float-particle top-40 right-12" style={{ animationDelay: '2s', width: '4px', height: '4px' } as unknown as React.CSSProperties}></div>
+                            <div className="particle animate-float-particle bottom-20 left-20" style={{ animationDelay: '1.5s' } as unknown as React.CSSProperties}></div>
                         </div>
 
                         <div className="relative mb-10">
@@ -278,7 +292,10 @@ const EliteWeeklyReport: React.FC<EliteWeeklyReportProps> = ({
                         </div>
 
                         <button
-                            onClick={onBack}
+                            onClick={() => {
+                                setShowSuccess(false);
+                                onBack();
+                            }}
                             className="w-full py-4 rounded-[20px] border border-primary-gold text-primary-gold font-extrabold text-[11px] uppercase tracking-[0.4em] transition-all active:scale-95 hover:bg-primary-gold/5"
                         >
                             VOLTAR AO INÍCIO

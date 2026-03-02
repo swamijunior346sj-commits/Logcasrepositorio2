@@ -182,11 +182,11 @@ const EliteReports: React.FC<EliteReportsProps> = ({
                 <div className="grid grid-cols-3 gap-3">
                     <button onClick={onEmitInvoice} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
                         <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">description</span>
-                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">NF-e</span>
+                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">NFS-e</span>
                     </button>
-                    <button onClick={onWeeklyReport} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
+                    <button onClick={onWeeklyReport} className="flex flex-col items-center justify-center py-4 px-1 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
                         <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">account_balance_wallet</span>
-                        <span className="text-[8px] font-bold text-center uppercase tracking-widest leading-tight text-zinc-500">RESUMO</span>
+                        <span className="text-[7px] font-bold text-center uppercase tracking-wider leading-[1.2em] text-zinc-500">RELATÓRIO FECHAMENTO SEMANAL</span>
                     </button>
                     <button onClick={onExpressReport} className="flex flex-col items-center justify-center py-4 rounded-2xl sharp-card group active:scale-95 transition-transform bg-[#050505]">
                         <span className="material-symbols-outlined text-[#EBC051]/80 mb-2 text-xl">bolt</span>

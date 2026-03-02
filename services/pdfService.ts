@@ -270,7 +270,7 @@ const buildWeeklyHTMLTemplate = (
   const total = loaded > 0 ? loaded : 1;
   const performance = loaded > 0 ? Math.round((delivered / loaded) * 100) : 0;
 
-  const idBadge = `#${Math.floor(Math.random() * 9000) + 1000}`; // Random ID or could use a hash
+  const idBadge = `#LC-${Math.floor(Math.random() * 9000) + 1000}`; // Random ID or could use a hash
 
   return `<!DOCTYPE html>
 <html class="dark" lang="pt-BR">
@@ -331,82 +331,82 @@ const buildWeeklyHTMLTemplate = (
 <div class="relative flex w-full flex-col max-w-[400px] pdf-container">
 <div class="pdf-frame bg-transparent w-full rounded-sm p-8 flex flex-col h-auto">
     <div class="flex flex-col items-center mb-10 text-center">
-        <div class="text-[16px] font-black tracking-[0.5em] metallic-gold-text uppercase mb-2">LogCash</div>
-        <div class="w-10 h-[1.5px] bg-primary-gold mb-8"></div>
-        <h1 class="text-sm font-bold tracking-[0.3em] text-ice-white uppercase mb-2">Relatório Operacional</h1>
-        <p class="text-[10px] text-white/50 uppercase tracking-widest font-medium">Emissão: ${dateStr} • Ref: ${idBadge}</p>
-    </div>
-    
-    <div class="mb-10">
-        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
-            Dados do Motorista
-        </h2>
-        <div class="space-y-4">
+    <div class="text-[16px] font-black tracking-[0.5em] metallic-gold-text uppercase mb-2">LogCash</div>
+    <div class="w-10 h-[1.5px] bg-primary-gold mb-8"></div>
+    <h1 class="text-sm font-bold tracking-[0.3em] text-ice-white uppercase mb-2">Relatório Operacional</h1>
+    <p class="text-[10px] text-white/50 uppercase tracking-widest font-medium">Emissão: ${dateStr} • Ref: ${idBadge}</p>
+</div>
+
+<div class="mb-10">
+    <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+        Dados do Motorista
+    </h2>
+    <div class="space-y-4">
+        <div class="flex flex-col">
+            <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Condutor</span>
+            <span class="text-[13px] font-semibold text-ice-white">${userName}</span>
+        </div>
+        <div class="flex justify-between items-end">
             <div class="flex flex-col">
-                <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Condutor</span>
-                <span class="text-[13px] font-semibold text-ice-white">${userName}</span>
+                <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Identificação</span>
+                <span class="text-[13px] font-semibold text-ice-white">${idBadge}</span>
             </div>
-            <div class="flex justify-between items-end">
-                <div class="flex flex-col">
-                    <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Identificação</span>
-                    <span class="text-[13px] font-semibold text-ice-white">${idBadge}</span>
-                </div>
-                <div class="flex flex-col text-right">
-                    <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Veículo</span>
-                    <span class="text-[13px] font-semibold text-ice-white">${vehicleName}</span>
-                </div>
-            </div>
-            <div class="gold-divider mt-2"></div>
-        </div>
-    </div>
-    
-    <div class="mb-10">
-        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
-            Resumo da Rota
-        </h2>
-        <div class="space-y-4">
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Volumes Carregados</span>
-                <span class="text-[12px] font-bold text-ice-white">${loaded} Unid.</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Entregas Sucesso</span>
-                <span class="text-[12px] font-bold text-ice-white">${delivered} Unid.</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Acareações</span>
-                <span class="text-[12px] font-bold text-ice-white">${returns} Unid.</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Performance da Rota</span>
-                <span class="text-[12px] font-bold text-primary-gold">${performance}%</span>
-            </div>
-            <div class="gold-divider mt-2"></div>
-        </div>
-    </div>
-    
-    <div class="mb-2">
-        <h2 class="section-header uppercase mb-5 flex items-center gap-2">
-            <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
-            Detalhamento Financeiro
-        </h2>
-        <div class="space-y-4">
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Ganhos de Rota</span>
-                <span class="text-[12px] font-bold text-ice-white">${formatCurrency(gains)}</span>
-            </div>
-            <div class="flex justify-between items-center">
-                <span class="text-[11px] text-white/70 font-medium">Bônus Performance</span>
-                <span class="text-[12px] font-bold text-ice-white">${formatCurrency(bonus)}</span>
-            </div>
-            <div class="flex justify-between items-center pt-3 mt-2">
-                <span class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.15em]">Valor Líquido</span>
-                <span class="text-xl font-bold metallic-gold-text">${formatCurrency(totalLiquid)}</span>
+            <div class="flex flex-col text-right">
+                <span class="text-[9px] text-primary-gold uppercase tracking-widest font-bold mb-1">Veículo</span>
+                <span class="text-[13px] font-semibold text-ice-white">${vehicleName || 'Não Informado'}</span>
             </div>
         </div>
+        <div class="gold-divider mt-2"></div>
     </div>
+</div>
+
+<div class="mb-10">
+    <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+        Resumo da Rota
+    </h2>
+    <div class="space-y-4">
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Volumes Carregados</span>
+            <span class="text-[12px] font-bold text-ice-white">${loaded} Unid.</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Entregas Sucesso</span>
+            <span class="text-[12px] font-bold text-ice-white">${delivered} Unid.</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Acareações</span>
+            <span class="text-[12px] font-bold text-ice-white">${returns} Unid.</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Performance da Rota</span>
+            <span class="text-[12px] font-bold text-primary-gold">${performance}%</span>
+        </div>
+        <div class="gold-divider mt-2"></div>
+    </div>
+</div>
+
+<div class="mb-2">
+    <h2 class="section-header uppercase mb-5 flex items-center gap-2">
+        <span class="w-1.5 h-1.5 bg-primary-gold rounded-full shadow-[0_0_5px_#EBC051]"></span>
+        Detalhamento Financeiro
+    </h2>
+    <div class="space-y-4">
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Ganhos de Rota</span>
+            <span class="text-[12px] font-bold text-ice-white">${formatCurrency(gains)}</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="text-[11px] text-white/70 font-medium">Bônus Performance</span>
+            <span class="text-[12px] font-bold text-ice-white">${formatCurrency(bonus)}</span>
+        </div>
+        <div class="flex justify-between items-center pt-3 mt-2">
+            <span class="text-[11px] font-bold text-primary-gold uppercase tracking-[0.15em]">Valor Líquido</span>
+            <span class="text-xl font-bold metallic-gold-text">${formatCurrency(totalLiquid)}</span>
+        </div>
+    </div>
+</div>
 </div>
 </div>
 </body>

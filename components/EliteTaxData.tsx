@@ -6,253 +6,189 @@ interface EliteTaxDataProps {
 }
 
 const EliteTaxData: React.FC<EliteTaxDataProps> = ({ onBack, onSave }) => {
-    const [formData, setFormData] = useState({
-        razaoSocial: 'EXECUTIVE LOGISTICS LTDA',
-        cnpj: '12.345.678/0001-90',
-        cep: '01414-001',
-        logradouro: 'Alameda Santos',
-        numero: '2159',
-        isMei: true
-    });
-    const [showSaveSuccess, setShowSaveSuccess] = useState(false);
+    const [razaoSocial, setRazaoSocial] = useState('EXECUTIVE LOGISTICS LTDA');
+    const [cnpj, setCnpj] = useState('12.345.678/0001-90');
+    const [cep, setCep] = useState('01414-001');
+    const [logradouro, setLogradouro] = useState('Alameda Santos');
+    const [numero, setNumero] = useState('2159');
+    const [isMei, setIsMei] = useState(true);
 
     const handleSave = () => {
-        onSave(formData);
+        onSave({ razaoSocial, cnpj, cep, logradouro, numero, isMei });
     };
 
     return (
-        <div className="flex flex-col items-center bg-pitch-black animate-in fade-in duration-700 min-h-screen">
+        <div className="flex justify-center items-start min-h-screen bg-pitch-black animate-in fade-in duration-700">
             <style dangerouslySetInnerHTML={{
                 __html: `
-                .gold-glow-input {
-                    box-shadow: 0 0 15px -5px rgba(235, 192, 81, 0.15);
-                }
-                .gold-glow-input:focus-within {
-                    box-shadow: 0 0 20px -5px rgba(235, 192, 81, 0.3);
-                    border-color: rgba(235, 192, 81, 0.5);
-                }
                 .metallic-gold-text {
-                    background: linear-gradient(135deg, #F9E29C 0%, #D4AF37 50%, #AA771C 100%);
+                    background: linear-gradient(135deg, #F9E29C 0%, #EBC051 50%, #AA771C 100%);
                     -webkit-background-clip: text;
                     -webkit-text-fill-color: transparent;
                 }
-                .btn-luxury-outline {
-                    border: 1px solid #EBC051;
+                .input-card-outline {
                     background: transparent;
+                    border: 1px solid rgba(235, 192, 81, 0.4);
+                    transition: all 0.3s duration-300;
+                }
+                .input-card-outline:focus-within {
+                    border-color: #EBC051;
+                    box-shadow: 0 0 15px rgba(235, 192, 81, 0.15);
+                }
+                .btn-luxury-outline {
+                    background: transparent;
+                    border: 1px solid #EBC051;
                     color: #EBC051;
-                    text-shadow: 0 0 8px rgba(235, 192, 81, 0.3);
+                    transition: all 0.3s ease;
                 }
                 .btn-luxury-outline:active {
                     background: rgba(235, 192, 81, 0.05);
-                    transform: translateY(2px);
+                    transform: scale(0.98);
                 }
                 .gold-divider {
                     height: 1px;
                     background: linear-gradient(90deg, transparent, rgba(235, 192, 81, 0.3), transparent);
                 }
                 .custom-toggle {
-                    width: 44px;
-                    height: 24px;
-                    background: #262626;
+                    width: 40px;
+                    height: 20px;
+                    background: rgba(235, 192, 81, 0.1);
+                    border: 1px solid rgba(235, 192, 81, 0.3);
                     border-radius: 100px;
                     position: relative;
                     transition: all 0.3s;
-                    cursor: pointer;
-                    border: 1px solid rgba(255, 255, 255, 0.1);
                 }
                 .custom-toggle::after {
                     content: '';
                     position: absolute;
                     left: 2px;
                     top: 2px;
-                    width: 18px;
-                    height: 18px;
-                    background: #555;
+                    width: 14px;
+                    height: 14px;
+                    background: rgba(235, 192, 81, 0.4);
                     border-radius: 50%;
                     transition: all 0.3s;
                 }
                 .toggle-active .custom-toggle {
-                    background: #EBC051;
+                    background: rgba(235, 192, 81, 0.2);
                     border-color: #EBC051;
                 }
                 .toggle-active .custom-toggle::after {
-                    left: calc(100% - 20px);
-                    background: #000;
-                }
-                .glass-overlay-premium {
-                    background: rgba(0, 0, 0, 0.92);
-                    backdrop-filter: blur(25px);
-                    -webkit-backdrop-filter: blur(25px);
-                }
-                .modal-border-only {
-                    background: transparent;
-                    border: 1px solid #EBC051;
-                    box-shadow: 0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(235, 192, 81, 0.05);
-                }
-                .gold-glow-icon {
-                    text-shadow: 0 0 30px rgba(235, 192, 81, 0.6);
-                }
-                .outline-button-gold-modal {
-                    background: transparent;
-                    border: 1px solid #EBC051;
-                }
-                .outline-button-gold-modal:active {
-                    background: rgba(235, 192, 81, 0.1);
-                    transform: scale(0.97);
-                }
-                @keyframes pulse-gold {
-                    0% { transform: scale(1); opacity: 0.8; }
-                    50% { transform: scale(1.05); opacity: 1; }
-                    100% { transform: scale(1); opacity: 0.8; }
-                }
-                .animate-pulse-gold {
-                    animation: pulse-gold 3s ease-in-out infinite;
+                    left: calc(100% - 16px);
+                    background: #EBC051;
+                    box-shadow: 0 0 10px rgba(235, 192, 81, 0.4);
                 }
                 `
             }} />
 
-            <div className="relative flex min-h-screen w-full flex-col max-w-[430px] bg-pitch-black shadow-2xl pb-12">
-                {/* Header Actions */}
-                <div className="flex items-center justify-center p-6 mt-4">
-                    <h2 className="text-[12px] font-black tracking-[0.4em] text-white uppercase text-center">DADOS FISCAIS</h2>
-                </div>
+            <div className="relative flex min-h-screen w-full flex-col max-w-[430px] bg-pitch-black shadow-2xl overflow-hidden">
+                <header className="sticky top-0 z-30 flex items-center px-6 pt-14 pb-6 bg-pitch-black/80 backdrop-blur-xl">
+                    <h1 className="flex-1 text-center text-sm font-black tracking-[0.4em] metallic-gold-text uppercase">
+                        Dados Fiscais
+                    </h1>
+                </header>
 
-                <main className="flex-1 px-6 pt-2 pb-24">
-                    {/* Informações da Empresa */}
+                <main className="flex-1 px-6 pb-40 overflow-y-auto">
                     <section className="mt-4">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Informações da Empresa</span>
-                            <div className="flex-1 gold-divider text-left"></div>
+                            <span className="text-[9px] font-black tracking-[0.25em] text-primary-gold/50 uppercase">Informações da Empresa</span>
+                            <div className="flex-1 gold-divider"></div>
                         </div>
-
                         <div className="space-y-4">
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Razão Social</label>
+                            <div className="input-card-outline rounded-xl p-4">
+                                <label className="block text-[8px] font-bold text-primary-gold/60 uppercase tracking-[0.2em] mb-1">Razão Social</label>
                                 <input
-                                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
+                                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
-                                    value={formData.razaoSocial}
-                                    onChange={(e) => setFormData({ ...formData, razaoSocial: e.target.value })}
+                                    value={razaoSocial}
+                                    onChange={(e) => setRazaoSocial(e.target.value)}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">CNPJ</label>
+                            <div className="input-card-outline rounded-xl p-4">
+                                <label className="block text-[8px] font-bold text-primary-gold/60 uppercase tracking-[0.2em] mb-1">CNPJ</label>
                                 <input
-                                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
+                                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
-                                    value={formData.cnpj}
-                                    onChange={(e) => setFormData({ ...formData, cnpj: e.target.value })}
+                                    value={cnpj}
+                                    onChange={(e) => setCnpj(e.target.value)}
                                 />
                             </div>
                         </div>
                     </section>
 
-                    {/* Endereço Fiscal */}
                     <section className="mt-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Endereço Fiscal</span>
+                            <span className="text-[9px] font-black tracking-[0.25em] text-primary-gold/50 uppercase">Endereço Fiscal</span>
                             <div className="flex-1 gold-divider"></div>
                         </div>
-
                         <div className="space-y-4">
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">CEP</label>
+                            <div className="input-card-outline rounded-xl p-4">
+                                <label className="block text-[8px] font-bold text-primary-gold/60 uppercase tracking-[0.2em] mb-1">CEP</label>
                                 <input
-                                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
+                                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
-                                    value={formData.cep}
-                                    onChange={(e) => setFormData({ ...formData, cep: e.target.value })}
+                                    value={cep}
+                                    onChange={(e) => setCep(e.target.value)}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Logradouro</label>
+                            <div className="input-card-outline rounded-xl p-4">
+                                <label className="block text-[8px] font-bold text-primary-gold/60 uppercase tracking-[0.2em] mb-1">Logradouro</label>
                                 <input
-                                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
+                                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
-                                    value={formData.logradouro}
-                                    onChange={(e) => setFormData({ ...formData, logradouro: e.target.value })}
+                                    value={logradouro}
+                                    onChange={(e) => setLogradouro(e.target.value)}
                                 />
                             </div>
-                            <div className="bg-[#121212] border border-white/5 rounded-2xl p-4 gold-glow-input transition-all text-left">
-                                <label className="block text-[9px] font-bold text-white/40 uppercase tracking-widest mb-1">Número</label>
+                            <div className="input-card-outline rounded-xl p-4">
+                                <label className="block text-[8px] font-bold text-primary-gold/60 uppercase tracking-[0.2em] mb-1">Número</label>
                                 <input
-                                    className="w-full bg-transparent border-none p-0 text-sm font-medium text-white focus:ring-0 placeholder:text-white/20"
+                                    className="w-full bg-transparent border-none p-0 text-sm font-semibold text-white focus:ring-0 placeholder:text-white/20"
                                     type="text"
-                                    value={formData.numero}
-                                    onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
+                                    value={numero}
+                                    onChange={(e) => setNumero(e.target.value)}
                                 />
                             </div>
                         </div>
                     </section>
 
-                    {/* Configuração de Impostos */}
                     <section className="mt-10">
                         <div className="flex items-center gap-3 mb-6">
-                            <span className="text-[10px] font-black tracking-[0.2em] text-primary-gold/60 uppercase">Configuração de Impostos</span>
+                            <span className="text-[9px] font-black tracking-[0.25em] text-primary-gold/50 uppercase">Configuração de Impostos</span>
                             <div className="flex-1 gold-divider"></div>
                         </div>
-
                         <div
-                            className={`bg-[#121212] border border-white/5 rounded-2xl p-5 gold-glow-input flex items-center justify-between transition-all cursor-pointer ${formData.isMei ? 'toggle-active' : ''}`}
-                            onClick={() => setFormData({ ...formData, isMei: !formData.isMei })}
+                            className="input-card-outline rounded-xl p-5 flex items-center justify-between cursor-pointer select-none"
+                            onClick={() => setIsMei(!isMei)}
                         >
-                            <div className="text-left">
-                                <h4 className="text-sm font-bold text-white">Optante pelo MEI</h4>
-                                <p className="text-[10px] text-white/40 mt-1 uppercase tracking-wider font-semibold">Microempreendedor Individual</p>
+                            <div>
+                                <h4 className="text-sm font-bold text-white tracking-tight">Optante pelo MEI</h4>
+                                <p className="text-[9px] text-primary-gold/40 mt-1 uppercase tracking-widest">Microempreendedor Individual</p>
                             </div>
-                            <div className="custom-toggle"></div>
+                            <div className={isMei ? "toggle-active" : ""}>
+                                <div className="custom-toggle"></div>
+                            </div>
                         </div>
                     </section>
                 </main>
 
-                {/* Action Button */}
-                <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] p-6 bg-gradient-to-t from-pitch-black via-pitch-black to-transparent pt-12 z-20">
+                <div className="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-pitch-black via-pitch-black to-transparent pt-12">
                     <button
-                        onClick={() => setShowSaveSuccess(true)}
-                        className="w-full btn-luxury-outline py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.35em] flex items-center justify-center gap-3 active:scale-[0.98] transition-all"
+                        onClick={handleSave}
+                        className="w-full btn-luxury-outline py-5 rounded-xl font-black text-xs uppercase tracking-[0.4em] flex items-center justify-center gap-3"
                     >
-                        <span className="material-symbols-outlined text-base">verified</span>
                         Salvar Alterações
                     </button>
-
                     <div className="flex justify-center items-center gap-2 pt-6 opacity-20">
-                        <div className="h-[1px] w-8 bg-primary-gold"></div>
-                        <span className="material-symbols-outlined text-[10px] text-primary-gold">security</span>
-                        <div className="h-[1px] w-8 bg-primary-gold"></div>
+                        <div className="h-[1px] w-6 bg-primary-gold"></div>
+                        <span className="material-symbols-outlined text-[10px] text-primary-gold">verified_user</span>
+                        <div className="h-[1px] w-6 bg-primary-gold"></div>
                     </div>
                 </div>
-            </div>
 
-            {/* Custom Confirm Save Popup */}
-            {showSaveSuccess && (
-                <div className="fixed inset-0 z-[100] glass-overlay-premium flex items-center justify-center px-8 animate-in fade-in duration-300">
-                    <div className="w-full max-w-[340px] modal-border-only rounded-[40px] overflow-hidden bg-pitch-black">
-                        <div className="p-10 text-center">
-                            <div className="relative size-24 mx-auto mb-8 flex items-center justify-center">
-                                <div className="absolute inset-0 bg-[#EBC051]/15 blur-3xl rounded-full"></div>
-                                <div className="relative flex items-center justify-center animate-pulse-gold">
-                                    <span className="material-symbols-outlined text-[#EBC051] text-[84px] leading-none gold-glow-icon" style={{ fontVariationSettings: "'FILL' 1, 'wght' 300" }}>
-                                        check_circle
-                                    </span>
-                                </div>
-                            </div>
-                            <h2 className="text-2xl font-black tracking-[0.2em] text-white uppercase mb-3">CONFIRMADO</h2>
-                            <p className="text-white/50 text-sm font-medium mb-12 leading-relaxed">
-                                Operação realizada com sucesso
-                            </p>
-                            <button
-                                onClick={() => {
-                                    setShowSaveSuccess(false);
-                                    handleSave();
-                                }}
-                                className="w-full py-4 outline-button-gold-modal rounded-[20px] flex items-center justify-center text-[#EBC051] font-bold uppercase tracking-[0.25em] text-[10px] transition-all duration-300"
-                            >
-                                ENTENDIDO
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                <div className="fixed top-0 right-0 w-[300px] h-[300px] bg-primary-gold/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+                <div className="fixed bottom-0 left-0 w-[300px] h-[300px] bg-primary-gold/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+            </div>
         </div>
     );
 };

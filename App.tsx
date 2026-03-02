@@ -922,7 +922,8 @@ const App: React.FC = () => {
       <PremiumSuccessPopup
         isOpen={showSuccessPopup}
         onClose={closeSuccessPopup}
-        message={premiumSuccessMsg}
+        title="CONFIRMADO"
+        message="Operação realizada com sucesso"
       />
     </div>
   );

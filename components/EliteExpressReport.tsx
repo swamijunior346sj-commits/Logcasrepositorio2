@@ -194,17 +194,7 @@ const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBac
 
             {/* Main Content Area - Blurred during export */}
             <div className={`flex flex-col flex-1 transition-all duration-300 ${isOverlayActive ? 'blur-md select-none pointer-events-none' : ''}`}>
-                {/* Header */}
-                <div className="sticky top-0 z-40 glass-header flex items-center justify-between px-6 py-7">
-                    <button
-                        onClick={onBack}
-                        className="flex size-8 items-center justify-start text-primary-gold/50 hover:text-primary-gold transition-colors"
-                    >
-                        <span className="material-symbols-outlined text-xl">arrow_back_ios</span>
-                    </button>
-                    <h1 className="text-[14px] font-bold tracking-[0.35em] text-primary-gold uppercase text-center font-jakarta">RELATÓRIO EXPRESSO</h1>
-                    <div className="size-8"></div> {/* Spacer */}
-                </div>
+                {/* Header Removido */}
 
                 {/* Content Area */}
                 <div className="flex-1 flex flex-col pt-2">
