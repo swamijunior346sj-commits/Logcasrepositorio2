@@ -122,7 +122,7 @@ const EliteProfile: React.FC<EliteProfileProps> = ({ userName, avatarUrl, onAvat
                     </div>
                     <div className="text-center space-y-2">
                         <h1 className="text-3xl font-extralight tracking-tight text-white flex gap-2">
-                            {userName.split(' ')[0]} <span className="font-bold metallic-text">{userName.split(' ').slice(1).join(' ') || ''}</span>
+                            {(userName || 'Usuário').split(' ')[0]} <span className="font-bold metallic-text">{(userName || '').split(' ').slice(1).join(' ') || ''}</span>
                         </h1>
                         <p className="text-[9px] font-medium text-white/40 tracking-[0.4em] uppercase">Motorista Verificado • Nível 15</p>
                     </div>

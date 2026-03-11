@@ -71,7 +71,11 @@ const App: React.FC = () => {
   // Controle de Execução (Bloqueio de duplo clique)
   const [isExecuting, setIsExecuting] = useState(false);
 
-  const [userName, setUserName] = useState(() => localStorage.getItem('logcash_user_name') || 'Operador Logístico');
+  const [userName, setUserName] = useState(() => {
+    const stored = localStorage.getItem('logcash_user_name') || '';
+    // Ignora valores genéricos que possam ter sido salvos anteriormente
+    return (stored && stored !== 'Operador Logístico' && stored !== 'Usuário') ? stored : '';
+  });
   const [avatarUrl, setAvatarUrl] = useState(() => localStorage.getItem('logcash_avatar_url') || '');
   const [vehicleName, setVehicleName] = useState(() => localStorage.getItem('logcash_vehicle_name') || 'Veículo Padrão');
   const [activeTab, setActiveTab] = useState<'dash' | 'stats' | 'route' | 'pdf-view' | 'profile' | 'tax-invoice' | 'invoice-success' | 'tax-data' | 'personal-data' | 'settings' | 'extrato' | 'express-report' | 'weekly-report' | 'weekly-pdf' | 'express-pdf' | 'vehicle-registration' | 'invoice-pdf'>('dash');
@@ -89,6 +93,16 @@ const App: React.FC = () => {
     data: { loaded: number, delivered: number, acareacao: number }
   } | null>(null);
 
+  // Utilitário: extrai o melhor nome disponível da sessão Supabase
+  const deriveNameFromSession = (s: any): string => {
+    const meta = s?.user?.user_metadata;
+    if (meta?.full_name) return meta.full_name;
+    if (meta?.name) return meta.name;
+    const email: string = s?.user?.email || '';
+    if (email) return email.split('@')[0];
+    return 'Usuário';
+  };
+
   // 1. Verifica Sessão
   useEffect(() => {
     supabaseService.getSession()
@@ -97,21 +111,31 @@ const App: React.FC = () => {
         if (!session) {
           setLoading(false);
         } else {
-          // Carregar perfil do Supabase
+          // Aplica o nome imediatamente a partir dos metadados da sessão
+          // (sem esperar o getProfile, para evitar o flash com 'Operador Logístico')
+          const sessionName = deriveNameFromSession(session);
+          setUserName(prev => (prev && prev !== 'Operador Logístico') ? prev : sessionName);
+
+          // Depois busca o perfil para sobrescrever com o nome salvo pelo usuário
           try {
             const profile = await supabaseService.getProfile();
-            if (profile) {
-              if (profile.full_name) setUserName(profile.full_name);
-              if (profile.avatar_url) setAvatarUrl(profile.avatar_url);
+            if (profile?.full_name) {
+              setUserName(profile.full_name);
+              localStorage.setItem('logcash_user_name', profile.full_name);
+            } else {
+              setUserName(sessionName);
+              localStorage.setItem('logcash_user_name', sessionName);
             }
+            if (profile?.avatar_url) setAvatarUrl(profile.avatar_url);
           } catch (err) {
             console.error("Erro ao carregar perfil:", err);
+            setUserName(sessionName);
           }
         }
       })
       .catch(err => {
         console.error("Falha ao verificar sessão:", err);
-        setLoading(false); // Garante que o loading pare mesmo com erro
+        setLoading(false);
       });
   }, []);
 
@@ -189,7 +213,9 @@ const App: React.FC = () => {
   const [pendingIds, setPendingIds] = useState<Set<string>>(new Set());
 
   useEffect(() => {
-    localStorage.setItem('logcash_user_name', userName);
+    if (userName && userName !== 'Operador Logístico' && userName !== 'Usuário') {
+      localStorage.setItem('logcash_user_name', userName);
+    }
   }, [userName]);
 
   useEffect(() => {
@@ -837,6 +863,7 @@ const App: React.FC = () => {
               <EliteDashboard
                 userName={userName}
                 counts={counts}
+                logs={logs}
                 valorPorPacote={VALOR_POR_PACOTE}
                 onNavigate={setActiveTab}
               />
@@ -873,6 +900,8 @@ const App: React.FC = () => {
             <EliteExpressReport
               userName={userName}
               onBack={() => setActiveTab('stats')}
+              rows={expressRows}
+              onRowsChange={setExpressRows}
               onExportPDF={(rows: TemporaryExpressRow[]) => {
                 generateQuickPDF(rows, userName);
               }}

@@ -6,13 +6,15 @@ interface EliteExpressReportProps {
     userName: string;
     onBack: () => void;
     onExportPDF: (rows: TemporaryExpressRow[]) => void;
-    onViewPDF: (rows: TemporaryExpressRow[]) => void;
+    onViewPDF?: (rows: TemporaryExpressRow[]) => void;
+    rows: TemporaryExpressRow[];
+    onRowsChange: (rows: TemporaryExpressRow[]) => void;
 }
 
-const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBack, onExportPDF, onViewPDF }) => {
+const EliteExpressReport: React.FC<EliteExpressReportProps> = ({ userName, onBack, onExportPDF, onViewPDF, rows, onRowsChange }) => {
     const [isExporting, setIsExporting] = useState(false);
     const [showSuccess, setShowSuccess] = useState(false);
-    const [rows, setRows] = useState<TemporaryExpressRow[]>([]);
+    const setRows = onRowsChange;
 
     // Temporary editing state
     const [editingId, setEditingId] = useState<string | null>(null);

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 
 interface EliteEditRouteProps {
     dateStr: string;
@@ -28,6 +28,11 @@ const EliteEditRoute: React.FC<EliteEditRouteProps> = ({
             ...prev,
             [key]: Math.max(0, prev[key] + delta)
         }));
+    };
+
+    const handleInputChange = (key: keyof typeof initialData, raw: string) => {
+        const v = parseInt(raw);
+        setData(prev => ({ ...prev, [key]: isNaN(v) ? 0 : Math.max(0, v) }));
     };
 
     return (
@@ -60,6 +65,7 @@ const EliteEditRoute: React.FC<EliteEditRouteProps> = ({
                     color: #EBC051;
                     transition: transform 0.2s;
                     background: transparent;
+                    flex-shrink: 0;
                 }
                 .stepper-btn:active {
                     transform: scale(0.9);
@@ -69,6 +75,27 @@ const EliteEditRoute: React.FC<EliteEditRouteProps> = ({
                     backdrop-filter: blur(12px);
                 }
                 .font-display { font-family: 'Montserrat', sans-serif; }
+                .stepper-input {
+                    background: transparent;
+                    border: none;
+                    border-bottom: 1px solid rgba(235, 192, 81, 0.35);
+                    color: #F5F5F5;
+                    font-size: 0.875rem;
+                    font-weight: 600;
+                    text-align: center;
+                    width: 3rem;
+                    outline: none;
+                    padding: 2px 0;
+                    -moz-appearance: textfield;
+                }
+                .stepper-input::-webkit-outer-spin-button,
+                .stepper-input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                .stepper-input:focus {
+                    border-bottom-color: #EBC051;
+                }
                 `
             }} />
 
@@ -80,39 +107,66 @@ const EliteEditRoute: React.FC<EliteEditRouteProps> = ({
                 </header>
 
                 <div className="space-y-6 mb-10">
+                    {/* Carregados */}
                     <div className="flex items-center justify-between">
                         <label className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Carregados</label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button onClick={() => updateValue('loaded', -1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">remove</span>
                             </button>
-                            <span className="text-sm font-semibold text-[#F5F5F5] w-8 text-center">{data.loaded}</span>
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                className="stepper-input"
+                                value={data.loaded}
+                                min={0}
+                                onChange={e => handleInputChange('loaded', e.target.value)}
+                                onFocus={e => e.target.select()}
+                            />
                             <button onClick={() => updateValue('loaded', 1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">add</span>
                             </button>
                         </div>
                     </div>
 
+                    {/* Entregues */}
                     <div className="flex items-center justify-between">
                         <label className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Entregues</label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button onClick={() => updateValue('delivered', -1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">remove</span>
                             </button>
-                            <span className="text-sm font-semibold text-[#F5F5F5] w-8 text-center">{data.delivered}</span>
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                className="stepper-input"
+                                value={data.delivered}
+                                min={0}
+                                onChange={e => handleInputChange('delivered', e.target.value)}
+                                onFocus={e => e.target.select()}
+                            />
                             <button onClick={() => updateValue('delivered', 1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">add</span>
                             </button>
                         </div>
                     </div>
 
+                    {/* Insucessos */}
                     <div className="flex items-center justify-between">
                         <label className="text-[8px] font-bold text-zinc-500 uppercase tracking-widest">Insucessos</label>
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-3">
                             <button onClick={() => updateValue('acareacao', -1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">remove</span>
                             </button>
-                            <span className="text-sm font-semibold text-[#F5F5F5] w-8 text-center">{data.acareacao.toString().padStart(2, '0')}</span>
+                            <input
+                                type="number"
+                                inputMode="numeric"
+                                className="stepper-input"
+                                value={data.acareacao}
+                                min={0}
+                                onChange={e => handleInputChange('acareacao', e.target.value)}
+                                onFocus={e => e.target.select()}
+                            />
                             <button onClick={() => updateValue('acareacao', 1)} className="stepper-btn">
                                 <span className="material-symbols-outlined text-sm">add</span>
                             </button>
